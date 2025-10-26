@@ -146,5 +146,5 @@ Potential optimizations:
 
 ---
 
-**Bhasa (ভাষা)** - From Interpreter to Compiler! 🇧🇩🚀
+**Bhasa (ভাষা)** - From Interpreter to Compiler! 🚀
 
