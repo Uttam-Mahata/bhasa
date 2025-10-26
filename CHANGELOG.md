@@ -1,5 +1,5 @@
 # ভাষা (Bhasa) - Changelog
-
+<!-- Bengali High-level Application Scripting Architecture -->
 ## Version 2.0 - Compiled Edition 🚀
 
 **Major Release**: Transformed from interpreter to compiled language!
@@ -146,5 +146,5 @@ Potential optimizations:
 
 ---
 
-**Bhasa (ভাষা)** - From Interpreter to Compiler! 🚀
+**Bhasa (ভাষা)** - From Interpreter to Compiler! 🇮🇳🚀
 

@@ -299,5 +299,5 @@ time ./bhasa examples/fibonacci.bhasa
 
 The compilation architecture transforms Bhasa from an educational interpreter into a **production-ready compiled language**. The bytecode VM provides significant performance improvements while maintaining all language features and Bengali syntax.
 
-**Key Innovation**: Stack-based VM with proper closure support, enabling Bengali-language programming at near-native speeds! 🚀🇧🇩
+**Key Innovation**: Stack-based VM with proper closure support, enabling Bengali-language programming at near-native speeds! 🇮🇳🚀
 

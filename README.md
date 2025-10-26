@@ -4,7 +4,7 @@ A **compiled** programming language that uses Bengali keywords, built with Go.
 
 ## Features
 
-- 🇧🇩 Bengali keywords and syntax
+- 🇮🇳 Bengali keywords and syntax
 - ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
 - 🖥️ **Stack-based virtual machine**
 - 📝 Variables and functions with closures
