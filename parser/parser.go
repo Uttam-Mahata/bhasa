@@ -145,6 +145,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.WHILE:
 		return p.parseWhileStatement()
+	case token.FOR:
+		return p.parseForStatement()
 	case token.IDENT:
 		// Check if this is an assignment (identifier followed by =)
 		if p.peekTokenIs(token.ASSIGN) {
@@ -225,6 +227,50 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 
 	if !p.expectPeek(token.RPAREN) {
 		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	stmt := &ast.ForStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// Parse initializer (can be LetStatement or AssignmentStatement or empty)
+	p.nextToken()
+	if !p.curTokenIs(token.SEMICOLON) {
+		stmt.Initializer = p.parseStatement()
+		// The statement parsing might consume the semicolon in some cases
+		if !p.curTokenIs(token.SEMICOLON) && !p.expectPeek(token.SEMICOLON) {
+			return nil
+		}
+	}
+
+	// Parse condition (can be expression or empty)
+	p.nextToken()
+	if !p.curTokenIs(token.SEMICOLON) {
+		stmt.Condition = p.parseExpression(LOWEST)
+		if !p.expectPeek(token.SEMICOLON) {
+			return nil
+		}
+	}
+
+	// Parse increment (can be assignment or expression or empty)
+	p.nextToken()
+	if !p.curTokenIs(token.RPAREN) {
+		stmt.Increment = p.parseStatement()
+		if !p.curTokenIs(token.RPAREN) && !p.expectPeek(token.RPAREN) {
+			return nil
+		}
 	}
 
 	if !p.expectPeek(token.LBRACE) {

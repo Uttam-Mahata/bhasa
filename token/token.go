@@ -59,6 +59,7 @@ const (
 	TRUE     = "সত্য"     // true
 	FALSE    = "মিথ্যা"   // false
 	WHILE    = "যতক্ষণ"   // while
+	FOR      = "পর্যন্ত"  // for
 )
 
 var keywords = map[string]TokenType{
@@ -70,6 +71,7 @@ var keywords = map[string]TokenType{
 	"সত্য":   TRUE,
 	"মিথ্যা": FALSE,
 	"যতক্ষণ": WHILE,
+	"পর্যন্ত": FOR,
 }
 
 // LookupIdent checks if an identifier is a keyword

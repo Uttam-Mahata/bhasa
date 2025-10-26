@@ -152,6 +152,36 @@ func (ws *WhileStatement) String() string {
 	return out.String()
 }
 
+// ForStatement represents a for loop (পর্যন্ত)
+type ForStatement struct {
+	Token       token.Token // the পর্যন্ত token
+	Initializer Statement   // e.g., ধরি i = ০
+	Condition   Expression  // e.g., i < ১০
+	Increment   Statement   // e.g., i = i + ১
+	Body        *BlockStatement
+}
+
+func (fs *ForStatement) statementNode()       {}
+func (fs *ForStatement) TokenLiteral() string { return fs.Token.Literal }
+func (fs *ForStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("for (")
+	if fs.Initializer != nil {
+		out.WriteString(fs.Initializer.String())
+	}
+	out.WriteString("; ")
+	if fs.Condition != nil {
+		out.WriteString(fs.Condition.String())
+	}
+	out.WriteString("; ")
+	if fs.Increment != nil {
+		out.WriteString(fs.Increment.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(fs.Body.String())
+	return out.String()
+}
+
 // Identifier represents an identifier
 type Identifier struct {
 	Token token.Token // the token.IDENT token

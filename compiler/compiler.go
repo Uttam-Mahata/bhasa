@@ -319,6 +319,60 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emit(code.OpNull)
 
+	case *ast.ForStatement:
+		// Compile initializer (if present)
+		if node.Initializer != nil {
+			err := c.Compile(node.Initializer)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Mark the start of the loop (where we check the condition)
+		loopStart := len(c.currentInstructions())
+
+		// Compile condition (if present, default to true if not)
+		var jumpNotTruthyPos int
+		if node.Condition != nil {
+			err := c.Compile(node.Condition)
+			if err != nil {
+				return err
+			}
+			jumpNotTruthyPos = c.emit(code.OpJumpNotTruthy, 9999)
+		}
+
+		// Compile body
+		err := c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.OpPop) {
+			c.removeLastPop()
+		}
+
+		// Compile increment (if present)
+		if node.Increment != nil {
+			err := c.Compile(node.Increment)
+			if err != nil {
+				return err
+			}
+			// If the increment is an expression statement, it will have emitted OpPop
+			// If it's an assignment statement, it won't have a value on the stack
+			// We don't need to do anything here
+		}
+
+		// Jump back to condition check
+		c.emit(code.OpJump, loopStart)
+
+		// Patch the condition jump (if we have a condition)
+		if node.Condition != nil {
+			afterLoopPos := len(c.currentInstructions())
+			c.changeOperand(jumpNotTruthyPos, afterLoopPos)
+		}
+
+		c.emit(code.OpNull)
+
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
