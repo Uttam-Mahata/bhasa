@@ -83,6 +83,28 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+// BreakStatement represents a break statement (বিরতি)
+type BreakStatement struct {
+	Token token.Token // the বিরতি token
+}
+
+func (bs *BreakStatement) statementNode()       {}
+func (bs *BreakStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BreakStatement) String() string {
+	return bs.TokenLiteral() + ";"
+}
+
+// ContinueStatement represents a continue statement (চালিয়ে_যাও)
+type ContinueStatement struct {
+	Token token.Token // the চালিয়ে_যাও token
+}
+
+func (cs *ContinueStatement) statementNode()       {}
+func (cs *ContinueStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ContinueStatement) String() string {
+	return cs.TokenLiteral() + ";"
+}
+
 // ExpressionStatement wraps an expression as a statement
 type ExpressionStatement struct {
 	Token      token.Token // the first token of the expression

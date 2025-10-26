@@ -14,6 +14,13 @@ type Compiler struct {
 	symbolTable *SymbolTable
 	scopes      []CompilationScope
 	scopeIndex  int
+	loopScopes  []LoopScope // Track nested loops for break/continue
+}
+
+// LoopScope tracks break and continue jump positions for a loop
+type LoopScope struct {
+	breakJumps    []int // Positions of break jumps to be patched
+	continueJumps []int // Positions of continue jumps to be patched
 }
 
 // CompilationScope tracks instructions and jump positions
@@ -55,6 +62,7 @@ func New() *Compiler {
 		symbolTable: symbolTable,
 		scopes:      []CompilationScope{mainScope},
 		scopeIndex:  0,
+		loopScopes:  []LoopScope{}, // Initialize empty loop scopes
 	}
 }
 
@@ -294,6 +302,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.WhileStatement:
+		// Enter loop scope for break/continue tracking
+		c.enterLoop()
+		
 		loopStart := len(c.currentInstructions())
 
 		err := c.Compile(node.Condition)
@@ -317,9 +328,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		afterLoopPos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterLoopPos)
 
+		// Patch break and continue jumps
+		breakJumps, continueJumps := c.leaveLoop()
+		for _, pos := range breakJumps {
+			c.changeOperand(pos, afterLoopPos)
+		}
+		for _, pos := range continueJumps {
+			c.changeOperand(pos, loopStart)
+		}
+
 		c.emit(code.OpNull)
 
 	case *ast.ForStatement:
+		// Enter loop scope for break/continue tracking
+		c.enterLoop()
+		
 		// Compile initializer (if present)
 		if node.Initializer != nil {
 			err := c.Compile(node.Initializer)
@@ -351,6 +374,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
+		// Mark where continue should jump to (the increment)
+		continueTarget := len(c.currentInstructions())
+
 		// Compile increment (if present)
 		if node.Increment != nil {
 			err := c.Compile(node.Increment)
@@ -366,9 +392,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpJump, loopStart)
 
 		// Patch the condition jump (if we have a condition)
+		afterLoopPos := len(c.currentInstructions())
 		if node.Condition != nil {
-			afterLoopPos := len(c.currentInstructions())
 			c.changeOperand(jumpNotTruthyPos, afterLoopPos)
+		}
+
+		// Patch break and continue jumps
+		breakJumps, continueJumps := c.leaveLoop()
+		for _, pos := range breakJumps {
+			c.changeOperand(pos, afterLoopPos)
+		}
+		for _, pos := range continueJumps {
+			c.changeOperand(pos, continueTarget)
 		}
 
 		c.emit(code.OpNull)
@@ -483,6 +518,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpReturnValue)
+
+	case *ast.BreakStatement:
+		if !c.isInLoop() {
+			return fmt.Errorf("break statement outside of loop")
+		}
+		// Emit a jump that will be patched to jump to after the loop
+		pos := c.emit(code.OpJump, 9999)
+		c.addBreakJump(pos)
+
+	case *ast.ContinueStatement:
+		if !c.isInLoop() {
+			return fmt.Errorf("continue statement outside of loop")
+		}
+		// Emit a jump that will be patched to jump to the loop increment/condition
+		pos := c.emit(code.OpJump, 9999)
+		c.addContinueJump(pos)
 
 	case *ast.CallExpression:
 		err := c.Compile(node.Function)
@@ -622,5 +673,47 @@ func (c *Compiler) loadSymbol(s Symbol) {
 	case FunctionScope:
 		c.emit(code.OpCurrentClosure)
 	}
+}
+
+// enterLoop starts tracking a new loop scope for break/continue
+func (c *Compiler) enterLoop() {
+	c.loopScopes = append(c.loopScopes, LoopScope{
+		breakJumps:    []int{},
+		continueJumps: []int{},
+	})
+}
+
+// leaveLoop exits a loop scope and returns break/continue jump positions
+func (c *Compiler) leaveLoop() (breakJumps []int, continueJumps []int) {
+	if len(c.loopScopes) == 0 {
+		return nil, nil
+	}
+	
+	lastIdx := len(c.loopScopes) - 1
+	loop := c.loopScopes[lastIdx]
+	c.loopScopes = c.loopScopes[:lastIdx]
+	
+	return loop.breakJumps, loop.continueJumps
+}
+
+// addBreakJump records a break jump position to be patched later
+func (c *Compiler) addBreakJump(pos int) {
+	if len(c.loopScopes) > 0 {
+		lastIdx := len(c.loopScopes) - 1
+		c.loopScopes[lastIdx].breakJumps = append(c.loopScopes[lastIdx].breakJumps, pos)
+	}
+}
+
+// addContinueJump records a continue jump position to be patched later
+func (c *Compiler) addContinueJump(pos int) {
+	if len(c.loopScopes) > 0 {
+		lastIdx := len(c.loopScopes) - 1
+		c.loopScopes[lastIdx].continueJumps = append(c.loopScopes[lastIdx].continueJumps, pos)
+	}
+}
+
+// isInLoop checks if we're currently inside a loop
+func (c *Compiler) isInLoop() bool {
+	return len(c.loopScopes) > 0
 }
 
