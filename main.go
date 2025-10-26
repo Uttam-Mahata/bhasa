@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bhasa/evaluator"
+	"bhasa/compiler"
 	"bhasa/lexer"
-	"bhasa/object"
 	"bhasa/parser"
 	"bhasa/repl"
+	"bhasa/vm"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -42,14 +42,18 @@ func runFile(filename string) {
 		os.Exit(1)
 	}
 
-	env := object.NewEnvironment()
-	evaluated := evaluator.Eval(program, env)
+	comp := compiler.New()
+	err = comp.Compile(program)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Compilation failed:\n %s\n", err)
+		os.Exit(1)
+	}
 
-	if evaluated != nil {
-		if evaluated.Type() == object.ERROR_OBJ {
-			fmt.Fprintf(os.Stderr, "%s\n", evaluated.Inspect())
-			os.Exit(1)
-		}
+	machine := vm.New(comp.Bytecode())
+	err = machine.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Executing bytecode failed:\n %s\n", err)
+		os.Exit(1)
 	}
 }
 

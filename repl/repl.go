@@ -1,10 +1,11 @@
 package repl
 
 import (
-	"bhasa/evaluator"
+	"bhasa/compiler"
 	"bhasa/lexer"
 	"bhasa/object"
 	"bhasa/parser"
+	"bhasa/vm"
 	"bufio"
 	"fmt"
 	"io"
@@ -33,7 +34,13 @@ Example:
 // Start starts the REPL
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
+
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltin(i, v.Name)
+	}
 
 	fmt.Fprint(out, BANNER)
 
@@ -65,9 +72,26 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program, env)
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
+		comp := compiler.NewWithState(symbolTable, constants)
+		err := comp.Compile(program)
+		if err != nil {
+			fmt.Fprintf(out, "Compilation failed:\n %s\n", err)
+			continue
+		}
+
+		code := comp.Bytecode()
+		constants = code.Constants
+
+		machine := vm.NewWithGlobalsStore(code, globals)
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		lastPopped := machine.LastPoppedStackElem()
+		if lastPopped != nil {
+			io.WriteString(out, lastPopped.Inspect())
 			io.WriteString(out, "\n")
 		}
 	}
