@@ -14,38 +14,38 @@ type Opcode byte
 
 // Bytecode instructions
 const (
-	OpConstant Opcode = iota // Load constant onto stack
-	OpPop                    // Pop value from stack
-	OpAdd                    // Add two values
-	OpSub                    // Subtract
-	OpMul                    // Multiply
-	OpDiv                    // Divide
-	OpMod                    // Modulo
-	OpTrue                   // Push true
-	OpFalse                  // Push false
-	OpEqual                  // Equal comparison
-	OpNotEqual               // Not equal comparison
-	OpGreaterThan            // Greater than
-	OpGreaterThanEqual       // Greater than or equal
-	OpMinus                  // Unary minus
-	OpBang                   // Logical not
-	OpJumpNotTruthy          // Conditional jump
-	OpJump                   // Unconditional jump
-	OpNull                   // Push null
-	OpGetGlobal              // Get global variable
-	OpSetGlobal              // Set global variable
-	OpArray                  // Create array
-	OpHash                   // Create hash
-	OpIndex                  // Index operation
-	OpCall                   // Function call
-	OpReturnValue            // Return with value
-	OpReturn                 // Return without value
-	OpGetLocal               // Get local variable
-	OpSetLocal               // Set local variable
-	OpGetBuiltin             // Get builtin function
-	OpClosure                // Create closure
-	OpGetFree                // Get free variable
-	OpCurrentClosure         // Get current closure
+	OpConstant         Opcode = iota // Load constant onto stack
+	OpPop                            // Pop value from stack
+	OpAdd                            // Add two values
+	OpSub                            // Subtract
+	OpMul                            // Multiply
+	OpDiv                            // Divide
+	OpMod                            // Modulo
+	OpTrue                           // Push true
+	OpFalse                          // Push false
+	OpEqual                          // Equal comparison
+	OpNotEqual                       // Not equal comparison
+	OpGreaterThan                    // Greater than
+	OpGreaterThanEqual               // Greater than or equal
+	OpMinus                          // Unary minus
+	OpBang                           // Logical not
+	OpJumpNotTruthy                  // Conditional jump
+	OpJump                           // Unconditional jump
+	OpNull                           // Push null
+	OpGetGlobal                      // Get global variable
+	OpSetGlobal                      // Set global variable
+	OpArray                          // Create array
+	OpHash                           // Create hash
+	OpIndex                          // Index operation
+	OpCall                           // Function call
+	OpReturnValue                    // Return with value
+	OpReturn                         // Return without value
+	OpGetLocal                       // Get local variable
+	OpSetLocal                       // Set local variable
+	OpGetBuiltin                     // Get builtin function
+	OpClosure                        // Create closure
+	OpGetFree                        // Get free variable
+	OpCurrentClosure                 // Get current closure
 )
 
 // Definition holds information about an opcode
@@ -197,4 +197,3 @@ func ReadUint16(ins Instructions) uint16 {
 func ReadUint8(ins Instructions) uint8 {
 	return uint8(ins[0])
 }
-

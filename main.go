@@ -56,4 +56,3 @@ func runFile(filename string) {
 		os.Exit(1)
 	}
 }
-

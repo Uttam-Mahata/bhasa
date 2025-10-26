@@ -99,4 +99,3 @@ func (s *SymbolTable) defineFree(original Symbol) Symbol {
 	s.store[original.Name] = symbol
 	return symbol
 }
-
