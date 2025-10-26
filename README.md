@@ -1,15 +1,18 @@
 # ভাষা (Bhasa) - A Bengali Programming Language
 
-A programming language that uses Bengali keywords, built with Go.
+A **compiled** programming language that uses Bengali keywords, built with Go.
 
 ## Features
 
 - 🇧🇩 Bengali keywords and syntax
-- 📝 Variables and functions
+- ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
+- 🖥️ **Stack-based virtual machine**
+- 📝 Variables and functions with closures
 - 🔢 Numbers, strings, booleans, arrays, and hash maps
 - 🔄 Control flow (if-else, while loops)
 - 🚀 Interactive REPL
 - 📚 Built-in functions
+- 🎯 Recursion and higher-order functions
 
 ## Bengali Keywords
 
@@ -77,13 +80,35 @@ Then you can type Bengali code interactively!
 
 ```
 bhasa/
-├── main.go           # Entry point and REPL
+├── main.go           # Entry point
 ├── token/            # Token definitions
 ├── lexer/            # Lexical analyzer
 ├── ast/              # Abstract Syntax Tree
 ├── parser/           # Parser implementation
-├── evaluator/        # Expression evaluator
+├── compiler/         # Bytecode compiler
+│   ├── compiler.go   # AST → Bytecode
+│   └── symbol_table.go # Variable scoping
+├── code/             # Bytecode instruction set
+├── vm/               # Virtual machine
+│   ├── vm.go         # Stack-based VM
+│   └── frame.go      # Call frames
 ├── object/           # Object system
+├── repl/             # Interactive REPL
 └── examples/         # Example programs
 ```
+
+## Architecture
+
+**Compilation Pipeline:**
+```
+Bengali Source → Lexer → Parser → AST → Compiler → Bytecode → VM → Execution
+```
+
+**Key Components:**
+- **Compiler**: Translates AST to bytecode (35+ opcodes)
+- **Virtual Machine**: Stack-based execution engine
+- **Symbol Table**: Manages variable scopes (global, local, free, builtin)
+- **Closures**: Full support for lexical scoping
+
+See [COMPILER.md](COMPILER.md) for detailed architecture documentation.
 

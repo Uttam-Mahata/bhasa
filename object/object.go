@@ -12,16 +12,18 @@ import (
 type ObjectType string
 
 const (
-	INTEGER_OBJ      = "INTEGER"
-	BOOLEAN_OBJ      = "BOOLEAN"
-	STRING_OBJ       = "STRING"
-	NULL_OBJ         = "NULL"
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	ERROR_OBJ        = "ERROR"
-	FUNCTION_OBJ     = "FUNCTION"
-	BUILTIN_OBJ      = "BUILTIN"
-	ARRAY_OBJ        = "ARRAY"
-	HASH_OBJ         = "HASH"
+	INTEGER_OBJ           = "INTEGER"
+	BOOLEAN_OBJ           = "BOOLEAN"
+	STRING_OBJ            = "STRING"
+	NULL_OBJ              = "NULL"
+	RETURN_VALUE_OBJ      = "RETURN_VALUE"
+	ERROR_OBJ             = "ERROR"
+	FUNCTION_OBJ          = "FUNCTION"
+	BUILTIN_OBJ           = "BUILTIN"
+	ARRAY_OBJ             = "ARRAY"
+	HASH_OBJ              = "HASH"
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
+	CLOSURE_OBJ           = "CLOSURE"
 )
 
 // Object represents a value in the language
@@ -217,5 +219,151 @@ func (e *Environment) Get(name string) (Object, bool) {
 func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
+}
+
+// CompiledFunction represents a compiled function
+type CompiledFunction struct {
+	Instructions  []byte
+	NumLocals     int
+	NumParameters int
+}
+
+func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
+}
+
+// Closure represents a closure
+type Closure struct {
+	Fn   *CompiledFunction
+	Free []Object
+}
+
+func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure[%p]", c)
+}
+
+// BuiltinDef represents a builtin definition
+type BuiltinDef struct {
+	Name    string
+	Builtin *Builtin
+}
+
+// Builtins is the list of builtin functions
+var Builtins = []BuiltinDef{
+	{
+		"লেখ",
+		&Builtin{Fn: func(args ...Object) Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+			return &Null{}
+		}},
+	},
+	{
+		"দৈর্ঘ্য",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			switch arg := args[0].(type) {
+			case *String:
+				return &Integer{Value: int64(len([]rune(arg.Value)))}
+			case *Array:
+				return &Integer{Value: int64(len(arg.Elements))}
+			default:
+				return &Error{Message: fmt.Sprintf("argument to 'দৈর্ঘ্য' not supported, got %s", args[0].Type())}
+			}
+		}},
+	},
+	{
+		"প্রথম",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'প্রথম' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			if len(arr.Elements) > 0 {
+				return arr.Elements[0]
+			}
+			return &Null{}
+		}},
+	},
+	{
+		"শেষ",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'শেষ' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			if length > 0 {
+				return arr.Elements[length-1]
+			}
+			return &Null{}
+		}},
+	},
+	{
+		"বাকি",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'বাকি' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			if length > 0 {
+				newElements := make([]Object, length-1)
+				copy(newElements, arr.Elements[1:length])
+				return &Array{Elements: newElements}
+			}
+			return &Null{}
+		}},
+	},
+	{
+		"যোগ",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'যোগ' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			newElements := make([]Object, length+1)
+			copy(newElements, arr.Elements)
+			newElements[length] = args[1]
+			return &Array{Elements: newElements}
+		}},
+	},
+	{
+		"টাইপ",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			return &String{Value: string(args[0].Type())}
+		}},
+	},
+}
+
+// GetBuiltinByName returns a builtin by name
+func GetBuiltinByName(name string) *Builtin {
+	for _, def := range Builtins {
+		if def.Name == name {
+			return def.Builtin
+		}
+	}
+	return nil
 }
 
