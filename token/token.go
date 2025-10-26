@@ -34,6 +34,9 @@ const (
 	NOT_EQ = "!="
 	LTE    = "<="
 	GTE    = ">="
+	
+	AND    = "&&"
+	OR     = "||"
 
 	// Delimiters
 	COMMA     = ","

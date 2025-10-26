@@ -86,6 +86,64 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpPop)
 
 	case *ast.InfixExpression:
+		// Handle short-circuit evaluation for logical operators
+		if node.Operator == "&&" {
+			err := c.Compile(node.Left)
+			if err != nil {
+				return err
+			}
+			// OpJumpNotTruthy pops the condition value and jumps if false
+			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+			
+			// If we reach here, left was truthy (and has been popped)
+			// Now evaluate right side - its value will be the result
+			err = c.Compile(node.Right)
+			if err != nil {
+				return err
+			}
+			
+			// Jump over the false case
+			jumpPos := c.emit(code.OpJump, 9999)
+			
+			// If left was false, we need to push false as the result
+			afterNotTruthyPos := len(c.currentInstructions())
+			c.changeOperand(jumpNotTruthyPos, afterNotTruthyPos)
+			c.emit(code.OpFalse)
+			
+			// Patch the jump to the end
+			afterPos := len(c.currentInstructions())
+			c.changeOperand(jumpPos, afterPos)
+			return nil
+		}
+		
+		if node.Operator == "||" {
+			err := c.Compile(node.Left)
+			if err != nil {
+				return err
+			}
+			// OpJumpNotTruthy pops the value and jumps if false
+			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+			
+			// If we're here, left was truthy (already popped by OpJumpNotTruthy)
+			// For OR, if left is true, we want to return true
+			c.emit(code.OpTrue)
+			jumpPos := c.emit(code.OpJump, 9999)
+			
+			// If left was false, we jumped here, now evaluate right
+			afterNotTruthyPos := len(c.currentInstructions())
+			c.changeOperand(jumpNotTruthyPos, afterNotTruthyPos)
+			
+			err = c.Compile(node.Right)
+			if err != nil {
+				return err
+			}
+			
+			// Patch the jump to skip right evaluation
+			afterPos := len(c.currentInstructions())
+			c.changeOperand(jumpPos, afterPos)
+			return nil
+		}
+		
 		if node.Operator == "<" {
 			err := c.Compile(node.Right)
 			if err != nil {
