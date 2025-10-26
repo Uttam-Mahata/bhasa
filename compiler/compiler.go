@@ -8,6 +8,9 @@ import (
 	"sort"
 )
 
+// Placeholder value for jump addresses that will be patched later
+const PLACEHOLDER_JUMP = 9999
+
 // Compiler compiles AST to bytecode
 type Compiler struct {
 	constants   []object.Object
@@ -101,7 +104,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 			// OpJumpNotTruthy pops the condition value and jumps if false
-			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, PLACEHOLDER_JUMP)
 			
 			// If we reach here, left was truthy (and has been popped)
 			// Now evaluate right side - its value will be the result
@@ -111,7 +114,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 			
 			// Jump over the false case
-			jumpPos := c.emit(code.OpJump, 9999)
+			jumpPos := c.emit(code.OpJump, PLACEHOLDER_JUMP)
 			
 			// If left was false, we need to push false as the result
 			afterNotTruthyPos := len(c.currentInstructions())
@@ -130,12 +133,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 			// OpJumpNotTruthy pops the value and jumps if false
-			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+			jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, PLACEHOLDER_JUMP)
 			
 			// If we're here, left was truthy (already popped by OpJumpNotTruthy)
 			// For OR, if left is true, we want to return true
 			c.emit(code.OpTrue)
-			jumpPos := c.emit(code.OpJump, 9999)
+			jumpPos := c.emit(code.OpJump, PLACEHOLDER_JUMP)
 			
 			// If left was false, we jumped here, now evaluate right
 			afterNotTruthyPos := len(c.currentInstructions())
@@ -231,7 +234,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, PLACEHOLDER_JUMP)
 
 		err = c.Compile(node.Consequence)
 		if err != nil {
@@ -242,7 +245,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
-		jumpPos := c.emit(code.OpJump, 9999)
+		jumpPos := c.emit(code.OpJump, PLACEHOLDER_JUMP)
 
 		afterConsequencePos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
@@ -312,7 +315,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, PLACEHOLDER_JUMP)
 
 		err = c.Compile(node.Body)
 		if err != nil {
@@ -361,7 +364,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if err != nil {
 				return err
 			}
-			jumpNotTruthyPos = c.emit(code.OpJumpNotTruthy, 9999)
+			jumpNotTruthyPos = c.emit(code.OpJumpNotTruthy, PLACEHOLDER_JUMP)
 		}
 
 		// Compile body
@@ -524,7 +527,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("break statement outside of loop")
 		}
 		// Emit a jump that will be patched to jump to after the loop
-		pos := c.emit(code.OpJump, 9999)
+		pos := c.emit(code.OpJump, PLACEHOLDER_JUMP)
 		c.addBreakJump(pos)
 
 	case *ast.ContinueStatement:
@@ -532,7 +535,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("continue statement outside of loop")
 		}
 		// Emit a jump that will be patched to jump to the loop increment/condition
-		pos := c.emit(code.OpJump, 9999)
+		pos := c.emit(code.OpJump, PLACEHOLDER_JUMP)
 		c.addContinueJump(pos)
 
 	case *ast.CallExpression:
