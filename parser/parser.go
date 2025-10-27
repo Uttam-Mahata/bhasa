@@ -12,33 +12,42 @@ import (
 const (
 	_ int = iota
 	LOWEST
-	OR          // ||
-	AND         // &&
-	EQUALS      // ==
-	LESSGREATER // > or <
-	SUM         // +
-	PRODUCT     // *
-	PREFIX      // -X or !X
-	CALL        // myFunction(X)
-	INDEX       // array[index]
+	OR              // ||
+	AND             // &&
+	BITWISE_OR_PREC // |
+	BITWISE_XOR     // ^
+	BITWISE_AND     // &
+	EQUALS          // ==
+	LESSGREATER     // > or <
+	SHIFT           // << or >>
+	SUM             // +
+	PRODUCT         // *
+	PREFIX          // -X or !X
+	CALL            // myFunction(X)
+	INDEX           // array[index]
 )
 
 var precedences = map[token.TokenType]int{
-	token.OR:       OR,
-	token.AND:      AND,
-	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
-	token.LT:       LESSGREATER,
-	token.GT:       LESSGREATER,
-	token.LTE:      LESSGREATER,
-	token.GTE:      LESSGREATER,
-	token.PLUS:     SUM,
-	token.MINUS:    SUM,
-	token.SLASH:    PRODUCT,
-	token.ASTERISK: PRODUCT,
-	token.PERCENT:  PRODUCT,
-	token.LPAREN:   CALL,
-	token.LBRACKET: INDEX,
+	token.OR:          OR,
+	token.AND:         AND,
+	token.BITWISE_OR:  BITWISE_OR_PREC,
+	token.BITWISE_XOR: BITWISE_XOR,
+	token.BITWISE_AND: BITWISE_AND,
+	token.EQ:          EQUALS,
+	token.NOT_EQ:      EQUALS,
+	token.LT:          LESSGREATER,
+	token.GT:          LESSGREATER,
+	token.LTE:         LESSGREATER,
+	token.GTE:         LESSGREATER,
+	token.LEFT_SHIFT:  SHIFT,
+	token.RIGHT_SHIFT: SHIFT,
+	token.PLUS:        SUM,
+	token.MINUS:       SUM,
+	token.SLASH:       PRODUCT,
+	token.ASTERISK:    PRODUCT,
+	token.PERCENT:     PRODUCT,
+	token.LPAREN:      CALL,
+	token.LBRACKET:    INDEX,
 }
 
 type (
@@ -72,6 +81,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.BITWISE_NOT, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
@@ -95,6 +105,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.AND, p.parseInfixExpression)
 	p.registerInfix(token.OR, p.parseInfixExpression)
+	p.registerInfix(token.BITWISE_AND, p.parseInfixExpression)
+	p.registerInfix(token.BITWISE_OR, p.parseInfixExpression)
+	p.registerInfix(token.BITWISE_XOR, p.parseInfixExpression)
+	p.registerInfix(token.LEFT_SHIFT, p.parseInfixExpression)
+	p.registerInfix(token.RIGHT_SHIFT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 

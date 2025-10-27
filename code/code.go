@@ -29,6 +29,12 @@ const (
 	OpGreaterThanEqual               // Greater than or equal
 	OpMinus                          // Unary minus
 	OpBang                           // Logical not
+	OpBitwiseNot                     // Bitwise not (~)
+	OpBitwiseAnd                     // Bitwise and (&)
+	OpBitwiseOr                      // Bitwise or (|)
+	OpBitwiseXor                     // Bitwise xor (^)
+	OpLeftShift                      // Left shift (<<)
+	OpRightShift                     // Right shift (>>)
 	OpJumpNotTruthy                  // Conditional jump
 	OpJump                           // Unconditional jump
 	OpNull                           // Push null
@@ -70,6 +76,12 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThanEqual: {"OpGreaterThanEqual", []int{}},
 	OpMinus:            {"OpMinus", []int{}},
 	OpBang:             {"OpBang", []int{}},
+	OpBitwiseNot:       {"OpBitwiseNot", []int{}},
+	OpBitwiseAnd:       {"OpBitwiseAnd", []int{}},
+	OpBitwiseOr:        {"OpBitwiseOr", []int{}},
+	OpBitwiseXor:       {"OpBitwiseXor", []int{}},
+	OpLeftShift:        {"OpLeftShift", []int{}},
+	OpRightShift:       {"OpRightShift", []int{}},
 	OpJumpNotTruthy:    {"OpJumpNotTruthy", []int{2}},
 	OpJump:             {"OpJump", []int{2}},
 	OpNull:             {"OpNull", []int{}},

@@ -127,6 +127,18 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpBitwiseNot:
+			err := vm.executeBitwiseNotOperator()
+			if err != nil {
+				return err
+			}
+
+		case code.OpBitwiseAnd, code.OpBitwiseOr, code.OpBitwiseXor, code.OpLeftShift, code.OpRightShift:
+			err := vm.executeBitwiseOperation(op)
+			if err != nil {
+				return err
+			}
+
 		case code.OpJump:
 			pos := int(code.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip = pos - 1
@@ -436,6 +448,48 @@ func (vm *VM) executeMinusOperator() error {
 
 	value := operand.(*object.Integer).Value
 	return vm.push(&object.Integer{Value: -value})
+}
+
+func (vm *VM) executeBitwiseNotOperator() error {
+	operand := vm.pop()
+
+	if operand.Type() != object.INTEGER_OBJ {
+		return fmt.Errorf("unsupported type for bitwise NOT: %s", operand.Type())
+	}
+
+	value := operand.(*object.Integer).Value
+	return vm.push(&object.Integer{Value: ^value})
+}
+
+func (vm *VM) executeBitwiseOperation(op code.Opcode) error {
+	right := vm.pop()
+	left := vm.pop()
+
+	if left.Type() != object.INTEGER_OBJ || right.Type() != object.INTEGER_OBJ {
+		return fmt.Errorf("unsupported types for bitwise operation: %s %s", left.Type(), right.Type())
+	}
+
+	leftValue := left.(*object.Integer).Value
+	rightValue := right.(*object.Integer).Value
+
+	var result int64
+
+	switch op {
+	case code.OpBitwiseAnd:
+		result = leftValue & rightValue
+	case code.OpBitwiseOr:
+		result = leftValue | rightValue
+	case code.OpBitwiseXor:
+		result = leftValue ^ rightValue
+	case code.OpLeftShift:
+		result = leftValue << uint(rightValue)
+	case code.OpRightShift:
+		result = leftValue >> uint(rightValue)
+	default:
+		return fmt.Errorf("unknown bitwise operator: %d", op)
+	}
+
+	return vm.push(&object.Integer{Value: result})
 }
 
 func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
