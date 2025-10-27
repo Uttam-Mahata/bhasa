@@ -1,5 +1,43 @@
 # ভাষা (Bhasa) - Changelog
 <!-- Bengali High-level Application Scripting Architecture -->
+## Version 2.1 - Extended Built-ins 🚀
+
+**Release**: Added comprehensive string methods, math functions, and array methods!
+
+### 🎯 New Features
+
+#### String Methods (7 new functions)
+- ✨ **বিভক্ত** (split) - Split string by delimiter
+- ✨ **যুক্ত** (join) - Join array elements with delimiter
+- ✨ **উপরে** (uppercase) - Convert to uppercase
+- ✨ **নিচে** (lowercase) - Convert to lowercase
+- ✨ **ছাঁটো** (trim) - Trim whitespace
+- ✨ **প্রতিস্থাপন** (replace) - Replace substring
+- ✨ **খুঁজুন** (find) - Find substring index
+
+#### Math Functions (6 new functions)
+- ✨ **শক্তি** (power) - Power function (base^exp)
+- ✨ **বর্গমূল** (sqrt) - Square root
+- ✨ **পরম** (abs) - Absolute value
+- ✨ **সর্বোচ্চ** (max) - Maximum of two numbers
+- ✨ **সর্বনিম্ন** (min) - Minimum of two numbers
+- ✨ **গোলাকার** (round) - Round to nearest integer
+
+#### Array Methods (2 new functions)
+- ✨ **সাজাও** (sort) - Sort array in ascending order
+- ✨ **উল্টাও** (reverse) - Reverse array elements
+
+### 📚 New Examples
+- `string_methods.bhasa` - Comprehensive string manipulation examples
+- `math_functions.bhasa` - Math operation examples
+- `array_methods.bhasa` - Array manipulation examples
+
+### 📊 Statistics
+- **Built-in Functions**: 22 (up from 7)
+- **Example Programs**: 14 (up from 9)
+
+---
+
 ## Version 2.0 - Compiled Edition 🚀
 
 **Major Release**: Transformed from interpreter to compiled language!

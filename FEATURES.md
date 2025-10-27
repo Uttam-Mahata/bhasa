@@ -73,6 +73,7 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 
 ### 6. Built-in Functions (`evaluator/builtins.go`)
 
+#### Core Functions
 | Function | Bengali | Purpose |
 |----------|---------|---------|
 | print | লেখ | Output to console |
@@ -82,6 +83,33 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 | rest | বাকি | All but first element |
 | push | যোগ | Add element to array |
 | type | টাইপ | Get type of value |
+
+#### String Methods
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| split | বিভক্ত | Split string by delimiter |
+| join | যুক্ত | Join array elements with delimiter |
+| uppercase | উপরে | Convert string to uppercase |
+| lowercase | নিচে | Convert string to lowercase |
+| trim | ছাঁটো | Trim whitespace from string |
+| replace | প্রতিস্থাপন | Replace substring in string |
+| find | খুঁজুন | Find index of substring |
+
+#### Math Functions
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| power | শক্তি | Raise number to power |
+| sqrt | বর্গমূল | Square root |
+| abs | পরম | Absolute value |
+| max | সর্বোচ্চ | Maximum of two numbers |
+| min | সর্বনিম্ন | Minimum of two numbers |
+| round | গোলাকার | Round to nearest integer |
+
+#### Array Methods
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| sort | সাজাও | Sort array in ascending order |
+| reverse | উল্টাও | Reverse array elements |
 
 ### 7. REPL (`repl/repl.go`)
 - Interactive shell for live coding
@@ -244,12 +272,12 @@ This language draws inspiration from:
 
 ## Project Statistics
 
-- **Lines of Code**: ~4,500
+- **Lines of Code**: ~5,200
 - **Packages**: 9 (token, lexer, ast, parser, compiler, code, vm, object, repl)
 - **Bytecode Instructions**: 35+ opcodes
-- **Built-in Functions**: 7
-- **Keywords**: 8
-- **Example Programs**: 9
+- **Built-in Functions**: 22 (7 core + 7 string + 6 math + 2 array)
+- **Keywords**: 11 (ধরি, ফাংশন, যদি, নাহলে, ফেরত, সত্য, মিথ্যা, যতক্ষণ, পর্যন্ত, বিরতি, চালিয়ে_যাও)
+- **Example Programs**: 14
 - **Architecture**: Compiler + VM (production-ready)
 
 ## Testing
@@ -264,6 +292,12 @@ All example programs have been tested and verified:
 - ✅ hash.bhasa
 - ✅ fibonacci.bhasa
 - ✅ comprehensive.bhasa
+- ✅ for_loops.bhasa
+- ✅ break_continue.bhasa
+- ✅ logical_operators.bhasa
+- ✅ string_methods.bhasa
+- ✅ math_functions.bhasa
+- ✅ array_methods.bhasa
 
 Run all tests with:
 ```bash
