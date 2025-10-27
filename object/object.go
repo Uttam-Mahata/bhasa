@@ -584,6 +584,57 @@ var Builtins = []BuiltinDef{
 			return &Integer{Value: int64(result)}
 		}},
 	},
+	// Array methods
+	{
+		"সাজাও",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'সাজাও' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			
+			// Create a copy of the array
+			sorted := make([]Object, length)
+			copy(sorted, arr.Elements)
+			
+			// Simple bubble sort for integers
+			for i := 0; i < length; i++ {
+				for j := i + 1; j < length; j++ {
+					if sorted[i].Type() != INTEGER_OBJ || sorted[j].Type() != INTEGER_OBJ {
+						return &Error{Message: "সাজাও can only sort arrays of integers"}
+					}
+					vi := sorted[i].(*Integer).Value
+					vj := sorted[j].(*Integer).Value
+					if vi > vj {
+						sorted[i], sorted[j] = sorted[j], sorted[i]
+					}
+				}
+			}
+			return &Array{Elements: sorted}
+		}},
+	},
+	{
+		"উল্টাও",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: fmt.Sprintf("argument to 'উল্টাও' must be ARRAY, got %s", args[0].Type())}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			reversed := make([]Object, length)
+			for i := 0; i < length; i++ {
+				reversed[i] = arr.Elements[length-1-i]
+			}
+			return &Array{Elements: reversed}
+		}},
+	},
 }
 
 // GetBuiltinByName returns a builtin by name

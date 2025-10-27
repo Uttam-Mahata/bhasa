@@ -2,7 +2,7 @@
 <!-- Bengali High-level Application Scripting Architecture -->
 ## Version 2.1 - Extended Built-ins 🚀
 
-**Release**: Added comprehensive string methods and math functions!
+**Release**: Added comprehensive string methods, math functions, and array methods!
 
 ### 🎯 New Features
 
@@ -23,13 +23,18 @@
 - ✨ **সর্বনিম্ন** (min) - Minimum of two numbers
 - ✨ **গোলাকার** (round) - Round to nearest integer
 
+#### Array Methods (2 new functions)
+- ✨ **সাজাও** (sort) - Sort array in ascending order
+- ✨ **উল্টাও** (reverse) - Reverse array elements
+
 ### 📚 New Examples
 - `string_methods.bhasa` - Comprehensive string manipulation examples
 - `math_functions.bhasa` - Math operation examples
+- `array_methods.bhasa` - Array manipulation examples
 
 ### 📊 Statistics
-- **Built-in Functions**: 20+ (up from 7)
-- **Example Programs**: 13 (up from 9)
+- **Built-in Functions**: 22 (up from 7)
+- **Example Programs**: 14 (up from 9)
 
 ---
 

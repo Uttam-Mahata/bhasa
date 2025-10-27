@@ -105,6 +105,12 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 | min | সর্বনিম্ন | Minimum of two numbers |
 | round | গোলাকার | Round to nearest integer |
 
+#### Array Methods
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| sort | সাজাও | Sort array in ascending order |
+| reverse | উল্টাও | Reverse array elements |
+
 ### 7. REPL (`repl/repl.go`)
 - Interactive shell for live coding
 - Maintains environment across inputs

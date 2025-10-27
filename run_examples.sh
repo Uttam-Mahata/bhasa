@@ -22,6 +22,7 @@ examples=(
     "logical_operators"
     "string_methods"
     "math_functions"
+    "array_methods"
 )
 
 for example in "${examples[@]}"; do

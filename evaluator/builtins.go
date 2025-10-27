@@ -319,5 +319,54 @@ var builtins = map[string]*object.Builtin{
 			return &object.Integer{Value: int64(result)}
 		},
 	},
+	// Array methods
+	"সাজাও": { // "sort" - sort array
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+			if args[0].Type() != object.ARRAY_OBJ {
+				return newError("argument to 'সাজাও' must be ARRAY, got %s", args[0].Type())
+			}
+			arr := args[0].(*object.Array)
+			length := len(arr.Elements)
+			
+			// Create a copy of the array
+			sorted := make([]object.Object, length)
+			copy(sorted, arr.Elements)
+			
+			// Simple bubble sort for integers
+			for i := 0; i < length; i++ {
+				for j := i + 1; j < length; j++ {
+					if sorted[i].Type() != object.INTEGER_OBJ || sorted[j].Type() != object.INTEGER_OBJ {
+						return newError("সাজাও can only sort arrays of integers")
+					}
+					vi := sorted[i].(*object.Integer).Value
+					vj := sorted[j].(*object.Integer).Value
+					if vi > vj {
+						sorted[i], sorted[j] = sorted[j], sorted[i]
+					}
+				}
+			}
+			return &object.Array{Elements: sorted}
+		},
+	},
+	"উল্টাও": { // "reverse" - reverse array
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+			if args[0].Type() != object.ARRAY_OBJ {
+				return newError("argument to 'উল্টাও' must be ARRAY, got %s", args[0].Type())
+			}
+			arr := args[0].(*object.Array)
+			length := len(arr.Elements)
+			reversed := make([]object.Object, length)
+			for i := 0; i < length; i++ {
+				reversed[i] = arr.Elements[length-1-i]
+			}
+			return &object.Array{Elements: reversed}
+		},
+	},
 }
 
