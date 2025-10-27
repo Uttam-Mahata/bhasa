@@ -16,6 +16,7 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 🔤 String manipulation methods
 - 🧮 Math functions
 - ⚡ Logical operators (&&, ||)
+- 🔧 Bitwise operators (&, |, ^, ~, <<, >>)
 
 ## Bengali Keywords
 

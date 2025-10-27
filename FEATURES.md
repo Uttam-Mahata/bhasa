@@ -26,8 +26,8 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 - **Expression Types**:
   - Literals (integers, strings, booleans)
   - Identifiers
-  - Prefix expressions (`!`, `-`)
-  - Infix expressions (`+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `>`, `<=`, `>=`)
+  - Prefix expressions (`!`, `-`, `~`)
+  - Infix expressions (`+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `&&`, `||`, `&`, `|`, `^`, `<<`, `>>`)
   - If-else expressions (`যদি`/`নাহলে`)
   - Function literals (`ফাংশন`)
   - Call expressions
@@ -139,7 +139,8 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 ### ✅ Operators
 - Arithmetic: `+`, `-`, `*`, `/`, `%`
 - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
-- Logical: `!`
+- Logical: `!`, `&&`, `||`
+- Bitwise: `&`, `|`, `^`, `~`, `<<`, `>>`
 - String concatenation with `+`
 
 ### ✅ Control Flow
@@ -274,10 +275,10 @@ This language draws inspiration from:
 
 - **Lines of Code**: ~5,200
 - **Packages**: 9 (token, lexer, ast, parser, compiler, code, vm, object, repl)
-- **Bytecode Instructions**: 35+ opcodes
+- **Bytecode Instructions**: 41+ opcodes
 - **Built-in Functions**: 22 (7 core + 7 string + 6 math + 2 array)
 - **Keywords**: 11 (ধরি, ফাংশন, যদি, নাহলে, ফেরত, সত্য, মিথ্যা, যতক্ষণ, পর্যন্ত, বিরতি, চালিয়ে_যাও)
-- **Example Programs**: 14
+- **Example Programs**: 15
 - **Architecture**: Compiler + VM (production-ready)
 
 ## Testing
@@ -295,6 +296,7 @@ All example programs have been tested and verified:
 - ✅ for_loops.bhasa
 - ✅ break_continue.bhasa
 - ✅ logical_operators.bhasa
+- ✅ bitwise_operators.bhasa
 - ✅ string_methods.bhasa
 - ✅ math_functions.bhasa
 - ✅ array_methods.bhasa
