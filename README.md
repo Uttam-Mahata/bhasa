@@ -9,10 +9,13 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 🖥️ **Stack-based virtual machine**
 - 📝 Variables and functions with closures
 - 🔢 Numbers, strings, booleans, arrays, and hash maps
-- 🔄 Control flow (if-else, while loops)
+- 🔄 Control flow (if-else, while/for loops, break/continue)
 - 🚀 Interactive REPL
-- 📚 Built-in functions
+- 📚 Built-in functions (20+ functions)
 - 🎯 Recursion and higher-order functions
+- 🔤 String manipulation methods
+- 🧮 Math functions
+- ⚡ Logical operators (&&, ||)
 
 ## Bengali Keywords
 

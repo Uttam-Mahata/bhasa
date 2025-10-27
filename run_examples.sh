@@ -17,6 +17,11 @@ examples=(
     "hash"
     "fibonacci"
     "comprehensive"
+    "for_loops"
+    "break_continue"
+    "logical_operators"
+    "string_methods"
+    "math_functions"
 )
 
 for example in "${examples[@]}"; do

@@ -73,6 +73,7 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 
 ### 6. Built-in Functions (`evaluator/builtins.go`)
 
+#### Core Functions
 | Function | Bengali | Purpose |
 |----------|---------|---------|
 | print | লেখ | Output to console |
@@ -82,6 +83,27 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 | rest | বাকি | All but first element |
 | push | যোগ | Add element to array |
 | type | টাইপ | Get type of value |
+
+#### String Methods
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| split | বিভক্ত | Split string by delimiter |
+| join | যুক্ত | Join array elements with delimiter |
+| uppercase | উপরে | Convert string to uppercase |
+| lowercase | নিচে | Convert string to lowercase |
+| trim | ছাঁটো | Trim whitespace from string |
+| replace | প্রতিস্থাপন | Replace substring in string |
+| find | খুঁজুন | Find index of substring |
+
+#### Math Functions
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| power | শক্তি | Raise number to power |
+| sqrt | বর্গমূল | Square root |
+| abs | পরম | Absolute value |
+| max | সর্বোচ্চ | Maximum of two numbers |
+| min | সর্বনিম্ন | Minimum of two numbers |
+| round | গোলাকার | Round to nearest integer |
 
 ### 7. REPL (`repl/repl.go`)
 - Interactive shell for live coding
