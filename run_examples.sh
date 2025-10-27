@@ -20,6 +20,7 @@ examples=(
     "for_loops"
     "break_continue"
     "logical_operators"
+    "bitwise_operators"
     "string_methods"
     "math_functions"
     "array_methods"
