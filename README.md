@@ -29,6 +29,9 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 | true | সত্য | Boolean true |
 | false | মিথ্যা | Boolean false |
 | while | যতক্ষণ | While loop |
+| for | পর্যন্ত | For loop |
+| break | বিরতি | Break statement |
+| continue | চালিয়ে_যাও | Continue statement |
 
 ## Installation
 
