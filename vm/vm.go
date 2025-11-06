@@ -121,6 +121,18 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpAnd:
+			err := vm.executeAndOperator()
+			if err != nil {
+				return err
+			}
+
+		case code.OpOr:
+			err := vm.executeOrOperator()
+			if err != nil {
+				return err
+			}
+
 		case code.OpMinus:
 			err := vm.executeMinusOperator()
 			if err != nil {
@@ -425,6 +437,28 @@ func (vm *VM) executeBangOperator() error {
 	default:
 		return vm.push(False)
 	}
+}
+
+func (vm *VM) executeAndOperator() error {
+	right := vm.pop()
+	left := vm.pop()
+
+	// Both operands are already on stack, return true if both are truthy
+	if isTruthy(left) && isTruthy(right) {
+		return vm.push(True)
+	}
+	return vm.push(False)
+}
+
+func (vm *VM) executeOrOperator() error {
+	right := vm.pop()
+	left := vm.pop()
+
+	// Return true if either operand is truthy
+	if isTruthy(left) || isTruthy(right) {
+		return vm.push(True)
+	}
+	return vm.push(False)
 }
 
 func (vm *VM) executeMinusOperator() error {
