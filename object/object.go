@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"hash/fnv"
+	"math"
 	"strings"
 )
 
@@ -353,6 +354,227 @@ var Builtins = []BuiltinDef{
 				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
 			}
 			return &String{Value: string(args[0].Type())}
+		}},
+	},
+	// String methods
+	{
+		"বিভক্ত", // split
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "arguments to 'বিভক্ত' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			delimiter := args[1].(*String).Value
+			parts := strings.Split(str, delimiter)
+			elements := make([]Object, len(parts))
+			for i, part := range parts {
+				elements[i] = &String{Value: part}
+			}
+			return &Array{Elements: elements}
+		}},
+	},
+	{
+		"যুক্ত", // join
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "first argument must be ARRAY, second must be STRING"}
+			}
+			arr := args[0].(*Array)
+			delimiter := args[1].(*String).Value
+			parts := make([]string, len(arr.Elements))
+			for i, elem := range arr.Elements {
+				parts[i] = elem.Inspect()
+			}
+			return &String{Value: strings.Join(parts, delimiter)}
+		}},
+	},
+	{
+		"উপরে", // uppercase
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'উপরে' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.ToUpper(str)}
+		}},
+	},
+	{
+		"নিচে", // lowercase
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'নিচে' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.ToLower(str)}
+		}},
+	},
+	{
+		"ছাঁটো", // trim
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'ছাঁটো' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.TrimSpace(str)}
+		}},
+	},
+	{
+		"প্রতিস্থাপন", // replace
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 3 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=3", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ || args[2].Type() != STRING_OBJ {
+				return &Error{Message: "all arguments to 'প্রতিস্থাপন' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			old := args[1].(*String).Value
+			new := args[2].(*String).Value
+			return &String{Value: strings.ReplaceAll(str, old, new)}
+		}},
+	},
+	{
+		"খুঁজুন", // find/indexOf
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "arguments to 'খুঁজুন' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			substr := args[1].(*String).Value
+			return &Integer{Value: int64(strings.Index(str, substr))}
+		}},
+	},
+	// Math functions
+	{
+		"শক্তি", // power
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'শক্তি' must be INTEGER"}
+			}
+			base := float64(args[0].(*Integer).Value)
+			exp := float64(args[1].(*Integer).Value)
+			result := math.Pow(base, exp)
+			return &Integer{Value: int64(result)}
+		}},
+	},
+	{
+		"বর্গমূল", // square root
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'বর্গমূল' must be INTEGER"}
+			}
+			n := float64(args[0].(*Integer).Value)
+			if n < 0 {
+				return &Error{Message: "cannot take square root of negative number"}
+			}
+			result := math.Sqrt(n)
+			return &Integer{Value: int64(result)}
+		}},
+	},
+	{
+		"পরম", // absolute value
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'পরম' must be INTEGER"}
+			}
+			n := args[0].(*Integer).Value
+			if n < 0 {
+				return &Integer{Value: -n}
+			}
+			return &Integer{Value: n}
+		}},
+	},
+	{
+		"সর্বোচ্চ", // max
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'সর্বোচ্চ' must be INTEGER"}
+			}
+			a := args[0].(*Integer).Value
+			b := args[1].(*Integer).Value
+			if a > b {
+				return &Integer{Value: a}
+			}
+			return &Integer{Value: b}
+		}},
+	},
+	{
+		"সর্বনিম্ন", // min
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'সর্বনিম্ন' must be INTEGER"}
+			}
+			a := args[0].(*Integer).Value
+			b := args[1].(*Integer).Value
+			if a < b {
+				return &Integer{Value: a}
+			}
+			return &Integer{Value: b}
+		}},
+	},
+	{
+		"গোলাকার", // round
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'গোলাকার' must be INTEGER"}
+			}
+			// For integers, round returns the same value
+			return args[0]
+		}},
+	},
+	// Array methods
+	{
+		"উল্টাও", // reverse
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: "argument to 'উল্টাও' must be ARRAY"}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			reversed := make([]Object, length)
+			for i := 0; i < length; i++ {
+				reversed[i] = arr.Elements[length-1-i]
+			}
+			return &Array{Elements: reversed}
 		}},
 	},
 }
