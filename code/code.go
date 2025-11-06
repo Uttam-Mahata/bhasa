@@ -29,6 +29,8 @@ const (
 	OpGreaterThanEqual               // Greater than or equal
 	OpMinus                          // Unary minus
 	OpBang                           // Logical not
+	OpAnd                            // Logical and
+	OpOr                             // Logical or
 	OpJumpNotTruthy                  // Conditional jump
 	OpJump                           // Unconditional jump
 	OpNull                           // Push null
@@ -70,6 +72,8 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThanEqual: {"OpGreaterThanEqual", []int{}},
 	OpMinus:            {"OpMinus", []int{}},
 	OpBang:             {"OpBang", []int{}},
+	OpAnd:              {"OpAnd", []int{}},
+	OpOr:               {"OpOr", []int{}},
 	OpJumpNotTruthy:    {"OpJumpNotTruthy", []int{2}},
 	OpJump:             {"OpJump", []int{2}},
 	OpNull:             {"OpNull", []int{}},
