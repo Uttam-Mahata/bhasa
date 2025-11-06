@@ -4,7 +4,8 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 
 ## Features
 
-- 🇮🇳 Bengali keywords and syntax
+- 🇮🇳 **Bengali keywords and syntax**
+- 🔤 **Bengali variable names** - Full Unicode support for identifiers
 - ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
 - 🖥️ **Stack-based virtual machine**
 - 📝 Variables and functions with closures
@@ -50,6 +51,21 @@ go build -o bhasa
 ধরি y = ১০;
 ধরি যোগফল = x + y;
 লেখ(যোগফল);
+```
+
+### Bengali Variable Names
+```bengali
+// Variables can use Bengali names
+ধরি নাম = "রহিম";
+ধরি বয়স = ২৫;
+ধরি বেতন = ৫০০০০;
+
+// Functions with Bengali names
+ধরি যোগফল_বের_করো = ফাংশন(ক, খ) {
+    ফেরত ক + খ;
+};
+
+লেখ(যোগফল_বের_করো(১০, ২০));  // Output: 30
 ```
 
 ### Functions
