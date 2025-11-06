@@ -2,12 +2,13 @@
 
 ## Overview
 
-Bhasa is a fully-functional **compiled** programming language that uses Bengali keywords and supports Bengali numerals. It's implemented in Go and includes a complete toolchain: lexer, parser, compiler, and stack-based virtual machine.
+Bhasa is a fully-functional **compiled** programming language that uses Bengali keywords, supports Bengali numerals, and allows Bengali variable names. It's implemented in Go and includes a complete toolchain: lexer, parser, compiler, and stack-based virtual machine.
 
 ## Core Components
 
 ### 1. Lexer (`lexer/lexer.go`)
 - **UTF-8 Support**: Properly handles multi-byte Unicode characters including Bengali script
+- **Bengali Variable Names**: Full support for identifiers using Bengali characters (ক-ঘ, vowel signs, etc.)
 - **Bengali Vowel Signs**: Recognizes all Bengali মাত্রা (vowel signs) and diacritics (U+0981 to U+09CD)
 - **Numeral Support**: Accepts both Bengali (০-৯) and Arabic (0-9) numerals
 - **Comment Support**: Single-line comments with `//`
