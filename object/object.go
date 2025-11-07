@@ -18,6 +18,13 @@ type ObjectType string
 
 const (
 	INTEGER_OBJ           = "INTEGER"
+	BYTE_OBJ              = "BYTE"
+	SHORT_OBJ             = "SHORT"
+	INT_OBJ               = "INT"
+	LONG_OBJ              = "LONG"
+	FLOAT_OBJ             = "FLOAT"
+	DOUBLE_OBJ            = "DOUBLE"
+	CHAR_OBJ              = "CHAR"
 	BOOLEAN_OBJ           = "BOOLEAN"
 	STRING_OBJ            = "STRING"
 	NULL_OBJ              = "NULL"
@@ -37,13 +44,69 @@ type Object interface {
 	Inspect() string
 }
 
-// Integer represents an integer value
+// Integer represents an integer value (legacy int64)
 type Integer struct {
 	Value int64
 }
 
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+
+// Byte represents a byte value (0-255)
+type Byte struct {
+	Value int8
+}
+
+func (b *Byte) Type() ObjectType { return BYTE_OBJ }
+func (b *Byte) Inspect() string  { return fmt.Sprintf("%d", uint8(b.Value)) }
+
+// Short represents a short integer (-32768 to 32767)
+type Short struct {
+	Value int16
+}
+
+func (s *Short) Type() ObjectType { return SHORT_OBJ }
+func (s *Short) Inspect() string  { return fmt.Sprintf("%d", s.Value) }
+
+// Int represents a 32-bit integer
+type Int struct {
+	Value int32
+}
+
+func (i *Int) Type() ObjectType { return INT_OBJ }
+func (i *Int) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+
+// Long represents a 64-bit integer
+type Long struct {
+	Value int64
+}
+
+func (l *Long) Type() ObjectType { return LONG_OBJ }
+func (l *Long) Inspect() string  { return fmt.Sprintf("%d", l.Value) }
+
+// Float represents a single-precision floating point number
+type Float struct {
+	Value float32
+}
+
+func (f *Float) Type() ObjectType { return FLOAT_OBJ }
+func (f *Float) Inspect() string  { return fmt.Sprintf("%g", f.Value) }
+
+// Double represents a double-precision floating point number
+type Double struct {
+	Value float64
+}
+
+func (d *Double) Type() ObjectType { return DOUBLE_OBJ }
+func (d *Double) Inspect() string  { return fmt.Sprintf("%g", d.Value) }
+
+// Char represents a Unicode character
+type Char struct {
+	Value rune
+}
+
+func (c *Char) Type() ObjectType { return CHAR_OBJ }
+func (c *Char) Inspect() string  { return string(c.Value) }
 
 // Boolean represents a boolean value
 type Boolean struct {
@@ -174,6 +237,34 @@ type Hashable interface {
 // HashKey methods for hashable types
 func (i *Integer) HashKey() HashKey {
 	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (b *Byte) HashKey() HashKey {
+	return HashKey{Type: b.Type(), Value: uint64(uint8(b.Value))}
+}
+
+func (s *Short) HashKey() HashKey {
+	return HashKey{Type: s.Type(), Value: uint64(uint16(s.Value))}
+}
+
+func (i *Int) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (l *Long) HashKey() HashKey {
+	return HashKey{Type: l.Type(), Value: uint64(l.Value)}
+}
+
+func (f *Float) HashKey() HashKey {
+	return HashKey{Type: f.Type(), Value: uint64(math.Float32bits(f.Value))}
+}
+
+func (d *Double) HashKey() HashKey {
+	return HashKey{Type: d.Type(), Value: math.Float64bits(d.Value)}
+}
+
+func (c *Char) HashKey() HashKey {
+	return HashKey{Type: c.Type(), Value: uint64(c.Value)}
 }
 
 func (b *Boolean) HashKey() HashKey {
@@ -592,11 +683,11 @@ var Builtins = []BuiltinDef{
 			}
 			arr := args[0].(*Array)
 			length := len(arr.Elements)
-			
+
 			// Create a copy to avoid modifying original
 			sorted := make([]Object, length)
 			copy(sorted, arr.Elements)
-			
+
 			// Simple bubble sort for integers
 			for i := 0; i < length-1; i++ {
 				for j := 0; j < length-i-1; j++ {
@@ -625,7 +716,7 @@ var Builtins = []BuiltinDef{
 			if args[1].Type() != CLOSURE_OBJ {
 				return &Error{Message: "second argument to 'ফিল্টার' must be FUNCTION"}
 			}
-			
+
 			// Note: We can't actually execute the closure here since we don't have VM access
 			// This is a limitation - filter needs to be implemented differently
 			// For now, return error
@@ -644,7 +735,7 @@ var Builtins = []BuiltinDef{
 			if args[1].Type() != CLOSURE_OBJ {
 				return &Error{Message: "second argument to 'ম্যাপ' must be FUNCTION"}
 			}
-			
+
 			// Note: Same limitation as filter - needs VM access to execute closures
 			return &Error{Message: "ম্যাপ: function execution not yet supported in built-ins"}
 		}},
@@ -659,13 +750,13 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ {
 				return &Error{Message: "argument to 'ফাইল_পড়ো' must be STRING"}
 			}
-			
+
 			filename := args[0].(*String).Value
 			content, err := os.ReadFile(filename)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error reading file: %s", err)}
 			}
-			
+
 			return &String{Value: string(content)}
 		}},
 	},
@@ -678,15 +769,15 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
 				return &Error{Message: "both arguments to 'ফাইল_লেখো' must be STRING"}
 			}
-			
+
 			filename := args[0].(*String).Value
 			content := args[1].(*String).Value
-			
+
 			err := os.WriteFile(filename, []byte(content), 0644)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error writing file: %s", err)}
 			}
-			
+
 			return &Null{}
 		}},
 	},
@@ -699,20 +790,20 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
 				return &Error{Message: "both arguments to 'ফাইল_যোগ' must be STRING"}
 			}
-			
+
 			filename := args[0].(*String).Value
 			content := args[1].(*String).Value
-			
+
 			f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error opening file: %s", err)}
 			}
 			defer f.Close()
-			
+
 			if _, err := f.WriteString(content); err != nil {
 				return &Error{Message: fmt.Sprintf("error appending to file: %s", err)}
 			}
-			
+
 			return &Null{}
 		}},
 	},
@@ -725,10 +816,10 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ {
 				return &Error{Message: "argument to 'ফাইল_আছে' must be STRING"}
 			}
-			
+
 			filename := args[0].(*String).Value
 			_, err := os.Stat(filename)
-			
+
 			if os.IsNotExist(err) {
 				return &Boolean{Value: false}
 			}
@@ -745,15 +836,15 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ {
 				return &Error{Message: "argument to 'JSON_পার্স' must be STRING"}
 			}
-			
+
 			jsonStr := args[0].(*String).Value
 			var data interface{}
-			
+
 			err := json.Unmarshal([]byte(jsonStr), &data)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error parsing JSON: %s", err)}
 			}
-			
+
 			// Convert JSON data to Bhasa objects
 			return jsonToObject(data)
 		}},
@@ -764,15 +855,15 @@ var Builtins = []BuiltinDef{
 			if len(args) != 1 {
 				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
 			}
-			
+
 			// Convert Bhasa object to JSON-compatible structure
 			data := objectToJSON(args[0])
-			
+
 			jsonBytes, err := json.Marshal(data)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error creating JSON: %s", err)}
 			}
-			
+
 			return &String{Value: string(jsonBytes)}
 		}},
 	},
@@ -821,13 +912,13 @@ var Builtins = []BuiltinDef{
 				return &Error{Message: "first argument to 'চাবি_আছে' must be HASH"}
 			}
 			hash := args[0].(*Hash)
-			
+
 			// Check if key is hashable
 			keyObj, ok := args[1].(Hashable)
 			if !ok {
 				return &Error{Message: "second argument must be a hashable type (INTEGER, STRING, or BOOLEAN)"}
 			}
-			
+
 			_, exists := hash.Pairs[keyObj.HashKey()]
 			return &Boolean{Value: exists}
 		}},
@@ -843,7 +934,7 @@ var Builtins = []BuiltinDef{
 			}
 			hash1 := args[0].(*Hash)
 			hash2 := args[1].(*Hash)
-			
+
 			// Create new hash with pairs from both
 			newPairs := make(map[HashKey]HashPair)
 			for k, v := range hash1.Pairs {
@@ -852,7 +943,7 @@ var Builtins = []BuiltinDef{
 			for k, v := range hash2.Pairs {
 				newPairs[k] = v // hash2 overwrites hash1 if same key
 			}
-			
+
 			return &Hash{Pairs: newPairs}
 		}},
 	},
@@ -869,15 +960,15 @@ var Builtins = []BuiltinDef{
 			if args[1].Type() != INTEGER_OBJ {
 				return &Error{Message: "second argument to 'অক্ষর' must be INTEGER"}
 			}
-			
+
 			str := args[0].(*String).Value
 			index := args[1].(*Integer).Value
 			runes := []rune(str)
-			
+
 			if index < 0 || index >= int64(len(runes)) {
 				return &Error{Message: fmt.Sprintf("index out of bounds: %d", index)}
 			}
-			
+
 			return &String{Value: string(runes[index])}
 		}},
 	},
@@ -890,14 +981,14 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ {
 				return &Error{Message: "argument to 'কোড' must be STRING"}
 			}
-			
+
 			str := args[0].(*String).Value
 			runes := []rune(str)
-			
+
 			if len(runes) == 0 {
 				return &Error{Message: "cannot get code of empty string"}
 			}
-			
+
 			return &Integer{Value: int64(runes[0])}
 		}},
 	},
@@ -910,7 +1001,7 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != INTEGER_OBJ {
 				return &Error{Message: "argument to 'অক্ষর_থেকে_কোড' must be INTEGER"}
 			}
-			
+
 			code := args[0].(*Integer).Value
 			// Validate Unicode code point range
 			if code < 0 || code > 0x10FFFF {
@@ -928,16 +1019,16 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != STRING_OBJ {
 				return &Error{Message: "argument to 'সংখ্যা' must be STRING"}
 			}
-			
+
 			str := args[0].(*String).Value
 			// Convert Bengali numerals to Arabic numerals
 			str = token.ConvertBengaliNumber(str)
-			
+
 			result, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("cannot parse '%s' as integer: %s", str, err)}
 			}
-			
+
 			return &Integer{Value: result}
 		}},
 	},
@@ -950,9 +1041,299 @@ var Builtins = []BuiltinDef{
 			if args[0].Type() != INTEGER_OBJ {
 				return &Error{Message: "argument to 'লেখা' must be INTEGER"}
 			}
-			
+
 			num := args[0].(*Integer).Value
 			return &String{Value: fmt.Sprintf("%d", num)}
+		}},
+	},
+	// Type casting functions
+	{
+		"বাইট", // convert to byte (0-255)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *Byte:
+				return arg // already a byte
+			case *Short:
+				value = int64(arg.Value)
+			case *Int:
+				value = int64(arg.Value)
+			case *Long:
+				value = arg.Value
+			case *Float:
+				value = int64(arg.Value)
+			case *Double:
+				value = int64(arg.Value)
+			case *Char:
+				value = int64(arg.Value)
+			case *String:
+				// Try to parse string
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as byte: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to BYTE", args[0].Type())}
+			}
+
+			// Check bounds (0-255)
+			if value < 0 || value > 255 {
+				return &Error{Message: fmt.Sprintf("value %d out of byte range (0-255)", value)}
+			}
+
+			return &Byte{Value: int8(value)}
+		}},
+	},
+	{
+		"ছোট_সংখ্যা", // convert to short (-32768 to 32767)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *Byte:
+				value = int64(arg.Value)
+			case *Short:
+				return arg // already a short
+			case *Int:
+				value = int64(arg.Value)
+			case *Long:
+				value = arg.Value
+			case *Float:
+				value = int64(arg.Value)
+			case *Double:
+				value = int64(arg.Value)
+			case *Char:
+				value = int64(arg.Value)
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as short: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to SHORT", args[0].Type())}
+			}
+
+			// Check bounds (-32768 to 32767)
+			if value < -32768 || value > 32767 {
+				return &Error{Message: fmt.Sprintf("value %d out of short range (-32768 to 32767)", value)}
+			}
+
+			return &Short{Value: int16(value)}
+		}},
+	},
+	{
+		"পূর্ণসংখ্যা", // convert to int (32-bit পূর্ণসংখ্যা)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *Byte:
+				value = int64(arg.Value)
+			case *Short:
+				value = int64(arg.Value)
+			case *Int:
+				return arg // already an int
+			case *Long:
+				value = arg.Value
+			case *Float:
+				value = int64(arg.Value)
+			case *Double:
+				value = int64(arg.Value)
+			case *Char:
+				value = int64(arg.Value)
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as int: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to INT", args[0].Type())}
+			}
+
+			// Check bounds (-2147483648 to 2147483647)
+			if value < -2147483648 || value > 2147483647 {
+				return &Error{Message: fmt.Sprintf("value %d out of int range (-2147483648 to 2147483647)", value)}
+			}
+
+			return &Int{Value: int32(value)}
+		}},
+	},
+	{
+		"দীর্ঘ_সংখ্যা", // convert to long (64-bit integer)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *Byte:
+				value = int64(arg.Value)
+			case *Short:
+				value = int64(arg.Value)
+			case *Int:
+				value = int64(arg.Value)
+			case *Long:
+				return arg // already a long
+			case *Float:
+				value = int64(arg.Value)
+			case *Double:
+				value = int64(arg.Value)
+			case *Char:
+				value = int64(arg.Value)
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as long: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to LONG", args[0].Type())}
+			}
+
+			return &Long{Value: value}
+		}},
+	},
+	{
+		"দশমিক", // convert to float (single precision দশমিক সংখ্যা)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value float64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = float64(arg.Value)
+			case *Byte:
+				value = float64(arg.Value)
+			case *Short:
+				value = float64(arg.Value)
+			case *Int:
+				value = float64(arg.Value)
+			case *Long:
+				value = float64(arg.Value)
+			case *Float:
+				return arg // already a float
+			case *Double:
+				value = arg.Value
+			case *Char:
+				value = float64(arg.Value)
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseFloat(strings.TrimSpace(str), 32)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as float: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to FLOAT", args[0].Type())}
+			}
+
+			return &Float{Value: float32(value)}
+		}},
+	},
+	{
+		"দশমিক_দ্বিগুণ", // convert to double (double precision দশমিক সংখ্যা)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value float64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = float64(arg.Value)
+			case *Byte:
+				value = float64(arg.Value)
+			case *Short:
+				value = float64(arg.Value)
+			case *Int:
+				value = float64(arg.Value)
+			case *Long:
+				value = float64(arg.Value)
+			case *Float:
+				value = float64(arg.Value)
+			case *Double:
+				return arg // already a double
+			case *Char:
+				value = float64(arg.Value)
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				parsed, err := strconv.ParseFloat(strings.TrimSpace(str), 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot parse '%s' as double: %s", arg.Value, err)}
+				}
+				value = parsed
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to DOUBLE", args[0].Type())}
+			}
+
+			return &Double{Value: value}
+		}},
+	},
+	{
+		"অক্ষর_রূপান্তর", // convert to char (Unicode character)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *Byte:
+				value = int64(arg.Value)
+			case *Short:
+				value = int64(arg.Value)
+			case *Int:
+				value = int64(arg.Value)
+			case *Long:
+				value = arg.Value
+			case *Char:
+				return arg // already a char
+			case *String:
+				runes := []rune(arg.Value)
+				if len(runes) == 0 {
+					return &Error{Message: "cannot convert empty string to CHAR"}
+				}
+				value = int64(runes[0])
+			default:
+				return &Error{Message: fmt.Sprintf("cannot convert %s to CHAR", args[0].Type())}
+			}
+
+			// Validate Unicode code point range
+			if value < 0 || value > 0x10FFFF {
+				return &Error{Message: fmt.Sprintf("invalid Unicode code point: %d (must be 0-0x10FFFF)", value)}
+			}
+
+			return &Char{Value: rune(value)}
 		}},
 	},
 }
@@ -1026,4 +1407,3 @@ func objectToJSON(obj Object) interface{} {
 		return nil
 	}
 }
-
