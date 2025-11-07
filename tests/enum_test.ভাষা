@@ -1,0 +1,21 @@
+// Simple Enum Tests for Bhasa Language
+
+লেখ("=== Enum Test Suite ===\n");
+
+// Test 1: Simple enum definition (as hash)
+লেখ("Test 1: Simple enum as hash");
+ধরি Direction = {"North": 0, "South": 1, "East": 2, "West": 3};
+লেখ("Direction defined");
+লেখ(Direction);
+
+// Test 2: Access enum values
+লেখ("\nTest 2: Access enum values");
+লেখ("North:", Direction["North"]);
+লেখ("South:", Direction["South"]);
+
+// Test 3: Use enum values
+লেখ("\nTest 3: Use enum values");
+ধরি currentDirection = Direction["North"];
+লেখ("Current direction:", currentDirection);
+
+লেখ("\n=== Enum Tests Completed ===");

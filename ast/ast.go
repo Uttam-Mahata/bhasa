@@ -3,6 +3,7 @@ package ast
 import (
 	"bhasa/token"
 	"bytes"
+	"fmt"
 	"strings"
 )
 
@@ -596,6 +597,58 @@ func (mas *MemberAssignmentStatement) String() string {
 		out.WriteString(mas.Value.String())
 	}
 	out.WriteString(";")
+	return out.String()
+}
+
+// EnumVariant represents a single variant in an enum definition
+type EnumVariant struct {
+	Name  string
+	Value *int // optional explicit value
+}
+
+// EnumDefinition represents an enum type definition
+// Example: গণনা { উত্তর, দক্ষিণ, পূর্ব, পশ্চিম }
+type EnumDefinition struct {
+	Token    token.Token     // the গণনা token
+	Name     *Identifier     // enum type name (from LetStatement)
+	Variants []*EnumVariant  // ordered list of variants
+}
+
+func (ed *EnumDefinition) expressionNode()      {}
+func (ed *EnumDefinition) TokenLiteral() string { return ed.Token.Literal }
+func (ed *EnumDefinition) String() string {
+	var out bytes.Buffer
+	out.WriteString("গণনা {")
+
+	variantStrs := []string{}
+	for _, variant := range ed.Variants {
+		varStr := variant.Name
+		if variant.Value != nil {
+			varStr += fmt.Sprintf(" = %d", *variant.Value)
+		}
+		variantStrs = append(variantStrs, varStr)
+	}
+
+	out.WriteString(strings.Join(variantStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// EnumValue represents accessing an enum variant
+// Example: দিক.উত্তর (Direction.North)
+type EnumValue struct {
+	Token       token.Token // the enum type name token
+	EnumType    *Identifier // the enum type name
+	VariantName *Identifier // the variant name
+}
+
+func (ev *EnumValue) expressionNode()      {}
+func (ev *EnumValue) TokenLiteral() string { return ev.Token.Literal }
+func (ev *EnumValue) String() string {
+	var out bytes.Buffer
+	out.WriteString(ev.EnumType.String())
+	out.WriteString(".")
+	out.WriteString(ev.VariantName.String())
 	return out.String()
 }
 
