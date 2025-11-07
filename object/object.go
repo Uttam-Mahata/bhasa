@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
-	"io/ioutil"
 	"math"
 	"os"
 	"strings"
@@ -660,7 +659,7 @@ var Builtins = []BuiltinDef{
 			}
 			
 			filename := args[0].(*String).Value
-			content, err := ioutil.ReadFile(filename)
+			content, err := os.ReadFile(filename)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error reading file: %s", err)}
 			}
@@ -681,7 +680,7 @@ var Builtins = []BuiltinDef{
 			filename := args[0].(*String).Value
 			content := args[1].(*String).Value
 			
-			err := ioutil.WriteFile(filename, []byte(content), 0644)
+			err := os.WriteFile(filename, []byte(content), 0644)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("error writing file: %s", err)}
 			}
