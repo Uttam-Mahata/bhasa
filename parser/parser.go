@@ -12,26 +12,35 @@ import (
 const (
 	_ int = iota
 	LOWEST
-	LOGICAL_OR  // ||
-	LOGICAL_AND // &&
-	EQUALS      // ==
-	LESSGREATER // > or <
-	SUM         // +
-	PRODUCT     // *
-	PREFIX      // -X or !X
-	CALL        // myFunction(X)
-	INDEX       // array[index]
+	LOGICAL_OR   // ||
+	LOGICAL_AND  // &&
+	BIT_OR       // |
+	BIT_XOR      // ^
+	BIT_AND      // &
+	EQUALS       // ==
+	LESSGREATER  // > or <
+	SHIFT        // << >>
+	SUM          // +
+	PRODUCT      // *
+	PREFIX       // -X or !X or ~X
+	CALL         // myFunction(X)
+	INDEX        // array[index]
 )
 
 var precedences = map[token.TokenType]int{
 	token.OR:       LOGICAL_OR,
 	token.AND:      LOGICAL_AND,
+	token.BIT_OR:   BIT_OR,
+	token.BIT_XOR:  BIT_XOR,
+	token.BIT_AND:  BIT_AND,
 	token.EQ:       EQUALS,
 	token.NOT_EQ:   EQUALS,
 	token.LT:       LESSGREATER,
 	token.GT:       LESSGREATER,
 	token.LTE:      LESSGREATER,
 	token.GTE:      LESSGREATER,
+	token.LSHIFT:   SHIFT,
+	token.RSHIFT:   SHIFT,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
@@ -72,6 +81,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.BIT_NOT, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
@@ -84,6 +94,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.OR, p.parseInfixExpression)
 	p.registerInfix(token.AND, p.parseInfixExpression)
+	p.registerInfix(token.BIT_OR, p.parseInfixExpression)
+	p.registerInfix(token.BIT_XOR, p.parseInfixExpression)
+	p.registerInfix(token.BIT_AND, p.parseInfixExpression)
+	p.registerInfix(token.LSHIFT, p.parseInfixExpression)
+	p.registerInfix(token.RSHIFT, p.parseInfixExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)

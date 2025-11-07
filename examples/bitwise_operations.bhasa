@@ -1,0 +1,74 @@
+// Test bitwise operations in Bhasa
+লেখ("=== Bitwise Operations Test ===");
+লেখ("");
+
+// Bitwise AND
+লেখ("Bitwise AND (&):");
+ধরি a = ১২;  // 1100 in binary
+ধরি b = ১০;  // 1010 in binary
+ধরি result = a & b;  // Expected: 8 (1000 in binary)
+লেখ("12 & 10 = ");
+লেখ(result);
+লেখ("");
+
+// Bitwise OR
+লেখ("Bitwise OR (|):");
+ধরি c = ১২;  // 1100 in binary
+ধরি d = ১০;  // 1010 in binary
+ধরি result2 = c | d;  // Expected: 14 (1110 in binary)
+লেখ("12 | 10 = ");
+লেখ(result2);
+লেখ("");
+
+// Bitwise XOR
+লেখ("Bitwise XOR (^):");
+ধরি e = ১২;  // 1100 in binary
+ধরি f = ১০;  // 1010 in binary
+ধরি result3 = e ^ f;  // Expected: 6 (0110 in binary)
+লেখ("12 ^ 10 = ");
+লেখ(result3);
+লেখ("");
+
+// Bitwise NOT
+লেখ("Bitwise NOT (~):");
+ধরি g = ৫;   // 0101 in binary
+ধরি result4 = ~g;  // Expected: -6 (two's complement)
+লেখ("~5 = ");
+লেখ(result4);
+লেখ("");
+
+// Left Shift
+লেখ("Left Shift (<<):");
+ধরি h = ৫;   // 0101 in binary
+ধরি result5 = h << ২;  // Expected: 20 (10100 in binary)
+লেখ("5 << 2 = ");
+লেখ(result5);
+লেখ("");
+
+// Right Shift
+লেখ("Right Shift (>>):");
+ধরি i = ২০;  // 10100 in binary
+ধরি result6 = i >> ২;  // Expected: 5 (0101 in binary)
+লেখ("20 >> 2 = ");
+লেখ(result6);
+লেখ("");
+
+// Complex expression
+লেখ("Complex expression:");
+ধরি j = (৮ & ৬) | (৪ ^ ২);  // (8 & 6) | (4 ^ 2) = 0 | 6 = 6
+লেখ("(8 & 6) | (4 ^ 2) = ");
+লেখ(j);
+লেখ("");
+
+// Shift operations with variables
+লেখ("Multiple shift operations:");
+ধরি k = ১;
+ধরি shifted = k << ৩;  // 1 << 3 = 8
+ধরি shifted_back = shifted >> ১;  // 8 >> 1 = 4
+লেখ("1 << 3 = ");
+লেখ(shifted);
+লেখ("8 >> 1 = ");
+লেখ(shifted_back);
+লেখ("");
+
+লেখ("=== All tests completed ===");

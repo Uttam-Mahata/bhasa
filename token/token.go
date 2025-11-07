@@ -40,6 +40,14 @@ const (
 	AND = "&&" // Logical AND
 	OR  = "||" // Logical OR
 
+	// Bitwise operators
+	BIT_AND   = "&"  // Bitwise AND
+	BIT_OR    = "|"  // Bitwise OR
+	BIT_XOR   = "^"  // Bitwise XOR
+	BIT_NOT   = "~"  // Bitwise NOT
+	LSHIFT    = "<<" // Left shift
+	RSHIFT    = ">>" // Right shift
+
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = ";"
