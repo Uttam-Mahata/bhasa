@@ -28,7 +28,10 @@ func (tc *TypeChecker) addError(msg string) {
 	tc.errors = append(tc.errors, msg)
 }
 
-// InferType infers the type of an expression
+// InferType infers the type of an expression.
+// Returns the Bengali type name if type can be inferred, or empty string if unknown.
+// Supported expressions: IntegerLiteral, StringLiteral, Boolean, ArrayLiteral,
+// HashLiteral, FunctionLiteral, InfixExpression, PrefixExpression.
 func (tc *TypeChecker) InferType(expr ast.Expression) string {
 	switch e := expr.(type) {
 	case *ast.IntegerLiteral:

@@ -4,6 +4,7 @@ import (
 	"bhasa/ast"
 	"bhasa/lexer"
 	"bhasa/parser"
+	"strings"
 	"testing"
 )
 
@@ -83,7 +84,7 @@ func TestTypeChecking(t *testing.T) {
 		if tt.expectedError && len(typeErrors) > 0 {
 			found := false
 			for _, errMsg := range typeErrors {
-				if contains(errMsg, tt.errorContains) {
+				if strings.Contains(errMsg, tt.errorContains) {
 					found = true
 					break
 				}
@@ -184,18 +185,4 @@ func TestTypeInference(t *testing.T) {
 				tt.expr, inferredType, tt.expectedType)
 		}
 	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && 
-		(s == substr || containsHelper(s, substr))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

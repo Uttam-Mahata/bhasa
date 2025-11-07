@@ -721,8 +721,8 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 func (p *Parser) parseTypeAnnotation() *ast.TypeAnnotation {
 	// Check if current token is a valid type keyword
 	switch p.curToken.Type {
-	case token.TYPE_INT, token.TYPE_STRING, token.TYPE_BOOL, 
-	     token.TYPE_ARRAY, token.TYPE_HASH, token.TYPE_FUNC:
+	case token.TYPE_INT, token.TYPE_STRING, token.TYPE_BOOL,
+		token.TYPE_ARRAY, token.TYPE_HASH, token.TYPE_FUNC:
 		return &ast.TypeAnnotation{
 			Token: p.curToken,
 			Type:  p.curToken.Literal,
