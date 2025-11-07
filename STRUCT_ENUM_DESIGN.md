@@ -120,7 +120,7 @@ person.বয়স = 31;
 
 ```bhasa
 // Simple enum
-ধরি দিক = enum {
+ধরি দিক = গণনা {
     উত্তর,
     দক্ষিণ,
     পূর্ব,
@@ -128,14 +128,14 @@ person.বয়স = 31;
 };
 
 // Enum with explicit values
-ধরি স্ট্যাটাস = enum {
+ধরি স্ট্যাটাস = গণনা {
     সফল = 0,
     ব্যর্থ = 1,
     অপেক্ষমান = 2
 };
 
 // Enum with associated data (like Rust)
-ধরি ফলাফল = enum {
+ধরি ফলাফল = গণনা {
     সফল(মান: পূর্ণসংখ্যা),
     ত্রুটি(বার্তা: লেখা)
 };
@@ -180,7 +180,7 @@ STRUCT = "স্ট্রাক্ট"  // struct keyword
 DOT    = "."          // field access (already exists)
 
 // Enum tokens
-ENUM   = "enum"       // enum keyword
+ENUM   = "গণনা"       // enum keyword (enumeration in Bengali)
 ARROW  = "=>"         // pattern matching (future)
 ```
 
@@ -303,7 +303,7 @@ OpMatchEnum    // Pattern match enum (future)
 };
 
 // Opcode enum
-ধরি Opcode = enum {
+ধরি Opcode = গণনা {
     OpConstant,
     OpPop,
     OpAdd,
@@ -324,7 +324,7 @@ OpMatchEnum    // Pattern match enum (future)
 };
 
 // Result type for error handling
-ধরি Result = enum {
+ধরি Result = গণনা {
     Ok(value: পূর্ণসংখ্যা),
     Err(message: লেখা)
 };
