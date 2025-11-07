@@ -2,6 +2,7 @@ package object
 
 import (
 	"bhasa/ast"
+	"bhasa/token"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -852,6 +853,102 @@ var Builtins = []BuiltinDef{
 			}
 			
 			return &Hash{Pairs: newPairs}
+		}},
+	},
+	// String/Character manipulation for self-hosting
+	{
+		"অক্ষর", // charAt - get character at index
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "first argument to 'অক্ষর' must be STRING"}
+			}
+			if args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "second argument to 'অক্ষর' must be INTEGER"}
+			}
+			
+			str := args[0].(*String).Value
+			index := args[1].(*Integer).Value
+			runes := []rune(str)
+			
+			if index < 0 || index >= int64(len(runes)) {
+				return &Error{Message: fmt.Sprintf("index out of bounds: %d", index)}
+			}
+			
+			return &String{Value: string(runes[index])}
+		}},
+	},
+	{
+		"কোড", // charCode - get character code (Unicode code point)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'কোড' must be STRING"}
+			}
+			
+			str := args[0].(*String).Value
+			runes := []rune(str)
+			
+			if len(runes) == 0 {
+				return &Error{Message: "cannot get code of empty string"}
+			}
+			
+			return &Integer{Value: int64(runes[0])}
+		}},
+	},
+	{
+		"অক্ষর_থেকে_কোড", // fromCharCode - create string from character code
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'অক্ষর_থেকে_কোড' must be INTEGER"}
+			}
+			
+			code := args[0].(*Integer).Value
+			return &String{Value: string(rune(code))}
+		}},
+	},
+	{
+		"সংখ্যা", // parseInt - convert string to integer
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'সংখ্যা' must be STRING"}
+			}
+			
+			str := args[0].(*String).Value
+			// Convert Bengali numerals to Arabic numerals
+			str = token.ConvertBengaliNumber(str)
+			
+			var result int64
+			_, err := fmt.Sscanf(str, "%d", &result)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("cannot parse '%s' as integer: %s", str, err)}
+			}
+			
+			return &Integer{Value: result}
+		}},
+	},
+	{
+		"লেখা", // toString - convert integer to string
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'লেখা' must be INTEGER"}
+			}
+			
+			num := args[0].(*Integer).Value
+			return &String{Value: fmt.Sprintf("%d", num)}
 		}},
 	},
 }

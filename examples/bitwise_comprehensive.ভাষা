@@ -1,0 +1,90 @@
+// Comprehensive test combining bitwise operations with other language features
+লেখ("=== Comprehensive Bitwise Test ===");
+লেখ("");
+
+// Test 1: Bitwise operations in functions
+লেখ("Test 1: Bitwise operations in functions");
+ধরি setBit = ফাংশন(num, position) {
+    ফেরত num | (১ << position);
+};
+
+ধরি clearBit = ফাংশন(num, position) {
+    ফেরত num & ~(১ << position);
+};
+
+ধরি toggleBit = ফাংশন(num, position) {
+    ফেরত num ^ (১ << position);
+};
+
+ধরি value = ৮;  // 1000 in binary
+লেখ("Initial value: ");
+লেখ(value);
+
+ধরি withBit = setBit(value, ০);  // Set bit 0: 1001 = 9
+লেখ("Set bit 0: ");
+লেখ(withBit);
+
+ধরি cleared = clearBit(value, ৩);  // Clear bit 3: 0000 = 0
+লেখ("Clear bit 3: ");
+লেখ(cleared);
+
+ধরি toggled = toggleBit(value, ২);  // Toggle bit 2: 1100 = 12
+লেখ("Toggle bit 2: ");
+লেখ(toggled);
+লেখ("");
+
+// Test 2: Bitwise operations with conditionals
+লেখ("Test 2: Bitwise operations with conditionals");
+ধরি checkEven = ফাংশন(n) {
+    যদি ((n & ১) == ০) {
+        ফেরত সত্য;
+    } নাহলে {
+        ফেরত মিথ্যা;
+    }
+};
+
+লেখ("Is 10 even? ");
+লেখ(checkEven(১০));
+লেখ("Is 7 even? ");
+লেখ(checkEven(৭));
+লেখ("");
+
+// Test 3: Bitwise operations in loops
+লেখ("Test 3: Counting set bits");
+ধরি countBits = ফাংশন(n) {
+    ধরি count = ০;
+    ধরি temp = n;
+    যতক্ষণ (temp > ০) {
+        count = count + (temp & ১);
+        temp = temp >> ১;
+    }
+    ফেরত count;
+};
+
+লেখ("Bits in 15 (1111): ");
+লেখ(countBits(১৫));
+লেখ("Bits in 7 (0111): ");
+লেখ(countBits(৭));
+লেখ("");
+
+// Test 4: Combining bitwise with logical operators
+লেখ("Test 4: Combining bitwise and logical");
+ধরি a = ৮;
+ধরি b = ৪;
+যদি ((a & b) == ০ && (a | b) == ১২) {
+    লেখ("8 and 4 have no common bits, combined they equal 12");
+}
+লেখ("");
+
+// Test 5: Array of bitwise results
+লেখ("Test 5: Array of bitwise operations");
+ধরি results = [১২ & ১০, ১২ | ১০, ১২ ^ ১০];
+লেখ("AND result: ");
+লেখ(results[০]);
+লেখ("OR result: ");
+লেখ(results[১]);
+লেখ("XOR result: ");
+লেখ(results[২]);
+লেখ("");
+
+লেখ("=== All comprehensive tests passed ===");
