@@ -16,6 +16,7 @@ type Symbol struct {
 	Name  string
 	Scope SymbolScope
 	Index int
+	Type  string // optional type annotation
 }
 
 // SymbolTable tracks symbols and their scopes
@@ -44,7 +45,21 @@ func NewEnclosedSymbolTable(outer *SymbolTable) *SymbolTable {
 
 // Define defines a symbol
 func (s *SymbolTable) Define(name string) Symbol {
-	symbol := Symbol{Name: name, Index: s.numDefinitions}
+	symbol := Symbol{Name: name, Index: s.numDefinitions, Type: ""}
+	if s.Outer == nil {
+		symbol.Scope = GlobalScope
+	} else {
+		symbol.Scope = LocalScope
+	}
+
+	s.store[name] = symbol
+	s.numDefinitions++
+	return symbol
+}
+
+// DefineWithType defines a symbol with a type annotation
+func (s *SymbolTable) DefineWithType(name string, typeName string) Symbol {
+	symbol := Symbol{Name: name, Index: s.numDefinitions, Type: typeName}
 	if s.Outer == nil {
 		symbol.Scope = GlobalScope
 	} else {

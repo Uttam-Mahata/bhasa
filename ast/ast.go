@@ -44,11 +44,22 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+// TypeAnnotation represents a type annotation for variables and functions
+type TypeAnnotation struct {
+	Token token.Token // the type token
+	Type  string      // the type name (e.g., "পূর্ণসংখ্যা", "লেখা", etc.)
+}
+
+func (ta *TypeAnnotation) expressionNode()      {}
+func (ta *TypeAnnotation) TokenLiteral() string { return ta.Token.Literal }
+func (ta *TypeAnnotation) String() string       { return ta.Type }
+
 // LetStatement represents a variable declaration (ধরি)
 type LetStatement struct {
-	Token token.Token // the ধরি token
-	Name  *Identifier
-	Value Expression
+	Token          token.Token // the ধরি token
+	Name           *Identifier
+	TypeAnnotation *TypeAnnotation // optional type annotation
+	Value          Expression
 }
 
 func (ls *LetStatement) statementNode()       {}
@@ -57,6 +68,10 @@ func (ls *LetStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
+	if ls.TypeAnnotation != nil {
+		out.WriteString(": ")
+		out.WriteString(ls.TypeAnnotation.String())
+	}
 	out.WriteString(" = ")
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
@@ -172,8 +187,9 @@ func (ws *WhileStatement) String() string {
 
 // Identifier represents an identifier
 type Identifier struct {
-	Token token.Token // the token.IDENT token
-	Value string
+	Token          token.Token // the token.IDENT token
+	Value          string
+	TypeAnnotation *TypeAnnotation // optional type annotation for function parameters
 }
 
 func (i *Identifier) expressionNode()      {}
@@ -273,9 +289,10 @@ func (ie *IfExpression) String() string {
 
 // FunctionLiteral represents a function literal
 type FunctionLiteral struct {
-	Token      token.Token // The ফাংশন token
-	Parameters []*Identifier
-	Body       *BlockStatement
+	Token          token.Token // The ফাংশন token
+	Parameters     []*Identifier
+	ReturnType     *TypeAnnotation // optional return type annotation
+	Body           *BlockStatement
 }
 
 func (fl *FunctionLiteral) expressionNode()      {}
@@ -284,12 +301,21 @@ func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
 	params := []string{}
 	for _, p := range fl.Parameters {
-		params = append(params, p.String())
+		paramStr := p.Value
+		if p.TypeAnnotation != nil {
+			paramStr += ": " + p.TypeAnnotation.String()
+		}
+		params = append(params, paramStr)
 	}
 	out.WriteString(fl.TokenLiteral())
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") ")
+	out.WriteString(")")
+	if fl.ReturnType != nil {
+		out.WriteString(": ")
+		out.WriteString(fl.ReturnType.String())
+	}
+	out.WriteString(" ")
 	out.WriteString(fl.Body.String())
 	return out.String()
 }

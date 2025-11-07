@@ -21,6 +21,7 @@ type Compiler struct {
 	loopStack    []LoopContext       // track nested loops for break/continue
 	moduleCache  map[string]bool     // track loaded modules to prevent circular imports
 	moduleLoader ModuleLoader        // function to load module files
+	typeChecker  *TypeChecker        // type checker for static typing
 }
 
 // LoopContext tracks loop start and break positions
@@ -74,6 +75,7 @@ func New() *Compiler {
 		scopeIndex:   0,
 		moduleCache:  make(map[string]bool),
 		moduleLoader: DefaultModuleLoader,
+		typeChecker:  NewTypeChecker(),
 	}
 }
 
@@ -241,7 +243,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.LetStatement:
-		symbol := c.symbolTable.Define(node.Name.Value)
+		// Perform type checking if type annotation exists
+		if node.TypeAnnotation != nil {
+			if !c.typeChecker.CheckLetStatement(node) {
+				// Collect type errors but continue compilation
+				// Type errors will be reported separately
+			}
+		}
+		
+		var symbol Symbol
+		if node.TypeAnnotation != nil {
+			symbol = c.symbolTable.DefineWithType(node.Name.Value, node.TypeAnnotation.Type)
+		} else {
+			symbol = c.symbolTable.Define(node.Name.Value)
+		}
+		
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
@@ -257,6 +273,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		symbol, ok := c.symbolTable.Resolve(node.Name.Value)
 		if !ok {
 			return fmt.Errorf("undefined variable %s", node.Name.Value)
+		}
+
+		// Check type if variable has type annotation
+		if symbol.Type != "" {
+			if !c.typeChecker.CheckAssignment(symbol.Type, node.Value) {
+				// Type error will be reported separately
+			}
 		}
 
 		err := c.Compile(node.Value)
@@ -495,10 +518,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpIndex)
 
 	case *ast.FunctionLiteral:
+		// Check function return type if annotation exists
+		if node.ReturnType != nil {
+			if !c.typeChecker.CheckFunctionReturn(node) {
+				// Type error will be reported separately
+			}
+		}
+		
 		c.enterScope()
 
 		for _, p := range node.Parameters {
-			c.symbolTable.Define(p.Value)
+			if p.TypeAnnotation != nil {
+				c.symbolTable.DefineWithType(p.Value, p.TypeAnnotation.Type)
+			} else {
+				c.symbolTable.Define(p.Value)
+			}
 		}
 
 		err := c.Compile(node.Body)
@@ -562,6 +596,11 @@ func (c *Compiler) Bytecode() *Bytecode {
 		Instructions: c.currentInstructions(),
 		Constants:    c.constants,
 	}
+}
+
+// TypeErrors returns any type checking errors encountered during compilation
+func (c *Compiler) TypeErrors() []string {
+	return c.typeChecker.Errors()
 }
 
 func (c *Compiler) addConstant(obj object.Object) int {

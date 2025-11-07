@@ -194,6 +194,17 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
+	// Check for optional type annotation (: টাইপ)
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume identifier
+		p.nextToken() // consume colon
+		
+		stmt.TypeAnnotation = p.parseTypeAnnotation()
+		if stmt.TypeAnnotation == nil {
+			return nil
+		}
+	}
+
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
 	}
@@ -512,6 +523,17 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 
 	lit.Parameters = p.parseFunctionParameters()
 
+	// Check for optional return type annotation (: টাইপ)
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume )
+		p.nextToken() // consume :
+		
+		lit.ReturnType = p.parseTypeAnnotation()
+		if lit.ReturnType == nil {
+			return nil
+		}
+	}
+
 	if !p.expectPeek(token.LBRACE) {
 		return nil
 	}
@@ -532,12 +554,36 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	p.nextToken()
 
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	
+	// Check for optional type annotation for parameter
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume identifier
+		p.nextToken() // consume :
+		
+		ident.TypeAnnotation = p.parseTypeAnnotation()
+		if ident.TypeAnnotation == nil {
+			return nil
+		}
+	}
+	
 	identifiers = append(identifiers, ident)
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
 		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		
+		// Check for optional type annotation for parameter
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken() // consume identifier
+			p.nextToken() // consume :
+			
+			ident.TypeAnnotation = p.parseTypeAnnotation()
+			if ident.TypeAnnotation == nil {
+				return nil
+			}
+		}
+		
 		identifiers = append(identifiers, ident)
 	}
 
@@ -669,4 +715,20 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
+}
+
+// parseTypeAnnotation parses a type annotation
+func (p *Parser) parseTypeAnnotation() *ast.TypeAnnotation {
+	// Check if current token is a valid type keyword
+	switch p.curToken.Type {
+	case token.TYPE_INT, token.TYPE_STRING, token.TYPE_BOOL, 
+	     token.TYPE_ARRAY, token.TYPE_HASH, token.TYPE_FUNC:
+		return &ast.TypeAnnotation{
+			Token: p.curToken,
+			Type:  p.curToken.Literal,
+		}
+	default:
+		p.error(fmt.Sprintf("expected type annotation, got %s", p.curToken.Type))
+		return nil
+	}
 }

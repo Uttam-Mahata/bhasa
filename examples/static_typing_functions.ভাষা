@@ -1,0 +1,67 @@
+// Static Typing Test - Function Type Annotations
+// Testing type annotations for function parameters and return types
+
+লেখ("=== Function Type Annotation Tests ===");
+লেখ("");
+
+// Test 1: Function with parameter type annotations
+লেখ("Test 1: Function with typed parameters");
+ধরি add: ফাংশন_টাইপ = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা) {
+    ফেরত a + b;
+};
+লেখ("add(10, 20) = ");
+লেখ(add(১০, ২০));
+লেখ("");
+
+// Test 2: Function with return type annotation
+লেখ("Test 2: Function with return type");
+ধরি multiply: ফাংশন_টাইপ = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a * b;
+};
+লেখ("multiply(5, 6) = ");
+লেখ(multiply(৫, ৬));
+লেখ("");
+
+// Test 3: Function returning boolean
+লেখ("Test 3: Function returning boolean");
+ধরি isPositive = ফাংশন(n: পূর্ণসংখ্যা): বুলিয়ান {
+    ফেরত n > ০;
+};
+লেখ("isPositive(10) = ");
+লেখ(isPositive(১০));
+লেখ("isPositive(-5) = ");
+লেখ(isPositive(-৫));
+লেখ("");
+
+// Test 4: Function returning string
+লেখ("Test 4: Function returning string");
+ধরি greet = ফাংশন(name: লেখা): লেখা {
+    ফেরত "নমস্কার, " + name;
+};
+লেখ(greet("বাংলা"));
+লেখ("");
+
+// Test 5: Function without type annotations (still works)
+লেখ("Test 5: Dynamic function (no annotations)");
+ধরি subtract = ফাংশন(a, b) {
+    ফেরত a - b;
+};
+লেখ("subtract(20, 5) = ");
+লেখ(subtract(২০, ৫));
+লেখ("");
+
+// Test 6: Nested function with types
+লেখ("Test 6: Higher-order function");
+ধরি applyTwice = ফাংশন(f: ফাংশন_টাইপ, x: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত f(f(x));
+};
+
+ধরি increment = ফাংশন(n: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত n + ১;
+};
+
+লেখ("applyTwice(increment, 5) = ");
+লেখ(applyTwice(increment, ৫));
+লেখ("");
+
+লেখ("=== All function type annotation tests passed! ===");

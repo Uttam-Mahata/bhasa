@@ -1,0 +1,52 @@
+// Static Typing Test - Variable Type Annotations
+// Testing type annotations for variables
+
+লেখ("=== Static Typing Tests ===");
+লেখ("");
+
+// Test 1: Basic variable with type annotation
+লেখ("Test 1: Integer type annotation");
+ধরি x: পূর্ণসংখ্যা = ১০;
+লেখ("x = ");
+লেখ(x);
+লেখ("");
+
+// Test 2: String type annotation
+লেখ("Test 2: String type annotation");
+ধরি name: লেখা = "বাংলা";
+লেখ("name = ");
+লেখ(name);
+লেখ("");
+
+// Test 3: Boolean type annotation
+লেখ("Test 3: Boolean type annotation");
+ধরি flag: বুলিয়ান = সত্য;
+লেখ("flag = ");
+লেখ(flag);
+লেখ("");
+
+// Test 4: Array type annotation
+লেখ("Test 4: Array type annotation");
+ধরি numbers: তালিকা = [১, ২, ৩, ৪, ৫];
+লেখ("numbers = ");
+লেখ(numbers);
+লেখ("");
+
+// Test 5: Hash type annotation
+লেখ("Test 5: Hash type annotation");
+ধরি person: হ্যাশ = {"নাম": "রহিম", "বয়স": ২৫};
+লেখ("person = ");
+লেখ(person);
+লেখ("");
+
+// Test 6: Variables without type annotations (dynamic typing still works)
+লেখ("Test 6: Dynamic typing (no annotation)");
+ধরি y = ৫০;
+ধরি z = "ভাষা";
+লেখ("y = ");
+লেখ(y);
+লেখ("z = ");
+লেখ(z);
+লেখ("");
+
+লেখ("=== All basic type annotation tests passed! ===");

@@ -49,6 +49,16 @@ func runFile(filename string) {
 		os.Exit(1)
 	}
 
+	// Display type checking errors (warnings, not fatal)
+	typeErrors := comp.TypeErrors()
+	if len(typeErrors) > 0 {
+		fmt.Fprintln(os.Stderr, "Type checking warnings:")
+		for _, msg := range typeErrors {
+			fmt.Fprintf(os.Stderr, "\t%s\n", msg)
+		}
+		fmt.Fprintln(os.Stderr, "")
+	}
+
 	machine := vm.New(comp.Bytecode())
 	err = machine.Run()
 	if err != nil {

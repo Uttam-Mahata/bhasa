@@ -73,6 +73,14 @@ const (
 	BREAK    = "বিরতি"       // break
 	CONTINUE = "চালিয়ে_যাও"  // continue
 	IMPORT   = "অন্তর্ভুক্ত"  // import/include
+
+	// Type keywords (Bengali)
+	TYPE_INT     = "পূর্ণসংখ্যা"    // integer type
+	TYPE_STRING  = "লেখা"           // string type
+	TYPE_BOOL    = "বুলিয়ান"       // boolean type
+	TYPE_ARRAY   = "তালিকা"        // array type
+	TYPE_HASH    = "হ্যাশ"          // hash type
+	TYPE_FUNC    = "ফাংশন_টাইপ"    // function type
 )
 
 var keywords = map[string]TokenType{
@@ -88,6 +96,12 @@ var keywords = map[string]TokenType{
 	"বিরতি":       BREAK,
 	"চালিয়ে_যাও":  CONTINUE,
 	"অন্তর্ভুক্ত": IMPORT,
+	"পূর্ণসংখ্যা":  TYPE_INT,
+	"লেখা":        TYPE_STRING,
+	"বুলিয়ান":    TYPE_BOOL,
+	"তালিকা":     TYPE_ARRAY,
+	"হ্যাশ":       TYPE_HASH,
+	"ফাংশন_টাইপ": TYPE_FUNC,
 }
 
 // LookupIdent checks if an identifier is a keyword

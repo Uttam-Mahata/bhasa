@@ -1,0 +1,43 @@
+// Static Typing Test - Type Mismatch Detection
+// This file demonstrates type checking errors
+
+লেখ("=== Type Mismatch Tests ===");
+লেখ("");
+
+// Test 1: Type mismatch - integer variable assigned string
+লেখ("Test 1: Integer variable with string value (should show type error)");
+ধরি num: পূর্ণসংখ্যা = "not a number";
+লেখ("This line will execute even with type error");
+লেখ("");
+
+// Test 2: Type mismatch - string variable assigned integer
+লেখ("Test 2: String variable with integer value (should show type error)");
+ধরি text: লেখা = ১২৩;
+লেখ("This line will execute even with type error");
+লেখ("");
+
+// Test 3: Type mismatch - boolean variable assigned integer
+লেখ("Test 3: Boolean variable with integer value (should show type error)");
+ধরি isTrue: বুলিয়ান = ১;
+লেখ("This line will execute even with type error");
+লেখ("");
+
+// Test 4: Correct types (no error)
+লেখ("Test 4: Correct type assignments (no errors)");
+ধরি correctInt: পূর্ণসংখ্যা = ৪২;
+ধরি correctStr: লেখা = "সঠিক";
+ধরি correctBool: বুলিয়ান = সত্য;
+লেখ("All correct types assigned successfully");
+লেখ("");
+
+// Test 5: Function return type mismatch
+লেখ("Test 5: Function return type mismatch");
+ধরি wrongReturn = ফাংশন(x: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত সত্য;  // returning boolean instead of integer
+};
+লেখ("Function defined with return type error");
+লেখ("");
+
+লেখ("=== Type checking demonstration complete ===");
+লেখ("Note: Type errors are detected during compilation");
+লেখ("but execution continues to maintain backward compatibility");
