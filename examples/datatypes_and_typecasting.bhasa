@@ -1,0 +1,298 @@
+// Comprehensive Data Types and Type Casting Example
+// This example demonstrates all numeric types and type conversion functions
+//
+// Note: টাইপ() function calls are used throughout to show the actual type
+// of each value after casting. This helps verify that type casting is working
+// correctly and demonstrates the type system to learners.
+
+লেখ("==================================================");
+লেখ("    ভাষা Data Types and Type Casting Demo");
+লেখ("==================================================");
+লেখ("");
+
+// ===========================================
+// 1. Basic Type Casting
+// ===========================================
+লেখ("1. Basic Type Casting");
+লেখ("---------------------");
+ধরি original = 100;
+লেখ("Original value: 100");
+লেখ("");
+
+// Cast to Byte (0-255)
+ধরি as_byte = বাইট(original);
+লেখ("বাইট (Byte): ");
+লেখ(as_byte);
+লেখ("Type: " + টাইপ(as_byte));
+লেখ("");
+
+// Cast to Short (-32768 to 32767)
+ধরি as_short = ছোট_সংখ্যা(original);
+লেখ("ছোট_সংখ্যা (Short): ");
+লেখ(as_short);
+লেখ("Type: " + টাইপ(as_short));
+লেখ("");
+
+// Cast to Int
+ধরি as_int = পূর্ণসংখ্যা(original);
+লেখ("পূর্ণসংখ্যা (Int): ");
+লেখ(as_int);
+লেখ("Type: " + টাইপ(as_int));
+লেখ("");
+
+// Cast to Long
+ধরি as_long = দীর্ঘ_সংখ্যা(original);
+লেখ("দীর্ঘ_সংখ্যা (Long): ");
+লেখ(as_long);
+লেখ("Type: " + টাইপ(as_long));
+লেখ("");
+
+// Cast to Float
+ধরি as_float = দশমিক(original);
+লেখ("দশমিক (Float): ");
+লেখ(as_float);
+লেখ("Type: " + টাইপ(as_float));
+লেখ("");
+
+// Cast to Double
+ধরি as_double = দশমিক_দ্বিগুণ(original);
+লেখ("দশমিক_দ্বিগুণ (Double): ");
+লেখ(as_double);
+লেখ("Type: " + টাইপ(as_double));
+লেখ("");
+
+// ===========================================
+// 2. Character Type Casting
+// ===========================================
+লেখ("2. Character Type Casting");
+লেখ("-------------------------");
+ধরি char_a = অক্ষর_রূপান্তর("A");
+লেখ("Character A: ");
+লেখ(char_a);
+লেখ("Type: " + টাইপ(char_a));
+লেখ("");
+
+ধরি char_b = অক্ষর_রূপান্তর("B");
+লেখ("Character B: ");
+লেখ(char_b);
+লেখ("Type: " + টাইপ(char_b));
+লেখ("");
+
+// Bengali character
+ধরি char_bangla = অক্ষর_রূপান্তর("ক");
+লেখ("Bengali Character ক: ");
+লেখ(char_bangla);
+লেখ("Type: " + টাইপ(char_bangla));
+লেখ("");
+
+// ===========================================
+// 3. Byte Operations and Overflow
+// ===========================================
+লেখ("3. Byte Operations and Overflow");
+লেখ("-------------------------------");
+ধরি b1 = বাইট(100);
+ধরি b2 = বাইট(50);
+ধরি b_sum = b1 + b2;
+লেখ("বাইট(100) + বাইট(50) = ");
+লেখ(b_sum);
+লেখ("");
+
+// Byte overflow demonstration
+ধরি b_large = বাইট(200);
+ধরি b_overflow = b_large + বাইট(100);
+লেখ("Byte Overflow: বাইট(200) + বাইট(100) = ");
+লেখ(b_overflow);
+লেখ("(Wraps around due to 8-bit limit)");
+লেখ("");
+
+// ===========================================
+// 4. Short Operations
+// ===========================================
+লেখ("4. Short Operations");
+লেখ("-------------------");
+ধরি s1 = ছোট_সংখ্যা(1000);
+ধরি s2 = ছোট_সংখ্যা(2000);
+ধরি s_sum = s1 + s2;
+লেখ("ছোট_সংখ্যা(1000) + ছোট_সংখ্যা(2000) = ");
+লেখ(s_sum);
+লেখ("Type: " + টাইপ(s_sum));
+লেখ("");
+
+ধরি s3 = ছোট_সংখ্যা(100);
+ধরি s4 = ছোট_সংখ্যা(200);
+ধরি s_product = s3 * s4;
+লেখ("ছোট_সংখ্যা(100) * ছোট_সংখ্যা(200) = ");
+লেখ(s_product);
+লেখ("");
+
+// ===========================================
+// 5. Int Operations
+// ===========================================
+লেখ("5. Int Operations");
+লেখ("-----------------");
+ধরি i1 = পূর্ণসংখ্যা(50000);
+ধরি i2 = পূর্ণসংখ্যা(30000);
+ধরি i_sum = i1 + i2;
+লেখ("পূর্ণসংখ্যা(50000) + পূর্ণসংখ্যা(30000) = ");
+লেখ(i_sum);
+লেখ("Type: " + টাইপ(i_sum));
+লেখ("");
+
+ধরি i3 = পূর্ণসংখ্যা(1000);
+ধরি i4 = পূর্ণসংখ্যা(1000);
+ধরি i_product = i3 * i4;
+লেখ("পূর্ণসংখ্যা(1000) * পূর্ণসংখ্যা(1000) = ");
+লেখ(i_product);
+লেখ("");
+
+// ===========================================
+// 6. Long Operations (Large Numbers)
+// ===========================================
+লেখ("6. Long Operations (Large Numbers)");
+লেখ("-----------------------------------");
+ধরি l1 = দীর্ঘ_সংখ্যা(1000000);
+ধরি l2 = দীর্ঘ_সংখ্যা(2000000);
+ধরি l_sum = l1 + l2;
+লেখ("দীর্ঘ_সংখ্যা(1000000) + দীর্ঘ_সংখ্যা(2000000) = ");
+লেখ(l_sum);
+লেখ("Type: " + টাইপ(l_sum));
+লেখ("");
+
+ধরি l3 = দীর্ঘ_সংখ্যা(1000000);
+ধরি l4 = দীর্ঘ_সংখ্যা(2000000);
+ধরি l_product = l3 * l4;
+লেখ("দীর্ঘ_সংখ্যা(1000000) * দীর্ঘ_সংখ্যা(2000000) = ");
+লেখ(l_product);
+লেখ("");
+
+// ===========================================
+// 7. Float Operations
+// ===========================================
+লেখ("7. Float Operations");
+লেখ("-------------------");
+ধরি f1 = দশমিক(100);
+ধরি f2 = দশমিক(200);
+ধরি f_sum = f1 + f2;
+লেখ("দশমিক(100) + দশমিক(200) = ");
+লেখ(f_sum);
+লেখ("Type: " + টাইপ(f_sum));
+লেখ("");
+
+ধরি f3 = দশমিক(10);
+ধরি f4 = দশমিক(3);
+ধরি f_division = f3 / f4;
+লেখ("দশমিক(10) / দশমিক(3) = ");
+লেখ(f_division);
+লেখ("");
+
+// ===========================================
+// 8. Double Operations
+// ===========================================
+লেখ("8. Double Operations");
+লেখ("--------------------");
+ধরি d1 = দশমিক_দ্বিগুণ(1000);
+ধরি d2 = দশমিক_দ্বিগুণ(2000);
+ধরি d_sum = d1 + d2;
+লেখ("দশমিক_দ্বিগুণ(1000) + দশমিক_দ্বিগুণ(2000) = ");
+লেখ(d_sum);
+লেখ("Type: " + টাইপ(d_sum));
+লেখ("");
+
+ধরি d3 = দশমিক_দ্বিগুণ(100);
+ধরি d4 = দশমিক_দ্বিগুণ(7);
+ধরি d_division = d3 / d4;
+লেখ("দশমিক_দ্বিগুণ(100) / দশমিক_দ্বিগুণ(7) = ");
+লেখ(d_division);
+লেখ("");
+
+// ===========================================
+// 9. Type Conversion Chain
+// ===========================================
+লেখ("9. Type Conversion Chain");
+লেখ("------------------------");
+ধরি start_val = 200;
+লেখ("Starting with: 200");
+লেখ("");
+
+ধরি chain_byte = বাইট(start_val);
+লেখ("As Byte: ");
+লেখ(chain_byte);
+লেখ("Type: " + টাইপ(chain_byte));
+
+ধরি chain_short = ছোট_সংখ্যা(chain_byte);
+লেখ("Byte to Short: ");
+লেখ(chain_short);
+লেখ("Type: " + টাইপ(chain_short));
+
+ধরি chain_int = পূর্ণসংখ্যা(chain_short);
+লেখ("Short to Int: ");
+লেখ(chain_int);
+লেখ("Type: " + টাইপ(chain_int));
+
+ধরি chain_long = দীর্ঘ_সংখ্যা(chain_int);
+লেখ("Int to Long: ");
+লেখ(chain_long);
+লেখ("Type: " + টাইপ(chain_long));
+
+ধরি chain_float = দশমিক(chain_long);
+লেখ("Long to Float: ");
+লেখ(chain_float);
+লেখ("Type: " + টাইপ(chain_float));
+
+ধরি chain_double = দশমিক_দ্বিগুণ(chain_float);
+লেখ("Float to Double: ");
+লেখ(chain_double);
+লেখ("Type: " + টাইপ(chain_double));
+লেখ("");
+
+// ===========================================
+// 10. Practical Use Cases
+// ===========================================
+লেখ("10. Practical Use Cases");
+লেখ("-----------------------");
+
+// Use case 1: Age calculation
+লেখ("Use Case: Age Storage");
+ধরি age = বাইট(25);
+লেখ("Age (as Byte): ");
+লেখ(age);
+লেখ("");
+
+// Use case 2: Temperature readings
+লেখ("Use Case: Temperature Readings");
+ধরি temp_celsius = ছোট_সংখ্যা(22);
+লেখ("Temperature (Celsius, as Short): ");
+লেখ(temp_celsius);
+লেখ("");
+
+// Use case 3: Population count
+লেখ("Use Case: City Population");
+ধরি population = পূর্ণসংখ্যা(5000000);
+লেখ("Population (as Int): ");
+লেখ(population);
+লেখ("");
+
+// Use case 4: Distance in meters
+লেখ("Use Case: Distance to Moon");
+ধরি distance_to_moon = দীর্ঘ_সংখ্যা(384400000);
+লেখ("Distance (meters, as Long): ");
+লেখ(distance_to_moon);
+লেখ("");
+
+// Use case 5: Financial calculations
+লেখ("Use Case: Financial Calculations");
+ধরি price = দশমিক_দ্বিগুণ(1999);
+ধরি tax_rate = দশমিক_দ্বিগুণ(15);
+ধরি tax = price * tax_rate / দশমিক_দ্বিগুণ(100);
+লেখ("Price: ");
+লেখ(price);
+লেখ("Tax (15%): ");
+লেখ(tax);
+ধরি total = price + tax;
+লেখ("Total: ");
+লেখ(total);
+লেখ("");
+
+লেখ("==================================================");
+লেখ("    All Data Types and Type Casting Tests Complete!");
+লেখ("==================================================");
