@@ -111,7 +111,18 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 |----------|---------|---------|
 | reverse | উল্টাও | Reverse array elements |
 
-**Total Built-in Functions: 21**
+#### Type Casting Functions (7 functions)
+| Function | Bengali | Purpose |
+|----------|---------|---------|
+| intCast | পূর্ণসংখ্যা | Cast to integer (from string, boolean, integer) |
+| charCast | অক্ষর_রূপ | Cast to character (from integer code or string) |
+| shortCast | ছোট_সংখ্যা | Cast to short integer (16-bit, -32768 to 32767) |
+| byteCast | বাইট | Cast to byte (8-bit, 0 to 255) |
+| floatCast | দশমিক | Cast to float/double (from string, integer, boolean) |
+| boolCast | বুলিয়ান | Cast to boolean (from any type) |
+| stringCast | লেখা_রূপ | Cast to string representation (from any type) |
+
+**Total Built-in Functions: 28**
 
 ### 7. REPL (`repl/repl.go`)
 - Interactive shell for live coding

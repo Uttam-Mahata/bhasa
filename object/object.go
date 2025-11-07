@@ -955,6 +955,207 @@ var Builtins = []BuiltinDef{
 			return &String{Value: fmt.Sprintf("%d", num)}
 		}},
 	},
+	{
+		"পূর্ণসংখ্যা", // int cast - convert any value to integer
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			switch arg := args[0].(type) {
+			case *Integer:
+				return arg // already an integer
+			case *String:
+				// Convert Bengali numerals to Arabic numerals
+				str := token.ConvertBengaliNumber(arg.Value)
+				result, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot cast string '%s' to integer: %s", arg.Value, err)}
+				}
+				return &Integer{Value: result}
+			case *Boolean:
+				if arg.Value {
+					return &Integer{Value: 1}
+				}
+				return &Integer{Value: 0}
+			default:
+				return &Error{Message: fmt.Sprintf("cannot cast %s to integer", args[0].Type())}
+			}
+		}},
+	},
+	{
+		"অক্ষর_রূপ", // char cast - convert integer to character string
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			switch arg := args[0].(type) {
+			case *Integer:
+				if arg.Value < 0 || arg.Value > 1114111 { // Valid Unicode range
+					return &Error{Message: fmt.Sprintf("character code %d out of valid Unicode range (0-1114111)", arg.Value)}
+				}
+				return &String{Value: string(rune(arg.Value))}
+			case *String:
+				if len([]rune(arg.Value)) > 0 {
+					return &String{Value: string([]rune(arg.Value)[0])}
+				}
+				return &Error{Message: "cannot cast empty string to character"}
+			default:
+				return &Error{Message: fmt.Sprintf("cannot cast %s to character", args[0].Type())}
+			}
+		}},
+	},
+	{
+		"ছোট_সংখ্যা", // short cast - convert to short integer (16-bit range: -32768 to 32767)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				result, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot cast string '%s' to short: %s", arg.Value, err)}
+				}
+				value = result
+			case *Boolean:
+				if arg.Value {
+					value = 1
+				} else {
+					value = 0
+				}
+			default:
+				return &Error{Message: fmt.Sprintf("cannot cast %s to short", args[0].Type())}
+			}
+			
+			// Clamp to short range (-32768 to 32767)
+			if value > 32767 {
+				value = 32767
+			} else if value < -32768 {
+				value = -32768
+			}
+			
+			return &Integer{Value: value}
+		}},
+	},
+	{
+		"বাইট", // byte cast - convert to byte (8-bit range: 0 to 255)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			var value int64
+			switch arg := args[0].(type) {
+			case *Integer:
+				value = arg.Value
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				result, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot cast string '%s' to byte: %s", arg.Value, err)}
+				}
+				value = result
+			case *Boolean:
+				if arg.Value {
+					value = 1
+				} else {
+					value = 0
+				}
+			default:
+				return &Error{Message: fmt.Sprintf("cannot cast %s to byte", args[0].Type())}
+			}
+			
+			// Clamp to unsigned byte range (0 to 255)
+			if value > 255 {
+				value = 255
+			} else if value < 0 {
+				value = 0
+			}
+			
+			return &Integer{Value: value}
+		}},
+	},
+	{
+		"দশমিক", // double/float cast - convert to floating point (stored as formatted string for display)
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			switch arg := args[0].(type) {
+			case *Integer:
+				// Return integer as-is (can be used in float context)
+				return arg
+			case *String:
+				str := token.ConvertBengaliNumber(arg.Value)
+				// Try parsing as float
+				result, err := strconv.ParseFloat(strings.TrimSpace(str), 64)
+				if err != nil {
+					return &Error{Message: fmt.Sprintf("cannot cast string '%s' to float: %s", arg.Value, err)}
+				}
+				// For now, return as integer (truncated), or we could store as string representation
+				// This is a limitation of the current integer-only type system
+				return &Integer{Value: int64(result)}
+			case *Boolean:
+				if arg.Value {
+					return &Integer{Value: 1}
+				}
+				return &Integer{Value: 0}
+			default:
+				return &Error{Message: fmt.Sprintf("cannot cast %s to float", args[0].Type())}
+			}
+		}},
+	},
+	{
+		"বুলিয়ান", // boolean cast - convert to boolean
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			switch arg := args[0].(type) {
+			case *Boolean:
+				return arg // already boolean
+			case *Integer:
+				return &Boolean{Value: arg.Value != 0}
+			case *String:
+				str := strings.ToLower(strings.TrimSpace(arg.Value))
+				// Check for common true values
+				if str == "true" || str == "সত্য" || str == "1" || str == "yes" {
+					return &Boolean{Value: true}
+				}
+				// Check for common false values
+				if str == "false" || str == "মিথ্যা" || str == "0" || str == "no" || str == "" {
+					return &Boolean{Value: false}
+				}
+				// Non-empty strings are truthy
+				return &Boolean{Value: len(arg.Value) > 0}
+			case *Null:
+				return &Boolean{Value: false}
+			case *Array:
+				return &Boolean{Value: len(arg.Elements) > 0}
+			default:
+				return &Boolean{Value: true} // Objects are truthy
+			}
+		}},
+	},
+	{
+		"লেখা_রূপ", // string cast - convert any value to string representation
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			return &String{Value: args[0].Inspect()}
+		}},
+	},
 }
 
 // GetBuiltinByName returns a builtin by name

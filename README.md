@@ -166,6 +166,15 @@ Bhasa now has all the features needed to write a compiler for itself! See `examp
 - **সংখ্যা(str)** - Parse string to integer
 - **লেখা(num)** - Convert integer to string
 
+### Type Casting Functions
+- **পূর্ণসংখ্যা(value)** - Cast to integer (from string, boolean, or integer)
+- **অক্ষর_রূপ(value)** - Cast to character (from integer code or string)
+- **ছোট_সংখ্যা(value)** - Cast to short integer (16-bit, -32768 to 32767)
+- **বাইট(value)** - Cast to byte (8-bit, 0 to 255)
+- **দশমিক(value)** - Cast to float/double (from string, integer, or boolean)
+- **বুলিয়ান(value)** - Cast to boolean (from any type)
+- **লেখা_রূপ(value)** - Cast to string representation (from any type)
+
 ### File I/O Functions
 - **ফাইল_পড়ো(path)** - Read file contents
 - **ফাইল_লেখো(path, content)** - Write to file

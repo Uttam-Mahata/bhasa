@@ -1,0 +1,103 @@
+// Type Casting Examples (পূর্ণসংখ্যা, অক্ষর_রূপ, ছোট_সংখ্যা, বাইট, দশমিক, বুলিয়ান, লেখা_রূপ)
+
+লেখ("=== Type Casting Examples ===");
+লেখ("");
+
+// 1. পূর্ণসংখ্যা (int cast)
+লেখ("1. পূর্ণসংখ্যা (Integer Cast):");
+ধরি str_num = "১২৩";
+ধরি int_val = পূর্ণসংখ্যা(str_num);
+লেখ("String '১২৩' to int: " + লেখা(int_val));
+
+ধরি bool_val = সত্য;
+ধরি int_from_bool = পূর্ণসংখ্যা(bool_val);
+লেখ("Boolean সত্য to int: " + লেখা(int_from_bool));
+
+ধরি bool_false = মিথ্যা;
+ধরি int_from_false = পূর্ণসংখ্যা(bool_false);
+লেখ("Boolean মিথ্যা to int: " + লেখা(int_from_false));
+লেখ("");
+
+// 2. অক্ষর_রূপ (char cast)
+লেখ("2. অক্ষর_রূপ (Character Cast):");
+ধরি char_code = ৬৫; // ASCII 'A'
+ধরি char_val = অক্ষর_রূপ(char_code);
+লেখ("Code ৬৫ to char: " + char_val);
+
+ধরি bengali_char = অক্ষর_রূপ(২৪৭৫); // Bengali 'ক'
+লেখ("Code ২৪৭৫ to char: " + bengali_char);
+
+ধরি first_char = অক্ষর_রূপ("Hello");
+লেখ("First char of 'Hello': " + first_char);
+লেখ("");
+
+// 3. ছোট_সংখ্যা (short cast)
+লেখ("3. ছোট_সংখ্যা (Short Cast - 16-bit):");
+ধরি large_num = ১০০০০০;
+ধরি short_num = ছোট_সংখ্যা(large_num);
+লেখ("Large number ১০০০০০ to short (clamped): " + লেখা(short_num));
+
+ধরি normal_num = ১০০০;
+ধরি short_normal = ছোট_সংখ্যা(normal_num);
+লেখ("Normal number ১০০০ to short: " + লেখা(short_normal));
+লেখ("");
+
+// 4. বাইট (byte cast)
+লেখ("4. বাইট (Byte Cast - 8-bit, 0-255):");
+ধরি byte_num = ১০০;
+ধরি byte_val = বাইট(byte_num);
+লেখ("Number ১০০ to byte: " + লেখা(byte_val));
+
+ধরি overflow_byte = ৩০০;
+ধরি clamped_byte = বাইট(overflow_byte);
+লেখ("Number ৩০০ to byte (clamped to 255): " + লেখা(clamped_byte));
+
+ধরি negative_byte = -১০;
+ধরি zeroed_byte = বাইট(negative_byte);
+লেখ("Number -১০ to byte (clamped to 0): " + লেখা(zeroed_byte));
+লেখ("");
+
+// 5. দশমিক (float/double cast)
+লেখ("5. দশমিক (Float Cast):");
+ধরি int_to_float = দশমিক(৪২);
+লেখ("Integer ৪২ to float: " + লেখা(int_to_float));
+
+ধরি str_float = দশমিক("৩.১৪");
+লেখ("String '৩.১৪' to float (truncated): " + লেখা(str_float));
+লেখ("");
+
+// 6. বুলিয়ান (boolean cast)
+লেখ("6. বুলিয়ান (Boolean Cast):");
+ধরি int_zero = ০;
+ধরি bool_from_zero = বুলিয়ান(int_zero);
+লেখ("Integer ০ to boolean: " + লেখা_রূপ(bool_from_zero));
+
+ধরি int_nonzero = ৫;
+ধরি bool_from_nonzero = বুলিয়ান(int_nonzero);
+লেখ("Integer ৫ to boolean: " + লেখা_রূপ(bool_from_nonzero));
+
+ধরি empty_str = "";
+ধরি bool_from_empty = বুলিয়ান(empty_str);
+লেখ("Empty string to boolean: " + লেখা_রূপ(bool_from_empty));
+
+ধরি nonempty_str = "hello";
+ধরি bool_from_str = বুলিয়ান(nonempty_str);
+লেখ("Non-empty string to boolean: " + লেখা_রূপ(bool_from_str));
+লেখ("");
+
+// 7. লেখা_রূপ (string cast)
+লেখ("7. লেখা_রূপ (String Cast):");
+ধরি num = ১২৩;
+ধরি str_from_num = লেখা_রূপ(num);
+লেখ("Integer ১২৩ to string: " + str_from_num);
+
+ধরি arr = [১, ২, ৩];
+ধরি str_from_arr = লেখা_রূপ(arr);
+লেখ("Array [১, ২, ৩] to string: " + str_from_arr);
+
+ধরি bool_true = সত্য;
+ধরি str_from_bool = লেখা_রূপ(bool_true);
+লেখ("Boolean সত্য to string: " + str_from_bool);
+লেখ("");
+
+লেখ("=== Type Casting Complete ===");
