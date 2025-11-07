@@ -1,0 +1,44 @@
+// For Loop Examples (পর্যন্ত)
+
+লেখ("=== For Loop Examples ===");
+লেখ("");
+
+// 1. Basic for loop
+লেখ("1. Basic for loop (1 to 5):");
+পর্যন্ত (ধরি i = 1; i <= 5; i = i + 1) {
+    লেখ(i);
+}
+লেখ("");
+
+// 2. For loop with Bengali variable name
+লেখ("2. For loop with Bengali variable:");
+পর্যন্ত (ধরি সংখ্যা = 10; সংখ্যা <= 15; সংখ্যা = সংখ্যা + 1) {
+    লেখ(সংখ্যা);
+}
+লেখ("");
+
+// 3. For loop counting down
+লেখ("3. Counting down from 5 to 1:");
+পর্যন্ত (ধরি n = 5; n >= 1; n = n - 1) {
+    লেখ(n);
+}
+লেখ("");
+
+// 4. For loop with multiplication
+লেখ("4. Multiplication table of 3:");
+পর্যন্ত (ধরি x = 1; x <= 5; x = x + 1) {
+    ধরি result = x * 3;
+    লেখ(result);
+}
+লেখ("");
+
+// 5. Nested for loops
+লেখ("5. Nested loops (2x3 pattern):");
+পর্যন্ত (ধরি row = 1; row <= 2; row = row + 1) {
+    পর্যন্ত (ধরি col = 1; col <= 3; col = col + 1) {
+        লেখ(row * 10 + col);
+    }
+}
+লেখ("");
+
+লেখ("=== All for loop examples completed! ===");

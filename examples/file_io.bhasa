@@ -1,0 +1,53 @@
+// File I/O Examples (ফাইল_পড়ো, ফাইল_লেখো, ফাইল_যোগ, ফাইল_আছে)
+
+লেখ("=== File I/O Examples ===");
+লেখ("");
+
+// 1. Write to file
+লেখ("1. Writing to file...");
+ধরি ফাইলের_নাম = "/tmp/test_bhasa.txt";
+ধরি বিষয়বস্তু = "Hello from Bhasa!\nThis is a test file.\n";
+ফাইল_লেখো(ফাইলের_নাম, বিষয়বস্তু);
+লেখ("File written successfully");
+লেখ("");
+
+// 2. Check if file exists
+লেখ("2. Checking if file exists:");
+যদি (ফাইল_আছে(ফাইলের_নাম)) {
+    লেখ("File exists!");
+} নাহলে {
+    লেখ("File does not exist");
+}
+লেখ("");
+
+// 3. Read from file
+লেখ("3. Reading from file:");
+ধরি পড়া_বিষয়বস্তু = ফাইল_পড়ো(ফাইলের_নাম);
+লেখ("File content:");
+লেখ(পড়া_বিষয়বস্তু);
+লেখ("");
+
+// 4. Append to file
+লেখ("4. Appending to file...");
+ধরি অতিরিক্ত = "Appended line 1\nAppended line 2\n";
+ফাইল_যোগ(ফাইলের_নাম, অতিরিক্ত);
+লেখ("Content appended");
+লেখ("");
+
+// 5. Read again to verify
+লেখ("5. Reading again after append:");
+ধরি চূড়ান্ত_বিষয়বস্তু = ফাইল_পড়ো(ফাইলের_নাম);
+লেখ("Updated file content:");
+লেখ(চূড়ান্ত_বিষয়বস্তু);
+লেখ("");
+
+// 6. Check non-existent file
+লেখ("6. Checking non-existent file:");
+যদি (ফাইল_আছে("/tmp/does_not_exist.txt")) {
+    লেখ("File exists");
+} নাহলে {
+    লেখ("File does not exist (as expected)");
+}
+লেখ("");
+
+লেখ("=== File I/O examples completed! ===");

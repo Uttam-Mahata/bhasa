@@ -4,15 +4,19 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 
 ## Features
 
-- 🇮🇳 Bengali keywords and syntax
+- 🇮🇳 **Bengali keywords and syntax**
+- 🔤 **Bengali variable names** - Full Unicode support for identifiers
 - ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
 - 🖥️ **Stack-based virtual machine**
 - 📝 Variables and functions with closures
 - 🔢 Numbers, strings, booleans, arrays, and hash maps
 - 🔄 Control flow (if-else, while loops)
 - 🚀 Interactive REPL
-- 📚 Built-in functions
+- 📚 **20+ Built-in functions** (string methods, math functions, array operations)
 - 🎯 Recursion and higher-order functions
+- 🔗 **Logical operators** (&&, ||, !)
+- 🧮 **Math functions** (power, sqrt, abs, max, min)
+- 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
 
 ## Bengali Keywords
 
@@ -49,6 +53,21 @@ go build -o bhasa
 লেখ(যোগফল);
 ```
 
+### Bengali Variable Names
+```bengali
+// Variables can use Bengali names
+ধরি নাম = "রহিম";
+ধরি বয়স = ২৫;
+ধরি বেতন = ৫০০০০;
+
+// Functions with Bengali names
+ধরি যোগফল_বের_করো = ফাংশন(ক, খ) {
+    ফেরত ক + খ;
+};
+
+লেখ(যোগফল_বের_করো(১০, ২০));  // Output: 30
+```
+
 ### Functions
 ```bengali
 ধরি যোগ = ফাংশন(a, b) {
@@ -67,6 +86,50 @@ go build -o bhasa
     লেখ("x is not greater than 5");
 }
 ```
+
+### Logical Operators
+```bengali
+// AND operator
+যদি (x > 5 && y < 10) {
+    লেখ("Both conditions are true");
+}
+
+// OR operator
+যদি (score < 40 || score > 90) {
+    লেখ("Special attention needed");
+}
+```
+
+## Built-in Functions
+
+### Basic Functions
+- **লেখ()** - Print to console
+- **দৈর্ঘ্য()** - Length of string/array
+- **টাইপ()** - Get type of value
+
+### String Methods
+- **বিভক্ত(str, delimiter)** - Split string
+- **যুক্ত(arr, delimiter)** - Join array elements
+- **উপরে(str)** - Convert to uppercase
+- **নিচে(str)** - Convert to lowercase
+- **ছাঁটো(str)** - Trim whitespace
+- **প্রতিস্থাপন(str, old, new)** - Replace text
+- **খুঁজুন(str, substr)** - Find substring index
+
+### Math Functions
+- **শক্তি(base, exp)** - Power
+- **বর্গমূল(n)** - Square root
+- **পরম(n)** - Absolute value
+- **সর্বোচ্চ(a, b)** - Maximum
+- **সর্বনিম্ন(a, b)** - Minimum
+- **গোলাকার(n)** - Round number
+
+### Array Functions
+- **প্রথম(arr)** - First element
+- **শেষ(arr)** - Last element
+- **বাকি(arr)** - All but first
+- **যোগ(arr, element)** - Add element
+- **উল্টাও(arr)** - Reverse array
 
 ## Running the REPL
 

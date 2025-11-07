@@ -1,0 +1,43 @@
+// সারি মডিউল - Queue Data Structure Module
+// Implements a queue (FIFO) using arrays
+
+// নতুন_সারি - Create a new empty queue
+ধরি নতুন_সারি = ফাংশন() {
+    ফেরত [];
+};
+
+// এনকিউ - Add an element to the rear of the queue
+ধরি এনকিউ = ফাংশন(সারি, উপাদান) {
+    ফেরত যোগ(সারি, উপাদান);
+};
+
+// ডিকিউ - Remove and return the front element
+// Returns an array: [new_queue, dequeued_element] or [queue, null] if empty
+ধরি ডিকিউ = ফাংশন(সারি) {
+    ধরি দৈর্ঘ্য_মান = দৈর্ঘ্য(সারি);
+    যদি (দৈর্ঘ্য_মান == 0) {
+        ফেরত [সারি, 0];  // Empty queue
+    }
+    ধরি প্রথম_উপাদান = প্রথম(সারি);
+    ধরি নতুন_সারি = বাকি(সারি);
+    ফেরত [নতুন_সারি, প্রথম_উপাদান];
+};
+
+// সামনে - Peek at the front element without removing it
+ধরি সামনে = ফাংশন(সারি) {
+    ধরি দৈর্ঘ্য_মান = দৈর্ঘ্য(সারি);
+    যদি (দৈর্ঘ্য_মান == 0) {
+        ফেরত 0;  // Empty queue
+    }
+    ফেরত প্রথম(সারি);
+};
+
+// খালি_কিনা - Check if queue is empty
+ধরি খালি_কিনা = ফাংশন(সারি) {
+    ফেরত দৈর্ঘ্য(সারি) == 0;
+};
+
+// আকার - Get queue size
+ধরি আকার = ফাংশন(সারি) {
+    ফেরত দৈর্ঘ্য(সারি);
+};

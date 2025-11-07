@@ -1,0 +1,46 @@
+// স্ট্যাক মডিউল - Stack Data Structure Module
+// Implements a stack using arrays
+
+// নতুন_স্ট্যাক - Create a new empty stack
+ধরি নতুন_স্ট্যাক = ফাংশন() {
+    ফেরত [];
+};
+
+// পুশ - Push an element onto the stack
+ধরি পুশ = ফাংশন(স্ট্যাক, উপাদান) {
+    ফেরত যোগ(স্ট্যাক, উপাদান);
+};
+
+// পপ - Pop an element from the stack
+// Returns an array: [new_stack, popped_element] or [stack, null] if empty
+ধরি পপ = ফাংশন(স্ট্যাক) {
+    ধরি দৈর্ঘ্য_মান = দৈর্ঘ্য(স্ট্যাক);
+    যদি (দৈর্ঘ্য_মান == 0) {
+        ফেরত [স্ট্যাক, 0];  // Empty stack, return null equivalent
+    }
+    ধরি শেষ_উপাদান = শেষ(স্ট্যাক);
+    // Create new stack without last element by reversing, removing first, then reversing back
+    ধরি উল্টা = উল্টাও(স্ট্যাক);
+    ধরি উল্টা_বাকি = বাকি(উল্টা);
+    ধরি নতুন_স্ট্যাক = উল্টাও(উল্টা_বাকি);
+    ফেরত [নতুন_স্ট্যাক, শেষ_উপাদান];
+};
+
+// পিক - Peek at the top element without removing it
+ধরি পিক = ফাংশন(স্ট্যাক) {
+    ধরি দৈর্ঘ্য_মান = দৈর্ঘ্য(স্ট্যাক);
+    যদি (দৈর্ঘ্য_মান == 0) {
+        ফেরত 0;  // Empty stack
+    }
+    ফেরত শেষ(স্ট্যাক);
+};
+
+// খালি_কিনা - Check if stack is empty
+ধরি খালি_কিনা = ফাংশন(স্ট্যাক) {
+    ফেরত দৈর্ঘ্য(স্ট্যাক) == 0;
+};
+
+// আকার - Get stack size
+ধরি আকার = ফাংশন(স্ট্যাক) {
+    ফেরত দৈর্ঘ্য(স্ট্যাক);
+};
