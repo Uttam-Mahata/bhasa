@@ -378,8 +378,20 @@ func (vm *VM) executeBinaryIntegerOperation(
 	case code.OpBitXor:
 		result = leftValue ^ rightValue
 	case code.OpLeftShift:
+		if rightValue < 0 {
+			return fmt.Errorf("negative shift amount: %d", rightValue)
+		}
+		if rightValue >= 64 {
+			return fmt.Errorf("shift amount too large: %d (must be less than 64)", rightValue)
+		}
 		result = leftValue << uint(rightValue)
 	case code.OpRightShift:
+		if rightValue < 0 {
+			return fmt.Errorf("negative shift amount: %d", rightValue)
+		}
+		if rightValue >= 64 {
+			return fmt.Errorf("shift amount too large: %d (must be less than 64)", rightValue)
+		}
 		result = leftValue >> uint(rightValue)
 	default:
 		return fmt.Errorf("unknown integer operator: %d", op)
