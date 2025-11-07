@@ -538,6 +538,45 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// Create struct with number of fields
 		c.emit(code.OpStruct, len(node.Fields)*2)
 
+	case *ast.EnumDefinition:
+		// Store enum type name and variants as a constant
+		// This allows runtime to create enum values
+		enumName := ""
+		if node.Name != nil {
+			enumName = node.Name.Value
+		}
+
+		// Create a hash to store enum metadata
+		variants := make(map[string]int)
+		value := 0
+		for _, variant := range node.Variants {
+			if variant.Value != nil {
+				value = *variant.Value
+			}
+			variants[variant.Name] = value
+			value++
+		}
+
+		// Store enum definition as a hash constant
+		pairs := make(map[object.HashKey]object.HashPair)
+		for name, val := range variants {
+			key := &object.String{Value: name}
+			value := &object.Integer{Value: int64(val)}
+			pairs[key.HashKey()] = object.HashPair{Key: key, Value: value}
+		}
+
+		// Add enum type name to constants
+		enumTypeIndex := c.addConstant(&object.String{Value: enumName})
+		// Add variants hash to constants
+		variantsIndex := c.addConstant(&object.Hash{Pairs: pairs})
+
+		// Push both onto the stack
+		c.emit(code.OpConstant, enumTypeIndex)
+		c.emit(code.OpConstant, variantsIndex)
+
+		// The Let statement will handle binding this to the enum name
+		// For now, we just push the hash which represents the enum type
+
 	case *ast.MemberAccessExpression:
 		// Compile the object expression
 		err := c.Compile(node.Object)

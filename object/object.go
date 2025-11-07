@@ -37,6 +37,7 @@ const (
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	CLOSURE_OBJ           = "CLOSURE"
 	STRUCT_OBJ            = "STRUCT"
+	ENUM_OBJ              = "ENUM"
 )
 
 // Object represents a value in the language
@@ -359,6 +360,18 @@ func (s *Struct) Inspect() string {
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
 	return out.String()
+}
+
+// Enum represents an enum variant value
+type Enum struct {
+	EnumType    string // the enum type name
+	VariantName string // the variant name
+	Value       int    // the variant's integer value
+}
+
+func (e *Enum) Type() ObjectType { return ENUM_OBJ }
+func (e *Enum) Inspect() string {
+	return fmt.Sprintf("%s.%s", e.EnumType, e.VariantName)
 }
 
 // BuiltinDef represents a builtin definition

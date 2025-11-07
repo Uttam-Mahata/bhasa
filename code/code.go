@@ -60,6 +60,7 @@ const (
 	OpStruct                         // Create struct instance
 	OpGetStructField                 // Get struct field
 	OpSetStructField                 // Set struct field
+	OpEnum                           // Create enum variant
 )
 
 // Definition holds information about an opcode
@@ -115,6 +116,7 @@ var definitions = map[Opcode]*Definition{
 	OpStruct:           {"OpStruct", []int{2}},
 	OpGetStructField:   {"OpGetStructField", []int{}},
 	OpSetStructField:   {"OpSetStructField", []int{}},
+	OpEnum:             {"OpEnum", []int{2, 2}}, // enum type index, variant index
 }
 
 // Lookup returns the definition for an opcode

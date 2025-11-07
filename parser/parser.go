@@ -91,6 +91,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.STRUCT, p.parseStructDefinition)
+	p.registerPrefix(token.ENUM, p.parseEnumDefinition)
 
 	// Register infix parse functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -983,6 +984,98 @@ func (p *Parser) parseStructFields() []*ast.StructField {
 	}
 
 	return fields
+}
+
+// Enum parsing functions
+
+func (p *Parser) parseEnumDefinition() ast.Expression {
+	// Parse enum definition: গণনা { variant1, variant2, variant3 }
+	enumToken := p.curToken
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	enumDef := &ast.EnumDefinition{
+		Token:    enumToken,
+		Variants: []*ast.EnumVariant{},
+	}
+
+	// Empty enum
+	if p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		return enumDef
+	}
+
+	p.nextToken() // move to first variant name
+
+	// Parse first variant
+	if !p.curTokenIs(token.IDENT) {
+		p.error("expected variant name")
+		return nil
+	}
+
+	variant := &ast.EnumVariant{Name: p.curToken.Literal}
+
+	// Check for explicit value: variant = 0
+	if p.peekTokenIs(token.ASSIGN) {
+		p.nextToken() // consume =
+		p.nextToken() // move to value
+
+		if !p.curTokenIs(token.INT) {
+			p.error("expected integer value for enum variant")
+			return nil
+		}
+
+		// Parse the integer value
+		value, err := strconv.Atoi(p.curToken.Literal)
+		if err != nil {
+			p.error(fmt.Sprintf("could not parse %q as integer", p.curToken.Literal))
+			return nil
+		}
+		variant.Value = &value
+	}
+
+	enumDef.Variants = append(enumDef.Variants, variant)
+
+	// Parse remaining variants
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // consume comma
+		p.nextToken() // move to variant name
+
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected variant name")
+			return nil
+		}
+
+		variant := &ast.EnumVariant{Name: p.curToken.Literal}
+
+		// Check for explicit value
+		if p.peekTokenIs(token.ASSIGN) {
+			p.nextToken() // consume =
+			p.nextToken() // move to value
+
+			if !p.curTokenIs(token.INT) {
+				p.error("expected integer value for enum variant")
+				return nil
+			}
+
+			value, err := strconv.Atoi(p.curToken.Literal)
+			if err != nil {
+				p.error(fmt.Sprintf("could not parse %q as integer", p.curToken.Literal))
+				return nil
+			}
+			variant.Value = &value
+		}
+
+		enumDef.Variants = append(enumDef.Variants, variant)
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return enumDef
 }
 
 func (p *Parser) parseMemberAccess(left ast.Expression) ast.Expression {
