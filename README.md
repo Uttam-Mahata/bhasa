@@ -15,6 +15,7 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 📚 **20+ Built-in functions** (string methods, math functions, array operations)
 - 🎯 Recursion and higher-order functions
 - 🔗 **Logical operators** (&&, ||, !)
+- 🔢 **Bitwise operators** (&, |, ^, ~, <<, >>)
 - 🧮 **Math functions** (power, sqrt, abs, max, min)
 - 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
 
@@ -98,6 +99,27 @@ go build -o bhasa
 যদি (score < 40 || score > 90) {
     লেখ("Special attention needed");
 }
+```
+
+### Bitwise Operators
+```bengali
+// Bitwise AND
+ধরি a = ১২ & ১০;  // 8
+
+// Bitwise OR
+ধরি b = ১২ | ১০;  // 14
+
+// Bitwise XOR
+ধরি c = ১২ ^ ১০;  // 6
+
+// Bitwise NOT
+ধরি d = ~৫;  // -6
+
+// Left Shift
+ধরি e = ৫ << ২;  // 20
+
+// Right Shift
+ধরি f = ২০ >> ২;  // 5
 ```
 
 ## Built-in Functions

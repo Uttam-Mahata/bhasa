@@ -142,6 +142,7 @@ Bhasa is a fully-functional **compiled** programming language that uses Bengali 
 - Arithmetic: `+`, `-`, `*`, `/`, `%`
 - Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - Logical: `!`, `&&`, `||`
+- Bitwise: `&`, `|`, `^`, `~`, `<<`, `>>`
 - String concatenation with `+`
 
 ### ✅ Control Flow
@@ -212,6 +213,39 @@ Clear error reporting for:
 লেখ(দুইগুণ(যোগএক, ৫));  // Output: 7
 ```
 
+### 4. Bitwise Operations
+```bengali
+// Bitwise AND - sets each bit to 1 if both bits are 1
+ধরি result1 = ১২ & ১০;  // 12 & 10 = 8
+লেখ(result1);
+
+// Bitwise OR - sets each bit to 1 if any bit is 1
+ধরি result2 = ১২ | ১০;  // 12 | 10 = 14
+লেখ(result2);
+
+// Bitwise XOR - sets each bit to 1 if bits are different
+ধরি result3 = ১২ ^ ১০;  // 12 ^ 10 = 6
+লেখ(result3);
+
+// Bitwise NOT - inverts all bits
+ধরি result4 = ~৫;  // ~5 = -6
+লেখ(result4);
+
+// Left Shift - shifts bits left, filling with zeros
+ধরি result5 = ৫ << ২;  // 5 << 2 = 20
+লেখ(result5);
+
+// Right Shift - shifts bits right
+ধরি result6 = ২০ >> ২;  // 20 >> 2 = 5
+লেখ(result6);
+
+// Complex bitwise expressions
+ধরি mask = ১৫;  // 0x0F
+ধরি value = ২৫৫;  // 0xFF
+ধরি masked = value & mask;  // Get lower 4 bits
+লেখ(masked);  // Output: 15
+```
+
 ## Performance Characteristics
 
 - **Lexing**: O(n) where n is input length
@@ -276,10 +310,10 @@ This language draws inspiration from:
 
 - **Lines of Code**: ~4,500
 - **Packages**: 9 (token, lexer, ast, parser, compiler, code, vm, object, repl)
-- **Bytecode Instructions**: 35+ opcodes
+- **Bytecode Instructions**: 41+ opcodes (including 6 bitwise operations)
 - **Built-in Functions**: 7
 - **Keywords**: 8
-- **Example Programs**: 9
+- **Example Programs**: 10 (including bitwise operations demo)
 - **Architecture**: Compiler + VM (production-ready)
 
 ## Testing
