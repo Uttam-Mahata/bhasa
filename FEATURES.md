@@ -308,13 +308,14 @@ This language draws inspiration from:
 
 ## Project Statistics
 
-- **Lines of Code**: ~4,500
+- **Lines of Code**: ~5,000+
 - **Packages**: 9 (token, lexer, ast, parser, compiler, code, vm, object, repl)
 - **Bytecode Instructions**: 41+ opcodes (including 6 bitwise operations)
-- **Built-in Functions**: 7
-- **Keywords**: 8
-- **Example Programs**: 10 (including bitwise operations demo)
+- **Built-in Functions**: 30+ (including file I/O, character ops, conversion functions)
+- **Keywords**: 12 (including for, break, continue, import)
+- **Example Programs**: 13+ (including bitwise ops, self-hosting demos)
 - **Architecture**: Compiler + VM (production-ready)
+- **Self-Hosting**: ✅ Capable (has all features needed to write compiler in Bhasa)
 
 ## Testing
 
