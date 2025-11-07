@@ -14,6 +14,14 @@ type Compiler struct {
 	symbolTable *SymbolTable
 	scopes      []CompilationScope
 	scopeIndex  int
+	loopStack   []LoopContext // track nested loops for break/continue
+}
+
+// LoopContext tracks loop start and break positions
+type LoopContext struct {
+	loopStart      int
+	breakPositions []int
+	contPositions  []int
 }
 
 // CompilationScope tracks instructions and jump positions
@@ -242,6 +250,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.WhileStatement:
 		loopStart := len(c.currentInstructions())
 
+		// Push loop context for break/continue
+		loopCtx := LoopContext{loopStart: loopStart}
+		c.loopStack = append(c.loopStack, loopCtx)
+
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err
@@ -263,7 +275,121 @@ func (c *Compiler) Compile(node ast.Node) error {
 		afterLoopPos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterLoopPos)
 
+		// Patch all break statements
+		ctx := c.loopStack[len(c.loopStack)-1]
+		for _, pos := range ctx.breakPositions {
+			c.changeOperand(pos, afterLoopPos)
+		}
+
+		// Patch all continue statements (go back to loop start)
+		for _, pos := range ctx.contPositions {
+			c.changeOperand(pos, loopStart)
+		}
+
+		// Pop loop context
+		c.loopStack = c.loopStack[:len(c.loopStack)-1]
+
 		c.emit(code.OpNull)
+
+	case *ast.ForStatement:
+		// Compile initialization
+		if node.Init != nil {
+			err := c.Compile(node.Init)
+			if err != nil {
+				return err
+			}
+			// Pop the result if it's an expression statement
+			if _, ok := node.Init.(*ast.ExpressionStatement); ok {
+				c.emit(code.OpPop)
+			}
+		}
+
+		loopStart := len(c.currentInstructions())
+
+		// Push loop context
+		loopCtx := LoopContext{loopStart: loopStart}
+		c.loopStack = append(c.loopStack, loopCtx)
+
+		// Compile condition
+		var jumpNotTruthyPos int
+		if node.Condition != nil {
+			err := c.Compile(node.Condition)
+			if err != nil {
+				return err
+			}
+			jumpNotTruthyPos = c.emit(code.OpJumpNotTruthy, 9999)
+		}
+
+		// Compile body
+		err := c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.OpPop) {
+			c.removeLastPop()
+		}
+
+		// Continue statements jump here (before increment)
+		continueTarget := len(c.currentInstructions())
+
+		// Compile increment
+		if node.Increment != nil {
+			err := c.Compile(node.Increment)
+			if err != nil {
+				return err
+			}
+			// Pop the result
+			if _, ok := node.Increment.(*ast.ExpressionStatement); ok {
+				c.emit(code.OpPop)
+			}
+		}
+
+		// Jump back to condition check
+		c.emit(code.OpJump, loopStart)
+
+		afterLoopPos := len(c.currentInstructions())
+
+		// Patch condition jump
+		if node.Condition != nil {
+			c.changeOperand(jumpNotTruthyPos, afterLoopPos)
+		}
+
+		// Patch all break statements
+		ctx := c.loopStack[len(c.loopStack)-1]
+		for _, pos := range ctx.breakPositions {
+			c.changeOperand(pos, afterLoopPos)
+		}
+
+		// Patch all continue statements (go to increment)
+		for _, pos := range ctx.contPositions {
+			c.changeOperand(pos, continueTarget)
+		}
+
+		// Pop loop context
+		c.loopStack = c.loopStack[:len(c.loopStack)-1]
+
+		c.emit(code.OpNull)
+
+	case *ast.BreakStatement:
+		if len(c.loopStack) == 0 {
+			return fmt.Errorf("break statement outside loop")
+		}
+		// Emit a jump that will be patched later
+		pos := c.emit(code.OpJump, 9999)
+		// Record this position in the current loop context
+		ctx := &c.loopStack[len(c.loopStack)-1]
+		ctx.breakPositions = append(ctx.breakPositions, pos)
+
+	case *ast.ContinueStatement:
+		if len(c.loopStack) == 0 {
+			return fmt.Errorf("continue statement outside loop")
+		}
+		// Emit a jump that will be patched later
+		pos := c.emit(code.OpJump, 9999)
+		// Record this position in the current loop context
+		ctx := &c.loopStack[len(c.loopStack)-1]
+		ctx.contPositions = append(ctx.contPositions, pos)
 
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)

@@ -145,6 +145,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.WHILE:
 		return p.parseWhileStatement()
+	case token.FOR:
+		return p.parseForStatement()
+	case token.BREAK:
+		return p.parseBreakStatement()
+	case token.CONTINUE:
+		return p.parseContinueStatement()
 	case token.IDENT:
 		// Check if this is an assignment (identifier followed by =)
 		if p.peekTokenIs(token.ASSIGN) {
@@ -232,6 +238,80 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	}
 
 	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	stmt := &ast.ForStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// Parse initialization
+	p.nextToken()
+	if p.curToken.Type == token.LET {
+		stmt.Init = p.parseLetStatement()
+	} else if p.curToken.Type == token.IDENT {
+		stmt.Init = p.parseAssignmentStatement()
+	}
+	// If semicolon, skip it
+	if p.curToken.Type == token.SEMICOLON {
+		p.nextToken()
+	}
+
+	// Parse condition
+	if p.curToken.Type != token.SEMICOLON {
+		stmt.Condition = p.parseExpression(LOWEST)
+	}
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	// Parse increment
+	p.nextToken()
+	if p.curToken.Type != token.RPAREN {
+		if p.curToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN) {
+			stmt.Increment = p.parseAssignmentStatement()
+		} else {
+			// Could be an expression statement
+			exprStmt := &ast.ExpressionStatement{Token: p.curToken}
+			exprStmt.Expression = p.parseExpression(LOWEST)
+			stmt.Increment = exprStmt
+		}
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseBreakStatement() *ast.BreakStatement {
+	stmt := &ast.BreakStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
+	stmt := &ast.ContinueStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 
 	return stmt
 }
