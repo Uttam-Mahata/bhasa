@@ -86,11 +86,11 @@ const (
 	TYPE_BOOLEAN = "বুলিয়ান"       // boolean type
 	TYPE_ARRAY   = "তালিকা"         // array type
 	TYPE_HASH    = "ম্যাপ"          // hash/map type
-	AS           = "as"            // type casting keyword
+	AS           = "হিসাবে"        // type casting keyword (as/in the form of)
 
 	// Struct and Enum keywords
 	STRUCT = "স্ট্রাক্ট" // struct keyword
-	ENUM   = "enum"     // enum keyword
+	ENUM   = "গণনা"     // enum keyword (enumeration in Bengali)
 	DOT    = "."        // dot for field access
 	ARROW  = "=>"       // arrow for pattern matching
 )
@@ -120,10 +120,10 @@ var keywords = map[string]TokenType{
 	"বুলিয়ান":       TYPE_BOOLEAN,
 	"তালিকা":         TYPE_ARRAY,
 	"ম্যাপ":          TYPE_HASH,
-	"as":            AS,
+	"হিসাবে":        AS,
 	// Struct and Enum keywords
 	"স্ট্রাক্ট": STRUCT,
-	"enum":     ENUM,
+	"গণনা":     ENUM,
 }
 
 // LookupIdent checks if an identifier is a keyword
