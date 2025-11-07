@@ -1,0 +1,303 @@
+// Parser Module for Bhasa Self-Hosting Compiler (Basic Implementation)
+// This module implements a basic recursive descent parser
+
+লেখ("=== Parser Module (Basic) ===");
+
+// Parser precedence levels
+ধরি PRECEDENCE_LOWEST = ১;
+ধরি PRECEDENCE_EQUALS = ২;
+ধরি PRECEDENCE_LESSGREATER = ৩;
+ধরি PRECEDENCE_SUM = ৪;
+ধরি PRECEDENCE_PRODUCT = ৫;
+ধরি PRECEDENCE_PREFIX = ৬;
+ধরি PRECEDENCE_CALL = ৭;
+ধরি PRECEDENCE_INDEX = ৮;
+
+// Operator precedence map
+ধরি precedences = {
+    "==": PRECEDENCE_EQUALS,
+    "!=": PRECEDENCE_EQUALS,
+    "<": PRECEDENCE_LESSGREATER,
+    ">": PRECEDENCE_LESSGREATER,
+    "+": PRECEDENCE_SUM,
+    "-": PRECEDENCE_SUM,
+    "*": PRECEDENCE_PRODUCT,
+    "/": PRECEDENCE_PRODUCT,
+    "(": PRECEDENCE_CALL,
+    "[": PRECEDENCE_INDEX
+};
+
+// Create new parser
+ধরি নতুন_পার্সার = ফাংশন(tokens) {
+    ফেরত {
+        "tokens": tokens,
+        "position": ০,
+        "current_token": tokens[০],
+        "errors": []
+    };
+};
+
+// Get current token
+ধরি বর্তমান_টোকেন = ফাংশন(parser) {
+    ফেরত parser["current_token"];
+};
+
+// Peek at next token
+ধরি পরবর্তী_টোকেন_দেখো = ফাংশন(parser) {
+    ধরি next_pos = parser["position"] + ১;
+    যদি (next_pos < দৈর্ঘ্য(parser["tokens"])) {
+        ফেরত parser["tokens"][next_pos];
+    }
+    ফেরত parser["current_token"]; // Return EOF
+};
+
+// Advance to next token
+ধরি টোকেন_এগিয়ে_যাও = ফাংশন(parser) {
+    parser["position"] = parser["position"] + ১;
+    যদি (parser["position"] < দৈর্ঘ্য(parser["tokens"])) {
+        parser["current_token"] = parser["tokens"][parser["position"]];
+    }
+    ফেরত parser;
+};
+
+// Add error
+ধরি ত্রুটি_যোগ = ফাংশন(parser, message) {
+    ধরি errors = parser["errors"];
+    parser["errors"] = যোগ(errors, message);
+    ফেরত parser;
+};
+
+// Check if current token matches expected type
+ধরি টোকেন_মিলে_কিনা = ফাংশন(parser, token_type) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ফেরত current["type"] == token_type;
+};
+
+// Expect token and advance
+ধরি টোকেন_প্রত্যাশা = ফাংশন(parser, token_type) {
+    যদি (টোকেন_মিলে_কিনা(parser, token_type)) {
+        parser = টোকেন_এগিয়ে_যাও(parser);
+        ফেরত {"parser": parser, "success": সত্য};
+    }
+    
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি error_msg = "Expected token " + token_type + ", got " + current["type"];
+    parser = ত্রুটি_যোগ(parser, error_msg);
+    ফেরত {"parser": parser, "success": মিথ্যা};
+};
+
+// Get precedence of current token
+ধরি বর্তমান_অগ্রাধিকার = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি token_type = current["type"];
+    ধরি prec = precedences[token_type];
+    যদি (prec) {
+        ফেরত prec;
+    }
+    ফেরত PRECEDENCE_LOWEST;
+};
+
+// Parse identifier
+ধরি শনাক্তকারী_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি node = নতুন_শনাক্তকারী(current["literal"]);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse integer literal
+ধরি পূর্ণসংখ্যা_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি value = পূর্ণসংখ্যা(current["literal"]);
+    ধরি node = নতুন_পূর্ণসংখ্যা_লিটারেল(value);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse string literal
+ধরি স্ট্রিং_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি node = নতুন_স্ট্রিং_লিটারেল(current["literal"]);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse boolean
+ধরি বুলিয়ান_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি value = current["type"] == "সত্য";
+    ধরি node = নতুন_বুলিয়ান(value);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse prefix expression
+ধরি প্রিফিক্স_এক্সপ্রেশন_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি operator = current["literal"];
+    
+    parser = টোকেন_এগিয়ে_যাও(parser);
+    
+    ধরি right_result = এক্সপ্রেশন_পার্স(parser, PRECEDENCE_PREFIX);
+    parser = right_result["parser"];
+    ধরি right = right_result["node"];
+    
+    ধরি node = নতুন_প্রিফিক্স_এক্সপ্রেশন(operator, right);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse infix expression
+ধরি ইনফিক্স_এক্সপ্রেশন_পার্স = ফাংশন(parser, left) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি operator = current["literal"];
+    ধরি precedence = বর্তমান_অগ্রাধিকার(parser);
+    
+    parser = টোকেন_এগিয়ে_যাও(parser);
+    
+    ধরি right_result = এক্সপ্রেশন_পার্স(parser, precedence);
+    parser = right_result["parser"];
+    ধরি right = right_result["node"];
+    
+    ধরি node = নতুন_ইনফিক্স_এক্সপ্রেশন(left, operator, right);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse expression (simplified - basic infix/prefix parsing)
+ধরি এক্সপ্রেশন_পার্স = ফাংশন(parser, precedence) {
+    যদি (!precedence) {
+        precedence = PRECEDENCE_LOWEST;
+    }
+    
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি token_type = current["type"];
+    
+    // Parse prefix/primary expression
+    ধরি left = 0;
+    
+    যদি (token_type == "IDENT") {
+        ধরি result = শনাক্তকারী_পার্স(parser);
+        parser = result["parser"];
+        left = result["node"];
+    } নাহলে যদি (token_type == "INT") {
+        ধরি result = পূর্ণসংখ্যা_পার্স(parser);
+        parser = result["parser"];
+        left = result["node"];
+    } নাহলে যদি (token_type == "STRING") {
+        ধরি result = স্ট্রিং_পার্স(parser);
+        parser = result["parser"];
+        left = result["node"];
+    } নাহলে যদি (token_type == "সত্য" || token_type == "মিথ্যা") {
+        ধরি result = বুলিয়ান_পার্স(parser);
+        parser = result["parser"];
+        left = result["node"];
+    } নাহলে যদি (token_type == "!" || token_type == "-") {
+        ধরি result = প্রিফিক্স_এক্সপ্রেশন_পার্স(parser);
+        parser = result["parser"];
+        left = result["node"];
+    } নাহলে {
+        parser = ত্রুটি_যোগ(parser, "No prefix parse function for " + token_type);
+        ফেরত {"parser": parser, "node": 0};
+    }
+    
+    // Parse infix expressions
+    যতক্ষণ (সত্য) {
+        ধরি next = পরবর্তী_টোকেন_দেখো(parser);
+        যদি (next["type"] == ";" || next["type"] == "EOF") {
+            বিরতি;
+        }
+        
+        parser = টোকেন_এগিয়ে_যাও(parser);
+        ধরি next_prec = বর্তমান_অগ্রাধিকার(parser);
+        
+        যদি (precedence >= next_prec) {
+            বিরতি;
+        }
+        
+        ধরি result = ইনফিক্স_এক্সপ্রেশন_পার্স(parser, left);
+        parser = result["parser"];
+        left = result["node"];
+    }
+    
+    ফেরত {"parser": parser, "node": left};
+};
+
+// Parse let statement
+ধরি লেট_স্টেটমেন্ট_পার্স = ফাংশন(parser) {
+    parser = টোকেন_এগিয়ে_যাও(parser); // Skip 'ধরি'
+    
+    যদি (!টোকেন_মিলে_কিনা(parser, "IDENT")) {
+        parser = ত্রুটি_যোগ(parser, "Expected identifier after 'ধরি'");
+        ফেরত {"parser": parser, "node": 0};
+    }
+    
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি name = নতুন_শনাক্তকারী(current["literal"]);
+    
+    parser = টোকেন_এগিয়ে_যাও(parser);
+    
+    // Expect '='
+    ধরি expect_result = টোকেন_প্রত্যাশা(parser, "=");
+    parser = expect_result["parser"];
+    যদি (!expect_result["success"]) {
+        ফেরত {"parser": parser, "node": 0};
+    }
+    
+    // Parse value expression
+    ধরি value_result = এক্সপ্রেশন_পার্স(parser, PRECEDENCE_LOWEST);
+    parser = value_result["parser"];
+    ধরি value = value_result["node"];
+    
+    ধরি node = নতুন_লেট_স্টেটমেন্ট(name, value);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse statement
+ধরি স্টেটমেন্ট_পার্স = ফাংশন(parser) {
+    ধরি current = বর্তমান_টোকেন(parser);
+    ধরি token_type = current["type"];
+    
+    যদি (token_type == "ধরি") {
+        ফেরত লেট_স্টেটমেন্ট_পার্স(parser);
+    }
+    
+    // Default: expression statement
+    ধরি expr_result = এক্সপ্রেশন_পার্স(parser, PRECEDENCE_LOWEST);
+    parser = expr_result["parser"];
+    ধরি expr = expr_result["node"];
+    
+    ধরি node = নতুন_এক্সপ্রেশন_স্টেটমেন্ট(expr);
+    ফেরত {"parser": parser, "node": node};
+};
+
+// Parse program
+ধরি প্রোগ্রাম_পার্স = ফাংশন(parser) {
+    ধরি statements = [];
+    
+    যতক্ষণ (সত্য) {
+        ধরি current = বর্তমান_টোকেন(parser);
+        যদি (current["type"] == "EOF") {
+            বিরতি;
+        }
+        
+        ধরি stmt_result = স্টেটমেন্ট_পার্স(parser);
+        parser = stmt_result["parser"];
+        ধরি stmt = stmt_result["node"];
+        
+        যদি (stmt != ০) {
+            statements = যোগ(statements, stmt);
+        }
+        
+        // Skip semicolon if present
+        যদি (টোকেন_মিলে_কিনা(parser, ";")) {
+            parser = টোকেন_এগিয়ে_যাও(parser);
+        }
+        
+        parser = টোকেন_এগিয়ে_যাও(parser);
+    }
+    
+    ধরি program = নতুন_প্রোগ্রাম(statements);
+    ফেরত {"parser": parser, "program": program};
+};
+
+লেখ("Parser module loaded successfully (Basic Implementation)");
+লেখ("Functions: নতুন_পার্সার, প্রোগ্রাম_পার্স, স্টেটমেন্ট_পার্স, এক্সপ্রেশন_পার্স");
+লেখ("Note: This is a basic implementation for demonstration");
+লেখ("");
+
+// Export API: নতুন_পার্সার, প্রোগ্রাম_পার্স

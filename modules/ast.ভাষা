@@ -1,0 +1,243 @@
+// AST (Abstract Syntax Tree) Module for Bhasa Self-Hosting Compiler
+// This module defines AST node types and construction functions
+
+লেখ("=== AST Module ===");
+
+// Node type constants
+ধরি NODE_PROGRAM = "Program";
+ধরি NODE_LET_STATEMENT = "LetStatement";
+ধরি NODE_RETURN_STATEMENT = "ReturnStatement";
+ধরি NODE_EXPRESSION_STATEMENT = "ExpressionStatement";
+ধরি NODE_BLOCK_STATEMENT = "BlockStatement";
+ধরি NODE_IF_EXPRESSION = "IfExpression";
+ধরি NODE_FUNCTION_LITERAL = "FunctionLiteral";
+ধরি NODE_CALL_EXPRESSION = "CallExpression";
+ধরি NODE_IDENTIFIER = "Identifier";
+ধরি NODE_INTEGER_LITERAL = "IntegerLiteral";
+ধরি NODE_STRING_LITERAL = "StringLiteral";
+ধরি NODE_BOOLEAN = "Boolean";
+ধরি NODE_ARRAY_LITERAL = "ArrayLiteral";
+ধরি NODE_HASH_LITERAL = "HashLiteral";
+ধরি NODE_INDEX_EXPRESSION = "IndexExpression";
+ধরি NODE_PREFIX_EXPRESSION = "PrefixExpression";
+ধরি NODE_INFIX_EXPRESSION = "InfixExpression";
+ধরি NODE_WHILE_STATEMENT = "WhileStatement";
+ধরি NODE_FOR_STATEMENT = "ForStatement";
+ধরি NODE_ASSIGNMENT_STATEMENT = "AssignmentStatement";
+
+// Create Program node
+ধরি নতুন_প্রোগ্রাম = ফাংশন(statements) {
+    ফেরত {
+        "type": NODE_PROGRAM,
+        "statements": statements
+    };
+};
+
+// Create Let Statement node
+ধরি নতুন_লেট_স্টেটমেন্ট = ফাংশন(name, value) {
+    ফেরত {
+        "type": NODE_LET_STATEMENT,
+        "name": name,
+        "value": value
+    };
+};
+
+// Create Assignment Statement node
+ধরি নতুন_অ্যাসাইনমেন্ট = ফাংশন(name, value) {
+    ফেরত {
+        "type": NODE_ASSIGNMENT_STATEMENT,
+        "name": name,
+        "value": value
+    };
+};
+
+// Create Return Statement node
+ধরি নতুন_রিটার্ন_স্টেটমেন্ট = ফাংশন(value) {
+    ফেরত {
+        "type": NODE_RETURN_STATEMENT,
+        "value": value
+    };
+};
+
+// Create Expression Statement node
+ধরি নতুন_এক্সপ্রেশন_স্টেটমেন্ট = ফাংশন(expression) {
+    ফেরত {
+        "type": NODE_EXPRESSION_STATEMENT,
+        "expression": expression
+    };
+};
+
+// Create Block Statement node
+ধরি নতুন_ব্লক_স্টেটমেন্ট = ফাংশন(statements) {
+    ফেরত {
+        "type": NODE_BLOCK_STATEMENT,
+        "statements": statements
+    };
+};
+
+// Create While Statement node
+ধরি নতুন_যতক্ষণ_স্টেটমেন্ট = ফাংশন(condition, body) {
+    ফেরত {
+        "type": NODE_WHILE_STATEMENT,
+        "condition": condition,
+        "body": body
+    };
+};
+
+// Create For Statement node
+ধরি নতুন_পর্যন্ত_স্টেটমেন্ট = ফাংশন(init, condition, update, body) {
+    ফেরত {
+        "type": NODE_FOR_STATEMENT,
+        "init": init,
+        "condition": condition,
+        "update": update,
+        "body": body
+    };
+};
+
+// Create Identifier node
+ধরি নতুন_শনাক্তকারী = ফাংশন(name) {
+    ফেরত {
+        "type": NODE_IDENTIFIER,
+        "name": name
+    };
+};
+
+// Create Integer Literal node
+ধরি নতুন_পূর্ণসংখ্যা_লিটারেল = ফাংশন(value) {
+    ফেরত {
+        "type": NODE_INTEGER_LITERAL,
+        "value": value
+    };
+};
+
+// Create String Literal node
+ধরি নতুন_স্ট্রিং_লিটারেল = ফাংশন(value) {
+    ফেরত {
+        "type": NODE_STRING_LITERAL,
+        "value": value
+    };
+};
+
+// Create Boolean node
+ধরি নতুন_বুলিয়ান = ফাংশন(value) {
+    ফেরত {
+        "type": NODE_BOOLEAN,
+        "value": value
+    };
+};
+
+// Create Array Literal node
+ধরি নতুন_অ্যারে_লিটারেল = ফাংশন(elements) {
+    ফেরত {
+        "type": NODE_ARRAY_LITERAL,
+        "elements": elements
+    };
+};
+
+// Create Hash Literal node
+ধরি নতুন_হ্যাশ_লিটারেল = ফাংশন(pairs) {
+    ফেরত {
+        "type": NODE_HASH_LITERAL,
+        "pairs": pairs
+    };
+};
+
+// Create Prefix Expression node
+ধরি নতুন_প্রিফিক্স_এক্সপ্রেশন = ফাংশন(operator, right) {
+    ফেরত {
+        "type": NODE_PREFIX_EXPRESSION,
+        "operator": operator,
+        "right": right
+    };
+};
+
+// Create Infix Expression node
+ধরি নতুন_ইনফিক্স_এক্সপ্রেশন = ফাংশন(left, operator, right) {
+    ফেরত {
+        "type": NODE_INFIX_EXPRESSION,
+        "left": left,
+        "operator": operator,
+        "right": right
+    };
+};
+
+// Create If Expression node
+ধরি নতুন_যদি_এক্সপ্রেশন = ফাংশন(condition, consequence, alternative) {
+    ফেরত {
+        "type": NODE_IF_EXPRESSION,
+        "condition": condition,
+        "consequence": consequence,
+        "alternative": alternative
+    };
+};
+
+// Create Function Literal node
+ধরি নতুন_ফাংশন_লিটারেল = ফাংশন(parameters, body) {
+    ফেরত {
+        "type": NODE_FUNCTION_LITERAL,
+        "parameters": parameters,
+        "body": body
+    };
+};
+
+// Create Call Expression node
+ধরি নতুন_কল_এক্সপ্রেশন = ফাংশন(function, arguments) {
+    ফেরত {
+        "type": NODE_CALL_EXPRESSION,
+        "function": function,
+        "arguments": arguments
+    };
+};
+
+// Create Index Expression node
+ধরি নতুন_ইনডেক্স_এক্সপ্রেশন = ফাংশন(left, index) {
+    ফেরত {
+        "type": NODE_INDEX_EXPRESSION,
+        "left": left,
+        "index": index
+    };
+};
+
+// Function to pretty-print AST node (simplified)
+ধরি AST_প্রিন্ট = ফাংশন(node, indent) {
+    যদি (!indent) {
+        indent = "";
+    }
+    
+    ধরি node_type = node["type"];
+    
+    যদি (node_type == NODE_PROGRAM) {
+        লেখ(indent + "Program:");
+        ধরি statements = node["statements"];
+        ধরি i = ০;
+        যতক্ষণ (i < দৈর্ঘ্য(statements)) {
+            AST_প্রিন্ট(statements[i], indent + "  ");
+            i = i + ১;
+        }
+    } নাহলে যদি (node_type == NODE_LET_STATEMENT) {
+        লেখ(indent + "Let: " + node["name"]["name"]);
+        AST_প্রিন্ট(node["value"], indent + "  ");
+    } নাহলে যদি (node_type == NODE_IDENTIFIER) {
+        লেখ(indent + "Ident: " + node["name"]);
+    } নাহলে যদি (node_type == NODE_INTEGER_LITERAL) {
+        লেখ(indent + "Int: " + লেখা(node["value"]));
+    } নাহলে যদি (node_type == NODE_STRING_LITERAL) {
+        লেখ(indent + "String: \"" + node["value"] + "\"");
+    } নাহলে যদি (node_type == NODE_BOOLEAN) {
+        লেখ(indent + "Bool: " + লেখা_রূপ(node["value"]));
+    } নাহলে যদি (node_type == NODE_INFIX_EXPRESSION) {
+        লেখ(indent + "Infix: " + node["operator"]);
+        AST_প্রিন্ট(node["left"], indent + "  ");
+        AST_প্রিন্ট(node["right"], indent + "  ");
+    } নাহলে {
+        লেখ(indent + "Node: " + node_type);
+    }
+};
+
+লেখ("AST module loaded successfully");
+লেখ("Node types defined: Program, LetStatement, Identifier, Expressions, etc.");
+লেখ("Functions: নতুন_প্রোগ্রাম, নতুন_লেট_স্টেটমেন্ট, AST_প্রিন্ট, etc.");
+লেখ("");
+
+// Export API: All নতুন_* functions and AST_প্রিন্ট

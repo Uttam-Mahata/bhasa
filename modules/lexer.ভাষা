@@ -1,0 +1,343 @@
+// Lexer Module for Bhasa Self-Hosting Compiler
+// This module implements a lexical analyzer (tokenizer)
+
+লেখ("=== Lexer Module ===");
+
+// Lexer state structure
+ধরি নতুন_লেক্সার = ফাংশন(source) {
+    ফেরত {
+        "source": source,
+        "position": ০,
+        "read_position": ০,
+        "ch": "",
+        "line": ১,
+        "column": ০
+    };
+};
+
+// Read next character
+ধরি পরবর্তী_অক্ষর = ফাংশন(lexer) {
+    যদি (lexer["read_position"] >= দৈর্ঘ্য(lexer["source"])) {
+        lexer["ch"] = "";
+    } নাহলে {
+        lexer["ch"] = অক্ষর(lexer["source"], lexer["read_position"]);
+    }
+    
+    lexer["position"] = lexer["read_position"];
+    lexer["read_position"] = lexer["read_position"] + ১;
+    lexer["column"] = lexer["column"] + ১;
+    
+    ফেরত lexer;
+};
+
+// Peek at next character without advancing
+ধরি উঁকি_মারো = ফাংশন(lexer) {
+    যদি (lexer["read_position"] >= দৈর্ঘ্য(lexer["source"])) {
+        ফেরত "";
+    }
+    ফেরত অক্ষর(lexer["source"], lexer["read_position"]);
+};
+
+// Skip whitespace
+ধরি ফাঁকা_এড়াও = ফাংশন(lexer) {
+    যতক্ষণ (সত্য) {
+        ধরি ch = lexer["ch"];
+        যদি (ch == "") {
+            বিরতি;
+        }
+        
+        ধরি code = কোড(ch);
+        
+        // Handle newline for line counting
+        যদি (code == ১০) {
+            lexer["line"] = lexer["line"] + ১;
+            lexer["column"] = ০;
+            lexer = পরবর্তী_অক্ষর(lexer);
+            চালিয়ে_যাও;
+        }
+        
+        // Skip whitespace
+        যদি (code == ৩২ || code == ৯ || code == ১৩) {
+            lexer = পরবর্তী_অক্ষর(lexer);
+            চালিয়ে_যাও;
+        }
+        
+        বিরতি;
+    }
+    
+    ফেরত lexer;
+};
+
+// Read identifier
+ধরি শনাক্তকারী_পড়ো = ফাংশন(lexer) {
+    ধরি start = lexer["position"];
+    
+    যতক্ষণ (সত্য) {
+        ধরি ch = lexer["ch"];
+        যদি (ch == "") {
+            বিরতি;
+        }
+        
+        ধরি code = কোড(ch);
+        
+        // Check if valid identifier character
+        // Letters (a-z, A-Z), underscore, Bengali letters, or digits
+        ধরি is_letter = (code >= ৬৫ && code <= ৯০) || (code >= ৯৭ && code <= ১২২) || code == ৯৫;
+        ধরি is_bengali = code >= ২৪৩০ && code <= ২৫১১;
+        ধরি is_digit = (code >= ৪৮ && code <= ৫৭) || (code >= ২৪১৬ && code <= ২৪২৫);
+        
+        যদি (is_letter || is_bengali || is_digit) {
+            lexer = পরবর্তী_অক্ষর(lexer);
+        } নাহলে {
+            বিরতি;
+        }
+    }
+    
+    ধরি end = lexer["position"];
+    ধরি length = end - start;
+    ধরি ident = "";
+    
+    // Extract substring
+    ধরি i = start;
+    যতক্ষণ (i < end) {
+        ident = ident + অক্ষর(lexer["source"], i);
+        i = i + ১;
+    }
+    
+    ফেরত {"lexer": lexer, "ident": ident};
+};
+
+// Read number
+ধরি সংখ্যা_পড়ো = ফাংশন(lexer) {
+    ধরি start = lexer["position"];
+    
+    যতক্ষণ (সত্য) {
+        ধরি ch = lexer["ch"];
+        যদি (ch == "") {
+            বিরতি;
+        }
+        
+        ধরি code = কোড(ch);
+        
+        // Check if digit (Arabic or Bengali)
+        ধরি is_digit = (code >= ৪৮ && code <= ৫৭) || (code >= ২৪১৬ && code <= ২৪২৫);
+        
+        যদি (is_digit) {
+            lexer = পরবর্তী_অক্ষর(lexer);
+        } নাহলে {
+            বিরতি;
+        }
+    }
+    
+    ধরি end = lexer["position"];
+    ধরি number = "";
+    
+    // Extract substring
+    ধরি i = start;
+    যতক্ষণ (i < end) {
+        number = number + অক্ষর(lexer["source"], i);
+        i = i + ১;
+    }
+    
+    ফেরত {"lexer": lexer, "number": number};
+};
+
+// Read string literal
+ধরি স্ট্রিং_পড়ো = ফাংশন(lexer) {
+    // Skip opening quote
+    lexer = পরবর্তী_অক্ষর(lexer);
+    
+    ধরি str = "";
+    
+    যতক্ষণ (সত্য) {
+        ধরি ch = lexer["ch"];
+        যদি (ch == "" || ch == "\"") {
+            বিরতি;
+        }
+        
+        str = str + ch;
+        lexer = পরবর্তী_অক্ষর(lexer);
+    }
+    
+    // Skip closing quote if present
+    যদি (lexer["ch"] == "\"") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+    }
+    
+    ফেরত {"lexer": lexer, "string": str};
+};
+
+// Get next token
+ধরি পরবর্তী_টোকেন = ফাংশন(lexer) {
+    lexer = ফাঁকা_এড়াও(lexer);
+    
+    ধরি ch = lexer["ch"];
+    ধরি line = lexer["line"];
+    ধরি column = lexer["column"];
+    
+    // EOF
+    যদি (ch == "") {
+        ফেরত {
+            "token": {"type": "EOF", "literal": "", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    ধরি code = কোড(ch);
+    
+    // Single character tokens
+    যদি (ch == "=") {
+        ধরি next_ch = উঁকি_মারো(lexer);
+        যদি (next_ch == "=") {
+            lexer = পরবর্তী_অক্ষর(lexer);
+            lexer = পরবর্তী_অক্ষর(lexer);
+            ফেরত {
+                "token": {"type": "==", "literal": "==", "line": line, "column": column},
+                "lexer": lexer
+            };
+        }
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "=", "literal": "=", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "+") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "+", "literal": "+", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "-") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "-", "literal": "-", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "*") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "*", "literal": "*", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "/") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "/", "literal": "/", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "(") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "(", "literal": "(", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == ")") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": ")", "literal": ")", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "{") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "{", "literal": "{", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == "}") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": "}", "literal": "}", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    যদি (ch == ";") {
+        lexer = পরবর্তী_অক্ষর(lexer);
+        ফেরত {
+            "token": {"type": ";", "literal": ";", "line": line, "column": column},
+            "lexer": lexer
+        };
+    }
+    
+    // String literals
+    যদি (ch == "\"") {
+        ধরি result = স্ট্রিং_পড়ো(lexer);
+        ফেরত {
+            "token": {"type": "STRING", "literal": result["string"], "line": line, "column": column},
+            "lexer": result["lexer"]
+        };
+    }
+    
+    // Numbers
+    ধরি is_digit = (code >= ৪৮ && code <= ৫৭) || (code >= ২৪১৬ && code <= ২৪২৫);
+    যদি (is_digit) {
+        ধরি result = সংখ্যা_পড়ো(lexer);
+        ফেরত {
+            "token": {"type": "INT", "literal": result["number"], "line": line, "column": column},
+            "lexer": result["lexer"]
+        };
+    }
+    
+    // Identifiers and keywords
+    ধরি is_letter = (code >= ৬৫ && code <= ৯০) || (code >= ৯৭ && code <= ১২২) || code == ৯৫;
+    ধরি is_bengali = code >= ২৪৩০ && code <= ২৫১১;
+    যদি (is_letter || is_bengali) {
+        ধরি result = শনাক্তকারী_পড়ো(lexer);
+        ধরি token_type = শনাক্ত_করো(result["ident"]);
+        ফেরত {
+            "token": {"type": token_type, "literal": result["ident"], "line": line, "column": column},
+            "lexer": result["lexer"]
+        };
+    }
+    
+    // Unknown character
+    lexer = পরবর্তী_অক্ষর(lexer);
+    ফেরত {
+        "token": {"type": "ILLEGAL", "literal": ch, "line": line, "column": column},
+        "lexer": lexer
+    };
+};
+
+// Tokenize entire source
+ধরি টোকেনাইজ = ফাংশন(source) {
+    ধরি lexer = নতুন_লেক্সার(source);
+    lexer = পরবর্তী_অক্ষর(lexer);
+    
+    ধরি tokens = [];
+    
+    যতক্ষণ (সত্য) {
+        ধরি result = পরবর্তী_টোকেন(lexer);
+        ধরি token = result["token"];
+        lexer = result["lexer"];
+        
+        tokens = যোগ(tokens, token);
+        
+        যদি (token["type"] == "EOF") {
+            বিরতি;
+        }
+    }
+    
+    ফেরত tokens;
+};
+
+লেখ("Lexer module loaded successfully");
+লেখ("Functions: নতুন_লেক্সার, পরবর্তী_টোকেন, টোকেনাইজ");
+লেখ("");
+
+// Export API: নতুন_লেক্সার, পরবর্তী_টোকেন, টোকেনাইজ

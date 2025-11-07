@@ -1,0 +1,172 @@
+// Token Module for Bhasa Self-Hosting Compiler
+// This module defines token types and token manipulation functions
+
+লেখ("=== Token Module Loaded ===");
+
+// Token Type Constants
+ধরি TOKEN_ILLEGAL = "ILLEGAL";
+ধরি TOKEN_EOF = "EOF";
+
+// Identifiers and literals
+ধরি TOKEN_IDENT = "IDENT";
+ধরি TOKEN_INT = "INT";
+ধরি TOKEN_STRING = "STRING";
+
+// Operators
+ধরি TOKEN_ASSIGN = "=";
+ধরি TOKEN_PLUS = "+";
+ধরি TOKEN_MINUS = "-";
+ধরি TOKEN_BANG = "!";
+ধরি TOKEN_ASTERISK = "*";
+ধরি TOKEN_SLASH = "/";
+ধরি TOKEN_PERCENT = "%";
+
+ধরি TOKEN_LT = "<";
+ধরি TOKEN_GT = ">";
+ধরি TOKEN_EQ = "==";
+ধরি TOKEN_NOT_EQ = "!=";
+ধরি TOKEN_LTE = "<=";
+ধরি TOKEN_GTE = ">=";
+
+ধরি TOKEN_AND = "&&";
+ধরি TOKEN_OR = "||";
+
+// Bitwise operators
+ধরি TOKEN_BIT_AND = "&";
+ধরি TOKEN_BIT_OR = "|";
+ধরি TOKEN_BIT_XOR = "^";
+ধরি TOKEN_BIT_NOT = "~";
+ধরি TOKEN_LSHIFT = "<<";
+ধরি TOKEN_RSHIFT = ">>";
+
+// Delimiters
+ধরি TOKEN_COMMA = ",";
+ধরি TOKEN_SEMICOLON = ";";
+ধরি TOKEN_COLON = ":";
+
+ধরি TOKEN_LPAREN = "(";
+ধরি TOKEN_RPAREN = ")";
+ধরি TOKEN_LBRACE = "{";
+ধরি TOKEN_RBRACE = "}";
+ধরি TOKEN_LBRACKET = "[";
+ধরি TOKEN_RBRACKET = "]";
+
+// Keywords (Bengali)
+ধরি TOKEN_LET = "ধরি";
+ধরি TOKEN_FUNCTION = "ফাংশন";
+ধরি TOKEN_IF = "যদি";
+ধরি TOKEN_ELSE = "নাহলে";
+ধরি TOKEN_RETURN = "ফেরত";
+ধরি TOKEN_TRUE = "সত্য";
+ধরি TOKEN_FALSE = "মিথ্যা";
+ধরি TOKEN_WHILE = "যতক্ষণ";
+ধরি TOKEN_FOR = "পর্যন্ত";
+ধরি TOKEN_BREAK = "বিরতি";
+ধরি TOKEN_CONTINUE = "চালিয়ে_যাও";
+ধরি TOKEN_IMPORT = "অন্তর্ভুক্ত";
+
+// Create a keyword map using hash
+ধরি keywords = {
+    "ধরি": TOKEN_LET,
+    "ফাংশন": TOKEN_FUNCTION,
+    "যদি": TOKEN_IF,
+    "নাহলে": TOKEN_ELSE,
+    "ফেরত": TOKEN_RETURN,
+    "সত্য": TOKEN_TRUE,
+    "মিথ্যা": TOKEN_FALSE,
+    "যতক্ষণ": TOKEN_WHILE,
+    "পর্যন্ত": TOKEN_FOR,
+    "বিরতি": TOKEN_BREAK,
+    "চালিয়ে_যাও": TOKEN_CONTINUE,
+    "অন্তর্ভুক্ত": TOKEN_IMPORT
+};
+
+// Function to create a new token
+ধরি নতুন_টোকেন = ফাংশন(type, literal, line, column) {
+    ফেরত {
+        "type": type,
+        "literal": literal,
+        "line": line,
+        "column": column
+    };
+};
+
+// Function to lookup identifier or keyword
+ধরি শনাক্ত_করো = ফাংশন(ident) {
+    // Check if identifier is a keyword
+    ধরি keyword_type = keywords[ident];
+    যদি (keyword_type) {
+        ফেরত keyword_type;
+    }
+    ফেরত TOKEN_IDENT;
+};
+
+// Bengali digit to Arabic digit conversion map
+ধরি bengali_digits = {
+    "০": "0",
+    "১": "1",
+    "২": "2",
+    "৩": "3",
+    "৪": "4",
+    "৫": "5",
+    "৬": "6",
+    "৭": "7",
+    "৮": "8",
+    "৯": "9"
+};
+
+// Function to convert Bengali numerals to Arabic
+ধরি বাংলা_থেকে_আরবি = ফাংশন(str) {
+    ধরি result = "";
+    ধরি i = ০;
+    ধরি len = দৈর্ঘ্য(str);
+    
+    যতক্ষণ (i < len) {
+        ধরি ch = অক্ষর(str, i);
+        ধরি arabic = bengali_digits[ch];
+        যদি (arabic) {
+            result = result + arabic;
+        } নাহলে {
+            result = result + ch;
+        }
+        i = i + ১;
+    }
+    
+    ফেরত result;
+};
+
+// Function to check if character is a digit
+ধরি সংখ্যা_কিনা = ফাংশন(ch) {
+    ধরি code = কোড(ch);
+    // Check for Arabic digits (48-57) or Bengali digits (২৪১৬-২৪২৫)
+    ফেরত (code >= ৪৮ && code <= ৫৭) || (code >= ২৪১৬ && code <= ২৪২৫);
+};
+
+// Function to check if character is a letter (for identifiers)
+ধরি অক্ষর_কিনা = ফাংশন(ch) {
+    ধরি code = কোড(ch);
+    // ASCII letters (a-z, A-Z) or underscore
+    যদি ((code >= ৬৫ && code <= ৯০) || (code >= ৯৭ && code <= ১২২) || code == ৯৫) {
+        ফেরত সত্য;
+    }
+    // Bengali characters (Unicode range ২৪৩০-২৫১১ covers most Bengali letters)
+    যদি (code >= ২৪৩০ && code <= ২৫১১) {
+        ফেরত সত্য;
+    }
+    ফেরত মিথ্যা;
+};
+
+// Function to check if character is whitespace
+ধরি ফাঁকা_কিনা = ফাংশন(ch) {
+    ধরি code = কোড(ch);
+    // Space, tab, newline, carriage return
+    ফেরত code == ৩২ || code == ৯ || code == ১০ || code == ১৩;
+};
+
+লেখ("Token types and functions defined successfully");
+লেখ("Available token types: ILLEGAL, EOF, IDENT, INT, STRING, and operators");
+লেখ("Keywords: ধরি, ফাংশন, যদি, নাহলে, ফেরত, সত্য, মিথ্যা, etc.");
+লেখ("");
+
+// Export API (for demonstration - in a real module system these would be exported)
+// Functions: নতুন_টোকেন, শনাক্ত_করো, বাংলা_থেকে_আরবি, সংখ্যা_কিনা, অক্ষর_কিনা, ফাঁকা_কিনা
