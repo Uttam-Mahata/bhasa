@@ -17,6 +17,7 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 🔗 **Logical operators** (&&, ||, !)
 - 🧮 **Math functions** (power, sqrt, abs, max, min)
 - 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
+- 🎨 **Object-Oriented Programming** (classes, objects, methods)
 
 ## Bengali Keywords
 
@@ -30,6 +31,9 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 | true | সত্য | Boolean true |
 | false | মিথ্যা | Boolean false |
 | while | যতক্ষণ | While loop |
+| class | শ্রেণী | Class declaration |
+| new | নতুন | Object instantiation |
+| this | এই | Current instance |
 
 ## Installation
 
@@ -99,6 +103,25 @@ go build -o bhasa
     লেখ("Special attention needed");
 }
 ```
+
+### Object-Oriented Programming
+```bengali
+// Define a class
+শ্রেণী গাড়ি {
+    শুরু = ফাংশন() {
+        লেখ("গাড়ি চলছে!");
+    };
+    
+    থামো = ফাংশন() {
+        লেখ("গাড়ি থেমেছে!");
+    };
+}
+
+// Create an instance
+ধরি আমার_গাড়ি = নতুন গাড়ি();
+```
+
+See [OOP.md](OOP.md) for detailed OOP documentation.
 
 ## Built-in Functions
 

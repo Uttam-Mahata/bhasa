@@ -222,15 +222,36 @@ Clear error reporting for:
 - **Stack operations**: O(1) push/pop
 - **Variable access**: O(1) array indexing (vs O(log n) map lookup)
 
+## Currently Implemented Features
+
+### ✅ Object-Oriented Programming (NEW!)
+- Class declarations with `শ্রেণী` keyword
+- Object instantiation with `নতুন` keyword
+- Method definitions in classes
+- Member access syntax with `.` operator
+- `এই` (this) keyword for instance reference
+- Instance types in object system
+
 ## Future Enhancement Ideas
 
 1. **More Bengali Keywords**:
-   - `পর্যন্ত` (for/until)
-   - `বিরতি` (break)
-   - `চালিয়ে_যাও` (continue)
-   - `শ্রেণী` (class)
+   - ✅ `শ্রেণী` (class) - **IMPLEMENTED**
+   - ✅ `নতুন` (new) - **IMPLEMENTED**
+   - ✅ `এই` (this/self) - **IMPLEMENTED**
+   - `পর্যন্ত` (for/until) - Partially implemented
+   - `বিরতি` (break) - Implemented
+   - `চালিয়ে_যাও` (continue) - Implemented
 
-2. **Additional Built-ins**:
+2. **OOP Enhancements**:
+   - Full method call support with `this` context
+   - Constructor parameters and initialization
+   - Inheritance and class extension
+   - Method overriding
+   - Static methods and properties
+   - Private/public access modifiers
+   - Getters and setters
+
+3. **Additional Built-ins**:
    - File I/O operations
    - Math functions
    - String manipulation

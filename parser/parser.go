@@ -673,19 +673,28 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		return nil
 	}
 
+	// Skip the opening brace and any semicolons/newlines
 	p.nextToken()
 
 	// Parse methods
 	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		// Skip semicolons
+		if p.curTokenIs(token.SEMICOLON) {
+			p.nextToken()
+			continue
+		}
+
 		if p.curTokenIs(token.IDENT) {
 			methodName := p.curToken.Literal
 			
 			if !p.expectPeek(token.ASSIGN) {
-				return nil
+				p.nextToken()
+				continue
 			}
 
 			if !p.expectPeek(token.FUNCTION) {
-				return nil
+				p.nextToken()
+				continue
 			}
 
 			methodFunc := p.parseFunctionLiteral()
@@ -693,12 +702,15 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 				stmt.Methods[methodName] = funcLit
 			}
 
+			// Skip trailing semicolon if present
 			if p.peekTokenIs(token.SEMICOLON) {
 				p.nextToken()
 			}
+			
+			p.nextToken()
+		} else {
+			p.nextToken()
 		}
-
-		p.nextToken()
 	}
 
 	return stmt
