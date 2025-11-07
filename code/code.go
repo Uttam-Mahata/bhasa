@@ -21,6 +21,12 @@ const (
 	OpMul                            // Multiply
 	OpDiv                            // Divide
 	OpMod                            // Modulo
+	OpBitAnd                         // Bitwise AND
+	OpBitOr                          // Bitwise OR
+	OpBitXor                         // Bitwise XOR
+	OpBitNot                         // Bitwise NOT
+	OpLeftShift                      // Left shift
+	OpRightShift                     // Right shift
 	OpTrue                           // Push true
 	OpFalse                          // Push false
 	OpEqual                          // Equal comparison
@@ -64,6 +70,12 @@ var definitions = map[Opcode]*Definition{
 	OpMul:              {"OpMul", []int{}},
 	OpDiv:              {"OpDiv", []int{}},
 	OpMod:              {"OpMod", []int{}},
+	OpBitAnd:           {"OpBitAnd", []int{}},
+	OpBitOr:            {"OpBitOr", []int{}},
+	OpBitXor:           {"OpBitXor", []int{}},
+	OpBitNot:           {"OpBitNot", []int{}},
+	OpLeftShift:        {"OpLeftShift", []int{}},
+	OpRightShift:       {"OpRightShift", []int{}},
 	OpTrue:             {"OpTrue", []int{}},
 	OpFalse:            {"OpFalse", []int{}},
 	OpEqual:            {"OpEqual", []int{}},

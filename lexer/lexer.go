@@ -98,6 +98,10 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = l.newTokenWithPos(token.LTE, string(ch)+string(l.ch))
+		} else if l.peekChar() == '<' {
+			ch := l.ch
+			l.readChar()
+			tok = l.newTokenWithPos(token.LSHIFT, string(ch)+string(l.ch))
 		} else {
 			tok = l.newTokenWithPos(token.LT, string(l.ch))
 		}
@@ -106,6 +110,10 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = l.newTokenWithPos(token.GTE, string(ch)+string(l.ch))
+		} else if l.peekChar() == '>' {
+			ch := l.ch
+			l.readChar()
+			tok = l.newTokenWithPos(token.RSHIFT, string(ch)+string(l.ch))
 		} else {
 			tok = l.newTokenWithPos(token.GT, string(l.ch))
 		}
@@ -115,7 +123,7 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			tok = l.newTokenWithPos(token.AND, string(ch)+string(l.ch))
 		} else {
-			tok = l.newTokenWithPos(token.ILLEGAL, string(l.ch))
+			tok = l.newTokenWithPos(token.BIT_AND, string(l.ch))
 		}
 	case '|':
 		if l.peekChar() == '|' {
@@ -123,8 +131,12 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			tok = l.newTokenWithPos(token.OR, string(ch)+string(l.ch))
 		} else {
-			tok = l.newTokenWithPos(token.ILLEGAL, string(l.ch))
+			tok = l.newTokenWithPos(token.BIT_OR, string(l.ch))
 		}
+	case '^':
+		tok = l.newTokenWithPos(token.BIT_XOR, string(l.ch))
+	case '~':
+		tok = l.newTokenWithPos(token.BIT_NOT, string(l.ch))
 	case ',':
 		tok = l.newTokenWithPos(token.COMMA, string(l.ch))
 	case ';':

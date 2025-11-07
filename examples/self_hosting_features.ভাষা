@@ -1,0 +1,83 @@
+// Test self-hosting features
+লেখ("=== Self-Hosting Features Test ===");
+লেখ("");
+
+// Test 1: Character access
+লেখ("Test 1: Character access (অক্ষর)");
+ধরি text = "বাংলা";
+ধরি char1 = অক্ষর(text, ০);
+লেখ("First character of 'বাংলা': ");
+লেখ(char1);
+
+ধরি char2 = অক্ষর(text, ১);
+লেখ("Second character: ");
+লেখ(char2);
+লেখ("");
+
+// Test 2: Character code
+লেখ("Test 2: Character code (কোড)");
+ধরি code = কোড("A");
+লেখ("Character code of 'A': ");
+লেখ(code);
+
+ধরি bengaliCode = কোড("ব");
+লেখ("Character code of 'ব': ");
+লেখ(bengaliCode);
+লেখ("");
+
+// Test 3: From character code
+লেখ("Test 3: From character code (অক্ষর_থেকে_কোড)");
+ধরি charFromCode = অক্ষর_থেকে_কোড(৬৫);
+লেখ("Character from code 65: ");
+লেখ(charFromCode);
+
+ধরি bengaliChar = অক্ষর_থেকে_কোড(২৪৭২);
+লেখ("Character from code 2472 (Bengali): ");
+লেখ(bengaliChar);
+লেখ("");
+
+// Test 4: String to integer
+লেখ("Test 4: String to integer (সংখ্যা)");
+ধরি num1 = সংখ্যা("১২৩");
+লেখ("Parse '123': ");
+লেখ(num1);
+লেখ("Double it: ");
+লেখ(num1 * ২);
+লেখ("");
+
+// Test 5: Integer to string
+লেখ("Test 5: Integer to string (লেখা)");
+ধরি str1 = লেখা(৪৫৬);
+লেখ("Integer 456 as string: ");
+লেখ(str1);
+ধরি concatenated = str1 + " টাকা";
+লেখ("Concatenated: ");
+লেখ(concatenated);
+লেখ("");
+
+// Test 6: File I/O (if supported)
+লেখ("Test 6: File I/O");
+ধরি testFile = "/tmp/test_bhasa.txt";
+ধরি testContent = "This is a test from Bhasa!\nবাংলায় লেখা।\n";
+
+ফাইল_লেখো(testFile, testContent);
+লেখ("File written successfully");
+
+ধরি readContent = ফাইল_পড়ো(testFile);
+লেখ("File content read:");
+লেখ(readContent);
+
+ধরি exists = ফাইল_আছে(testFile);
+লেখ("File exists: ");
+লেখ(exists);
+লেখ("");
+
+// Test 7: For loop
+লেখ("Test 7: For loop");
+পর্যন্ত (ধরি i = ০; i < ৫; i = i + ১) {
+    লেখ("Iteration: ");
+    লেখ(i);
+}
+লেখ("");
+
+লেখ("=== All self-hosting features tested ===");
