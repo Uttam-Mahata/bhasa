@@ -311,14 +311,25 @@ func (vm *VM) Run() error {
 			expectedType := vm.constants[constIndex].(*object.String).Value
 			value := vm.pop()
 
-			if !vm.checkType(value, expectedType) {
-				return fmt.Errorf("type error: expected %s, got %s", expectedType, vm.getTypeName(value))
-			}
-
-			// Push value back on stack after type check
-			err := vm.push(value)
-			if err != nil {
-				return err
+			// Check if type matches exactly
+			if vm.checkType(value, expectedType) {
+				// Type matches, push value back
+				err := vm.push(value)
+				if err != nil {
+					return err
+				}
+			} else {
+				// Try implicit type conversion for compatible types
+				converted, err := vm.castType(value, expectedType)
+				if err != nil {
+					return fmt.Errorf("type error: expected %s, got %s (cannot convert: %v)",
+						expectedType, vm.getTypeName(value), err)
+				}
+				// Push converted value
+				err = vm.push(converted)
+				if err != nil {
+					return err
+				}
 			}
 
 		case code.OpTypeCast:

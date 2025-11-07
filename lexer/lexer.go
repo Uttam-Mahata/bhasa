@@ -67,6 +67,10 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.readChar()
 			tok = l.newTokenWithPos(token.EQ, string(ch)+string(l.ch))
+		} else if l.peekChar() == '>' {
+			ch := l.ch
+			l.readChar()
+			tok = l.newTokenWithPos(token.ARROW, string(ch)+string(l.ch))
 		} else {
 			tok = l.newTokenWithPos(token.ASSIGN, string(l.ch))
 		}
@@ -143,6 +147,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newTokenWithPos(token.SEMICOLON, string(l.ch))
 	case ':':
 		tok = l.newTokenWithPos(token.COLON, string(l.ch))
+	case '.':
+		tok = l.newTokenWithPos(token.DOT, string(l.ch))
 	case '(':
 		tok = l.newTokenWithPos(token.LPAREN, string(l.ch))
 	case ')':
