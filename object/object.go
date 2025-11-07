@@ -774,6 +774,86 @@ var Builtins = []BuiltinDef{
 			return &String{Value: string(jsonBytes)}
 		}},
 	},
+	// HashMap enhanced methods
+	{
+		"চাবিগুলো", // keys - returns array of hash keys
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "argument to 'চাবিগুলো' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			keys := make([]Object, 0, len(hash.Pairs))
+			for _, pair := range hash.Pairs {
+				keys = append(keys, pair.Key)
+			}
+			return &Array{Elements: keys}
+		}},
+	},
+	{
+		"মানগুলো", // values - returns array of hash values
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "argument to 'মানগুলো' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			values := make([]Object, 0, len(hash.Pairs))
+			for _, pair := range hash.Pairs {
+				values = append(values, pair.Value)
+			}
+			return &Array{Elements: values}
+		}},
+	},
+	{
+		"চাবি_আছে", // hasKey - checks if hash has key
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "first argument to 'চাবি_আছে' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			
+			// Check if key is hashable
+			keyObj, ok := args[1].(Hashable)
+			if !ok {
+				return &Error{Message: "second argument must be a hashable type (INTEGER, STRING, or BOOLEAN)"}
+			}
+			
+			_, exists := hash.Pairs[keyObj.HashKey()]
+			return &Boolean{Value: exists}
+		}},
+	},
+	{
+		"একত্রিত", // merge - merges two hashes
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ || args[1].Type() != HASH_OBJ {
+				return &Error{Message: "both arguments to 'একত্রিত' must be HASH"}
+			}
+			hash1 := args[0].(*Hash)
+			hash2 := args[1].(*Hash)
+			
+			// Create new hash with pairs from both
+			newPairs := make(map[HashKey]HashPair)
+			for k, v := range hash1.Pairs {
+				newPairs[k] = v
+			}
+			for k, v := range hash2.Pairs {
+				newPairs[k] = v // hash2 overwrites hash1 if same key
+			}
+			
+			return &Hash{Pairs: newPairs}
+		}},
+	},
 }
 
 // GetBuiltinByName returns a builtin by name
