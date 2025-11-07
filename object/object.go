@@ -1083,7 +1083,7 @@ var Builtins = []BuiltinDef{
 		}},
 	},
 	{
-		"দশমিক", // double/float cast - convert to floating point (stored as formatted string for display)
+		"দশমিক", // double/float cast - convert to floating point (returns truncated integer due to type system limitation)
 		&Builtin{Fn: func(args ...Object) Object {
 			if len(args) != 1 {
 				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
@@ -1091,7 +1091,7 @@ var Builtins = []BuiltinDef{
 			
 			switch arg := args[0].(type) {
 			case *Integer:
-				// Return integer as-is (can be used in float context)
+				// Return integer as-is (Bhasa currently only supports integer type)
 				return arg
 			case *String:
 				str := token.ConvertBengaliNumber(arg.Value)
@@ -1100,8 +1100,8 @@ var Builtins = []BuiltinDef{
 				if err != nil {
 					return &Error{Message: fmt.Sprintf("cannot cast string '%s' to float: %s", arg.Value, err)}
 				}
-				// For now, return as integer (truncated), or we could store as string representation
-				// This is a limitation of the current integer-only type system
+				// Note: Truncates to integer due to current type system limitation
+				// Future enhancement: Add Float type to preserve decimal values
 				return &Integer{Value: int64(result)}
 			case *Boolean:
 				if arg.Value {
@@ -1127,16 +1127,17 @@ var Builtins = []BuiltinDef{
 				return &Boolean{Value: arg.Value != 0}
 			case *String:
 				str := strings.ToLower(strings.TrimSpace(arg.Value))
-				// Check for common true values
+				// Check for explicit true values (case-insensitive)
 				if str == "true" || str == "সত্য" || str == "1" || str == "yes" {
 					return &Boolean{Value: true}
 				}
-				// Check for common false values
+				// Check for explicit false values (case-insensitive)
 				if str == "false" || str == "মিথ্যা" || str == "0" || str == "no" || str == "" {
 					return &Boolean{Value: false}
 				}
-				// Non-empty strings are truthy
-				return &Boolean{Value: len(arg.Value) > 0}
+				// For any other string, default to truthy if non-empty
+				// Note: This means strings like "maybe" or "False" (wrong case) are truthy
+				return &Boolean{Value: true}
 			case *Null:
 				return &Boolean{Value: false}
 			case *Array:
