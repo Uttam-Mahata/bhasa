@@ -1,5 +1,9 @@
 // Comprehensive Data Types and Type Casting Example
 // This example demonstrates all numeric types and type conversion functions
+//
+// Note: টাইপ() function calls are used throughout to show the actual type
+// of each value after casting. This helps verify that type casting is working
+// correctly and demonstrates the type system to learners.
 
 লেখ("==================================================");
 লেখ("    ভাষা Data Types and Type Casting Demo");
