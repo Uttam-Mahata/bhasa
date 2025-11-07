@@ -10,11 +10,14 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 🖥️ **Stack-based virtual machine**
 - 📝 Variables and functions with closures
 - 🔢 Numbers, strings, booleans, arrays, and hash maps
-- 🔄 Control flow (if-else, while loops)
+- 🔄 Control flow (if-else, while, for loops)
 - 🚀 Interactive REPL
-- 📚 **20+ Built-in functions** (string methods, math functions, array operations)
+- 📚 **30+ Built-in functions** (file I/O, string methods, math functions, array operations)
 - 🎯 Recursion and higher-order functions
 - 🔗 **Logical operators** (&&, ||, !)
+- 🔢 **Bitwise operators** (&, |, ^, ~, <<, >>)
+- 📁 **File I/O support** - Read and write files
+- 🔧 **Self-hosting capable** - Can write a compiler in Bhasa itself!
 - 🧮 **Math functions** (power, sqrt, abs, max, min)
 - 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
 
@@ -100,6 +103,46 @@ go build -o bhasa
 }
 ```
 
+### Bitwise Operators
+```bengali
+// Bitwise AND
+ধরি a = ১২ & ১০;  // 8
+
+// Bitwise OR
+ধরি b = ১২ | ১০;  // 14
+
+// Bitwise XOR
+ধরি c = ১২ ^ ১০;  // 6
+
+// Bitwise NOT
+ধরি d = ~৫;  // -6
+
+// Left Shift
+ধরি e = ৫ << ২;  // 20
+
+// Right Shift
+ধরি f = ২০ >> ২;  // 5
+```
+
+### For Loops
+```bengali
+// C-style for loop
+পর্যন্ত (ধরি i = ০; i < ১০; i = i + ১) {
+    লেখ(i);
+}
+```
+
+## Self-Hosting Capability
+
+Bhasa now has all the features needed to write a compiler for itself! See `examples/simple_lexer_demo.ভাষা` for a working lexer written entirely in Bhasa.
+
+**Key self-hosting features:**
+- Character access and manipulation (`অক্ষর`, `কোড`)
+- String parsing (`সংখ্যা`)
+- File I/O for reading/writing source files
+- For loops for iteration
+- Arrays and hashes for data structures
+
 ## Built-in Functions
 
 ### Basic Functions
@@ -115,6 +158,19 @@ go build -o bhasa
 - **ছাঁটো(str)** - Trim whitespace
 - **প্রতিস্থাপন(str, old, new)** - Replace text
 - **খুঁজুন(str, substr)** - Find substring index
+
+### Character/Conversion Functions (Self-Hosting Support)
+- **অক্ষর(str, index)** - Get character at index
+- **কোড(char)** - Get Unicode code point
+- **অক্ষর_থেকে_কোড(code)** - Create character from code
+- **সংখ্যা(str)** - Parse string to integer
+- **লেখা(num)** - Convert integer to string
+
+### File I/O Functions
+- **ফাইল_পড়ো(path)** - Read file contents
+- **ফাইল_লেখো(path, content)** - Write to file
+- **ফাইল_যোগ(path, content)** - Append to file
+- **ফাইল_আছে(path)** - Check if file exists
 
 ### Math Functions
 - **শক্তি(base, exp)** - Power

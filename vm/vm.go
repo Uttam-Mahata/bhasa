@@ -91,7 +91,8 @@ func (vm *VM) Run() error {
 		case code.OpPop:
 			vm.pop()
 
-		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv, code.OpMod:
+		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv, code.OpMod,
+			code.OpBitAnd, code.OpBitOr, code.OpBitXor, code.OpLeftShift, code.OpRightShift:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -135,6 +136,12 @@ func (vm *VM) Run() error {
 
 		case code.OpMinus:
 			err := vm.executeMinusOperator()
+			if err != nil {
+				return err
+			}
+
+		case code.OpBitNot:
+			err := vm.executeBitNotOperator()
 			if err != nil {
 				return err
 			}
@@ -364,6 +371,28 @@ func (vm *VM) executeBinaryIntegerOperation(
 		result = leftValue / rightValue
 	case code.OpMod:
 		result = leftValue % rightValue
+	case code.OpBitAnd:
+		result = leftValue & rightValue
+	case code.OpBitOr:
+		result = leftValue | rightValue
+	case code.OpBitXor:
+		result = leftValue ^ rightValue
+	case code.OpLeftShift:
+		if rightValue < 0 {
+			return fmt.Errorf("negative shift amount: %d", rightValue)
+		}
+		if rightValue >= 64 {
+			return fmt.Errorf("shift amount too large: %d (must be less than 64)", rightValue)
+		}
+		result = leftValue << uint(rightValue)
+	case code.OpRightShift:
+		if rightValue < 0 {
+			return fmt.Errorf("negative shift amount: %d", rightValue)
+		}
+		if rightValue >= 64 {
+			return fmt.Errorf("shift amount too large: %d (must be less than 64)", rightValue)
+		}
+		result = leftValue >> uint(rightValue)
 	default:
 		return fmt.Errorf("unknown integer operator: %d", op)
 	}
@@ -470,6 +499,17 @@ func (vm *VM) executeMinusOperator() error {
 
 	value := operand.(*object.Integer).Value
 	return vm.push(&object.Integer{Value: -value})
+}
+
+func (vm *VM) executeBitNotOperator() error {
+	operand := vm.pop()
+
+	if operand.Type() != object.INTEGER_OBJ {
+		return fmt.Errorf("unsupported type for bitwise NOT: %s", operand.Type())
+	}
+
+	value := operand.(*object.Integer).Value
+	return vm.push(&object.Integer{Value: ^value})
 }
 
 func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
