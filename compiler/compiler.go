@@ -8,7 +8,6 @@ import (
 	"bhasa/parser"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -672,25 +671,35 @@ func DefaultModuleLoader(modulePath string) (string, error) {
 	// Try different file extensions
 	extensions := []string{".ভাষা", ".bhasa"}
 	
-	var fullPath string
-	var err error
+	// Try different search paths
+	searchPaths := []string{
+		modulePath,            // Direct path
+		"modules/" + modulePath, // modules directory
+	}
 	
-	for _, ext := range extensions {
-		// Try with extension if not already present
-		testPath := modulePath
-		if !strings.HasSuffix(modulePath, ext) {
-			testPath = modulePath + ext
+	var fullPath string
+	
+	for _, basePath := range searchPaths {
+		for _, ext := range extensions {
+			// Try with extension if not already present
+			testPath := basePath
+			if !strings.HasSuffix(basePath, ext) {
+				testPath = basePath + ext
+			}
+			
+			// Check if file exists
+			if _, statErr := os.Stat(testPath); statErr == nil {
+				fullPath = testPath
+				break
+			}
 		}
-		
-		// Check if file exists
-		if _, statErr := os.Stat(testPath); statErr == nil {
-			fullPath = testPath
+		if fullPath != "" {
 			break
 		}
 	}
 	
 	if fullPath == "" {
-		return "", fmt.Errorf("module not found: %s (tried .ভাষা and .bhasa extensions)", modulePath)
+		return "", fmt.Errorf("module not found: %s (tried .ভাষা and .bhasa extensions in current dir and modules/ dir)", modulePath)
 	}
 	
 	// Read the file
@@ -704,25 +713,20 @@ func DefaultModuleLoader(modulePath string) (string, error) {
 
 // LoadAndCompileModule loads a module file, parses it, and compiles it
 func (c *Compiler) LoadAndCompileModule(modulePath string) error {
-	// Resolve absolute path to prevent duplicate loading with different relative paths
-	absPath, err := filepath.Abs(modulePath)
+	// Load module source code first (this will search in multiple locations)
+	source, err := c.moduleLoader(modulePath)
 	if err != nil {
-		return fmt.Errorf("error resolving module path: %v", err)
+		return err
 	}
 	
+	// Use module path as cache key (simple approach)
 	// Check if module is already loaded (circular dependency detection)
-	if c.moduleCache[absPath] {
+	if c.moduleCache[modulePath] {
 		return nil // Already loaded, skip
 	}
 	
 	// Mark as being loaded
-	c.moduleCache[absPath] = true
-	
-	// Load module source code
-	source, err := c.moduleLoader(absPath)
-	if err != nil {
-		return err
-	}
+	c.moduleCache[modulePath] = true
 	
 	// Parse the module
 	l := lexer.New(source)
@@ -730,7 +734,7 @@ func (c *Compiler) LoadAndCompileModule(modulePath string) error {
 	program := p.ParseProgram()
 	
 	if len(p.Errors()) > 0 {
-		return fmt.Errorf("parser errors in module %s: %v", absPath, p.Errors())
+		return fmt.Errorf("parser errors in module %s: %v", modulePath, p.Errors())
 	}
 	
 	// Compile the module
