@@ -187,9 +187,11 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 // readIdentifier reads an identifier (variable name or keyword)
+// Identifiers can contain letters, underscores, and digits (but must start with a letter or underscore)
 func (l *Lexer) readIdentifier() string {
 	startPos := l.position
-	for isLetter(l.ch) {
+	// Read first character (must be letter or underscore)
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return string(l.input[startPos:l.position])
