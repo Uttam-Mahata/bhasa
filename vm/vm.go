@@ -338,22 +338,131 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
-	switch {
-	case leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ:
-		return vm.executeBinaryIntegerOperation(op, left, right)
-	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
+	// String operations
+	if leftType == object.STRING_OBJ && rightType == object.STRING_OBJ {
 		return vm.executeBinaryStringOperation(op, left, right)
-	default:
-		return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
 	}
+
+	// Check if both operands are numeric types
+	if vm.isNumericType(leftType) && vm.isNumericType(rightType) {
+		return vm.executeBinaryNumericOperation(op, left, right)
+	}
+
+	return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
+}
+
+// isNumericType checks if a type is numeric
+func (vm *VM) isNumericType(t object.ObjectType) bool {
+	return t == object.INTEGER_OBJ || t == object.BYTE_OBJ || t == object.SHORT_OBJ ||
+		t == object.INT_OBJ || t == object.LONG_OBJ || t == object.FLOAT_OBJ ||
+		t == object.DOUBLE_OBJ || t == object.CHAR_OBJ
+}
+
+// isFloatingType checks if a type is floating-point
+func (vm *VM) isFloatingType(t object.ObjectType) bool {
+	return t == object.FLOAT_OBJ || t == object.DOUBLE_OBJ
+}
+
+// executeBinaryNumericOperation handles operations between any numeric types with type promotion
+func (vm *VM) executeBinaryNumericOperation(op code.Opcode, left, right object.Object) error {
+	leftType := left.Type()
+	rightType := right.Type()
+
+	// Determine if we need floating-point arithmetic
+	isFloat := vm.isFloatingType(leftType) || vm.isFloatingType(rightType)
+
+	// Bitwise operations require integer types
+	if op == code.OpBitAnd || op == code.OpBitOr || op == code.OpBitXor ||
+		op == code.OpLeftShift || op == code.OpRightShift {
+		if isFloat {
+			return fmt.Errorf("bitwise operations not supported for floating-point types")
+		}
+		return vm.executeBinaryIntegerOperation(op, left, right)
+	}
+
+	// For floating-point operations
+	if isFloat {
+		return vm.executeBinaryFloatOperation(op, left, right)
+	}
+
+	// For integer operations
+	return vm.executeBinaryIntegerOperation(op, left, right)
+}
+
+// toInt64 extracts int64 value from any numeric type
+func (vm *VM) toInt64(obj object.Object) int64 {
+	switch v := obj.(type) {
+	case *object.Integer:
+		return v.Value
+	case *object.Byte:
+		return int64(v.Value)
+	case *object.Short:
+		return int64(v.Value)
+	case *object.Int:
+		return int64(v.Value)
+	case *object.Long:
+		return v.Value
+	case *object.Char:
+		return int64(v.Value)
+	case *object.Float:
+		return int64(v.Value)
+	case *object.Double:
+		return int64(v.Value)
+	default:
+		return 0
+	}
+}
+
+// toFloat64 extracts float64 value from any numeric type
+func (vm *VM) toFloat64(obj object.Object) float64 {
+	switch v := obj.(type) {
+	case *object.Integer:
+		return float64(v.Value)
+	case *object.Byte:
+		return float64(v.Value)
+	case *object.Short:
+		return float64(v.Value)
+	case *object.Int:
+		return float64(v.Value)
+	case *object.Long:
+		return float64(v.Value)
+	case *object.Char:
+		return float64(v.Value)
+	case *object.Float:
+		return float64(v.Value)
+	case *object.Double:
+		return v.Value
+	default:
+		return 0.0
+	}
+}
+
+// promoteIntegerResult promotes integer result to appropriate type
+func (vm *VM) promoteIntegerResult(result int64, left, right object.Object) object.Object {
+	leftType := left.Type()
+	rightType := right.Type()
+
+	// Promotion rules: use the larger type
+	// Long > Int > Short > Byte/Char
+	if leftType == object.LONG_OBJ || rightType == object.LONG_OBJ {
+		return &object.Long{Value: result}
+	}
+	if leftType == object.INT_OBJ || rightType == object.INT_OBJ {
+		return &object.Int{Value: int32(result)}
+	}
+	if leftType == object.SHORT_OBJ || rightType == object.SHORT_OBJ {
+		return &object.Short{Value: int16(result)}
+	}
+	// Default to Integer (legacy int64) for backward compatibility
+	return &object.Integer{Value: result}
 }
 
 func (vm *VM) executeBinaryIntegerOperation(
 	op code.Opcode,
 	left, right object.Object,
 ) error {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
+	leftValue := vm.toInt64(left)
+	rightValue := vm.toInt64(right)
 
 	var result int64
 
@@ -370,6 +479,9 @@ func (vm *VM) executeBinaryIntegerOperation(
 		}
 		result = leftValue / rightValue
 	case code.OpMod:
+		if rightValue == 0 {
+			return fmt.Errorf("modulo by zero")
+		}
 		result = leftValue % rightValue
 	case code.OpBitAnd:
 		result = leftValue & rightValue
@@ -397,7 +509,46 @@ func (vm *VM) executeBinaryIntegerOperation(
 		return fmt.Errorf("unknown integer operator: %d", op)
 	}
 
-	return vm.push(&object.Integer{Value: result})
+	return vm.push(vm.promoteIntegerResult(result, left, right))
+}
+
+// executeBinaryFloatOperation handles floating-point arithmetic
+func (vm *VM) executeBinaryFloatOperation(
+	op code.Opcode,
+	left, right object.Object,
+) error {
+	leftValue := vm.toFloat64(left)
+	rightValue := vm.toFloat64(right)
+
+	var result float64
+
+	switch op {
+	case code.OpAdd:
+		result = leftValue + rightValue
+	case code.OpSub:
+		result = leftValue - rightValue
+	case code.OpMul:
+		result = leftValue * rightValue
+	case code.OpDiv:
+		if rightValue == 0 {
+			return fmt.Errorf("division by zero")
+		}
+		result = leftValue / rightValue
+	case code.OpMod:
+		// Floating-point modulo using fmod equivalent
+		if rightValue == 0 {
+			return fmt.Errorf("modulo by zero")
+		}
+		result = leftValue - rightValue*float64(int64(leftValue/rightValue))
+	default:
+		return fmt.Errorf("unknown float operator: %d", op)
+	}
+
+	// Promote to Double if either operand is Double, otherwise Float
+	if left.Type() == object.DOUBLE_OBJ || right.Type() == object.DOUBLE_OBJ {
+		return vm.push(&object.Double{Value: result})
+	}
+	return vm.push(&object.Float{Value: float32(result)})
 }
 
 func (vm *VM) executeBinaryStringOperation(
@@ -418,10 +569,12 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
 
-	if left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ {
-		return vm.executeIntegerComparison(op, left, right)
+	// Handle numeric comparisons
+	if vm.isNumericType(left.Type()) && vm.isNumericType(right.Type()) {
+		return vm.executeNumericComparison(op, left, right)
 	}
 
+	// Handle equality for non-numeric types
 	switch op {
 	case code.OpEqual:
 		return vm.push(nativeBoolToBooleanObject(right == left))
@@ -432,18 +585,38 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	}
 }
 
-func (vm *VM) executeIntegerComparison(
+func (vm *VM) executeNumericComparison(
 	op code.Opcode,
 	left, right object.Object,
 ) error {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
+	// Use float comparison if either operand is floating-point
+	if vm.isFloatingType(left.Type()) || vm.isFloatingType(right.Type()) {
+		leftValue := vm.toFloat64(left)
+		rightValue := vm.toFloat64(right)
+
+		switch op {
+		case code.OpEqual:
+			return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
+		case code.OpNotEqual:
+			return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+		case code.OpGreaterThan:
+			return vm.push(nativeBoolToBooleanObject(leftValue > rightValue))
+		case code.OpGreaterThanEqual:
+			return vm.push(nativeBoolToBooleanObject(leftValue >= rightValue))
+		default:
+			return fmt.Errorf("unknown operator: %d", op)
+		}
+	}
+
+	// Integer comparison
+	leftValue := vm.toInt64(left)
+	rightValue := vm.toInt64(right)
 
 	switch op {
 	case code.OpEqual:
-		return vm.push(nativeBoolToBooleanObject(rightValue == leftValue))
+		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
 	case code.OpNotEqual:
-		return vm.push(nativeBoolToBooleanObject(rightValue != leftValue))
+		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
 	case code.OpGreaterThan:
 		return vm.push(nativeBoolToBooleanObject(leftValue > rightValue))
 	case code.OpGreaterThanEqual:
@@ -451,6 +624,14 @@ func (vm *VM) executeIntegerComparison(
 	default:
 		return fmt.Errorf("unknown operator: %d", op)
 	}
+}
+
+// Legacy function - kept for compatibility (redirects to new function)
+func (vm *VM) executeIntegerComparison(
+	op code.Opcode,
+	left, right object.Object,
+) error {
+	return vm.executeNumericComparison(op, left, right)
 }
 
 func (vm *VM) executeBangOperator() error {
@@ -493,23 +674,63 @@ func (vm *VM) executeOrOperator() error {
 func (vm *VM) executeMinusOperator() error {
 	operand := vm.pop()
 
-	if operand.Type() != object.INTEGER_OBJ {
+	if !vm.isNumericType(operand.Type()) {
 		return fmt.Errorf("unsupported type for negation: %s", operand.Type())
 	}
 
-	value := operand.(*object.Integer).Value
-	return vm.push(&object.Integer{Value: -value})
+	// Handle floating-point negation
+	if vm.isFloatingType(operand.Type()) {
+		value := vm.toFloat64(operand)
+		if operand.Type() == object.DOUBLE_OBJ {
+			return vm.push(&object.Double{Value: -value})
+		}
+		return vm.push(&object.Float{Value: -float32(value)})
+	}
+
+	// Handle integer negation
+	value := vm.toInt64(operand)
+	switch operand.Type() {
+	case object.BYTE_OBJ:
+		return vm.push(&object.Byte{Value: -int8(value)})
+	case object.SHORT_OBJ:
+		return vm.push(&object.Short{Value: -int16(value)})
+	case object.INT_OBJ:
+		return vm.push(&object.Int{Value: -int32(value)})
+	case object.LONG_OBJ:
+		return vm.push(&object.Long{Value: -value})
+	case object.CHAR_OBJ:
+		return vm.push(&object.Char{Value: -rune(value)})
+	default:
+		return vm.push(&object.Integer{Value: -value})
+	}
 }
 
 func (vm *VM) executeBitNotOperator() error {
 	operand := vm.pop()
 
-	if operand.Type() != object.INTEGER_OBJ {
+	if !vm.isNumericType(operand.Type()) {
 		return fmt.Errorf("unsupported type for bitwise NOT: %s", operand.Type())
 	}
 
-	value := operand.(*object.Integer).Value
-	return vm.push(&object.Integer{Value: ^value})
+	if vm.isFloatingType(operand.Type()) {
+		return fmt.Errorf("bitwise NOT not supported for floating-point types")
+	}
+
+	value := vm.toInt64(operand)
+	switch operand.Type() {
+	case object.BYTE_OBJ:
+		return vm.push(&object.Byte{Value: int8(^value)})
+	case object.SHORT_OBJ:
+		return vm.push(&object.Short{Value: int16(^value)})
+	case object.INT_OBJ:
+		return vm.push(&object.Int{Value: int32(^value)})
+	case object.LONG_OBJ:
+		return vm.push(&object.Long{Value: ^value})
+	case object.CHAR_OBJ:
+		return vm.push(&object.Char{Value: rune(^value)})
+	default:
+		return vm.push(&object.Integer{Value: ^value})
+	}
 }
 
 func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
@@ -671,4 +892,3 @@ func (vm *VM) popFrame() *Frame {
 	vm.framesIndex--
 	return vm.frames[vm.framesIndex]
 }
-

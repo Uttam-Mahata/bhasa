@@ -1,10 +1,10 @@
 # ভাষা (Bhasa) - A Bengali Programming Language
 
-A **compiled** programming language that uses Bengali keywords, built with Go for India. 🇮🇳
+A **compiled** programming language that uses Bengali keywords, built with Go as a hobby project.
 
 ## Features
 
-- 🇮🇳 **Bengali keywords and syntax**
+- 📝 **Bengali keywords and syntax**
 - 🔤 **Bengali variable names** - Full Unicode support for identifiers
 - ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
 - 🖥️ **Stack-based virtual machine**
@@ -17,9 +17,11 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 - 🔗 **Logical operators** (&&, ||, !)
 - 🔢 **Bitwise operators** (&, |, ^, ~, <<, >>)
 - 📁 **File I/O support** - Read and write files
-- 🔧 **Self-hosting capable** - Can write a compiler in Bhasa itself!
+- 🔧 **Self-hosting capable** - Full compiler written in Bhasa itself!
 - 🧮 **Math functions** (power, sqrt, abs, max, min)
 - 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
+- 🔢 **Multiple numeric types** (Byte, Short, Int, Long, Float, Double) with type casting
+- 📦 **Module system** with `অন্তর্ভুক্ত` (import) support
 
 ## Bengali Keywords
 
@@ -33,6 +35,17 @@ A **compiled** programming language that uses Bengali keywords, built with Go fo
 | true | সত্য | Boolean true |
 | false | মিথ্যা | Boolean false |
 | while | যতক্ষণ | While loop |
+| for | পর্যন্ত | For loop |
+| break | বিরতি | Break statement |
+| continue | চালিয়ে_যাও | Continue statement |
+| null | নাল | Null value |
+| import | অন্তর্ভুক্ত | Import module |
+
+## Quick Links
+
+- 📖 [**Self-Hosting Compiler Guide**](SELF_HOSTING.md) - Learn how the Bhasa compiler is written in Bhasa
+- 🔧 [**Compiler API Documentation**](COMPILER_API.md) - Complete API reference for the self-hosted compiler
+- 🧪 [**Test Suite**](tests/) - Comprehensive tests for lexer, parser, compiler, and bootstrap
 
 ## Installation
 
@@ -187,6 +200,67 @@ Bhasa now has all the features needed to write a compiler for itself! See `examp
 - **যোগ(arr, element)** - Add element
 - **উল্টাও(arr)** - Reverse array
 
+## Type Casting Functions
+
+Bhasa supports multiple numeric types with explicit casting:
+
+```bengali
+// Numeric type conversions
+ধরি x = ১০০;
+ধরি b = বাইট(x);                    // Convert to Byte (0-255)
+ধরি s = ছোট_সংখ্যা(x);              // Convert to Short (-32768 to 32767)
+ধরি i = পূর্ণসংখ্যা(x);              // Convert to Int
+ধরি l = দীর্ঘ_সংখ্যা(x);              // Convert to Long
+ধরি f = দশমিক(x);                   // Convert to Float
+ধরি d = দশমিক_দ্বিগুণ(x);            // Convert to Double
+
+// Character conversion
+ধরি ch = অক্ষর_রূপান্তর("A");       // String to Char
+```
+
+### Supported Numeric Types
+- **বাইট (Byte)**: 0 to 255
+- **ছোট_সংখ্যা (Short)**: -32,768 to 32,767
+- **পূর্ণসংখ্যা (Int)**: -2,147,483,648 to 2,147,483,647
+- **দীর্ঘ_সংখ্যা (Long)**: Full 64-bit integer
+- **দশমিক (Float)**: 32-bit floating point
+- **দশমিক_দ্বিগুণ (Double)**: 64-bit floating point
+
+## Self-Hosting Compiler
+
+Bhasa includes a **complete self-hosted compiler** written entirely in Bhasa itself! This means you can compile Bhasa programs using a compiler written in Bhasa.
+
+### Self-Hosted Modules (in `modules/`)
+
+All compiler components are implemented in `.ভাষা` files:
+
+- **টোকেন.ভাষা** - Token type definitions and utilities
+- **লেক্সার.ভাষা** - Lexical analyzer (tokenizer)
+- **এএসটি.ভাষা** - Abstract Syntax Tree node structures
+- **পার্সার.ভাষা** - Pratt parser with operator precedence
+- **প্রতীক_টেবিল.ভাষা** - Symbol table for scoping
+- **কোড.ভাষা** - Bytecode instruction encoding/decoding
+- **কম্পাইলার.ভাষা** - AST to bytecode compiler
+- **মডিউল_লোডার.ভাষা** - Module import system
+- **ভাষা_কম্পাইলার.ভাষা** - Main compiler driver
+
+### Using the Self-Hosted Compiler
+
+```bengali
+// Import compiler modules
+অন্তর্ভুক্ত "modules/ভাষা_কম্পাইলার";
+
+// Compile a file
+ধরি ফলাফল = ফাইল_কম্পাইল_করো("my_program.ভাষা");
+যদি (ফলাফল["সফল"]) {
+    লেখ("কম্পাইল সফল!");
+} নাহলে {
+    লেখ("ত্রুটি: " + ফলাফল["ত্রুটি"]);
+}
+```
+
+For complete documentation, see [SELF_HOSTING.md](SELF_HOSTING.md) and [COMPILER_API.md](COMPILER_API.md).
+
 ## Running the REPL
 
 ```bash
@@ -199,11 +273,26 @@ Then you can type Bengali code interactively!
 
 ```
 bhasa/
-├── main.go           # Entry point
-├── token/            # Token definitions
-├── lexer/            # Lexical analyzer
-├── ast/              # Abstract Syntax Tree
-├── parser/           # Parser implementation
+├── main.go                    # Entry point
+├── token/                     # Token definitions (Go)
+├── lexer/                     # Lexical analyzer (Go)
+├── ast/                       # Abstract Syntax Tree (Go)
+├── parser/                    # Parser implementation (Go)
+├── modules/                   # Self-hosted compiler modules (.ভাষা)
+│   ├── টোকেন.ভাষা             # Token module
+│   ├── লেক্সার.ভাষা            # Lexer module
+│   ├── এএসটি.ভাষা              # AST module
+│   ├── পার্সার.ভাষা            # Parser module
+│   ├── প্রতীক_টেবিল.ভাষা       # Symbol table
+│   ├── কোড.ভাষা                # Bytecode instructions
+│   ├── কম্পাইলার.ভাষা          # Compiler module
+│   ├── মডিউল_লোডার.ভাষা        # Module loader
+│   └── ভাষা_কম্পাইলার.ভাষা     # Main compiler driver
+├── tests/                     # Test files (.ভাষা)
+│   ├── lexer_test.ভাষা
+│   ├── parser_test.ভাষা
+│   ├── compiler_test.ভাষা
+│   └── bootstrap_test.ভাষা
 ├── compiler/         # Bytecode compiler
 │   ├── compiler.go   # AST → Bytecode
 │   └── symbol_table.go # Variable scoping

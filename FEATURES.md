@@ -351,5 +351,5 @@ It serves as both a functional programming language and an educational resource 
 - **Stack-based execution models**
 - Closure compilation with free variables
 
-**From Interpreter to Compiler**: Bhasa has evolved from an educational tree-walking interpreter into a fully compiled language with a sophisticated virtual machine! 🇮🇳🚀
+**From Interpreter to Compiler**: Bhasa has evolved from an educational tree-walking interpreter into a fully compiled language with a sophisticated virtual machine! 🚀
 

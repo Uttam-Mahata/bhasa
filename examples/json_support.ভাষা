@@ -16,7 +16,7 @@
 ধরি person = {
     "name": "Rahman",
     "age": 30,
-    "city": "Dhaka"
+    "city": "MyCity"
 };
 ধরি json_person = JSON_স্ট্রিং(person);
 লেখ("Person as JSON:");
