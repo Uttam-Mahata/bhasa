@@ -1,0 +1,87 @@
+// Simple Lexer Demo - Written in Bhasa
+// Demonstrates that self-hosting is now possible
+লেখ("=== Simple Lexer in Bhasa ===");
+লেখ("");
+
+// Token types
+ধরি TOKEN_NUMBER = "NUMBER";
+ধরি TOKEN_PLUS = "PLUS";
+ধরি TOKEN_MINUS = "MINUS";
+ধরি TOKEN_EOF = "EOF";
+
+// Simple lexer function
+ধরি lex = ফাংশন(source) {
+    ধরি tokens = [];
+    ধরি i = ০;
+    ধরি len = দৈর্ঘ্য(source);
+    
+    যতক্ষণ (i < len) {
+        ধরি ch = অক্ষর(source, i);
+        ধরি code = কোড(ch);
+        
+        // Skip whitespace (space=32, newline=10, tab=9)
+        যদি (code == ৩২ || code == ১০ || code == ৯) {
+            i = i + ১;
+            চালিয়ে_যাও;
+        }
+        
+        // Plus operator (ASCII 43)
+        যদি (code == ৪৩) {
+            ধরি token = {"type": TOKEN_PLUS, "value": "+"};
+            tokens = যোগ(tokens, token);
+            i = i + ১;
+            চালিয়ে_যাও;
+        }
+        
+        // Minus operator (ASCII 45)
+        যদি (code == ৪৫) {
+            ধরি token = {"type": TOKEN_MINUS, "value": "-"};
+            tokens = যোগ(tokens, token);
+            i = i + ১;
+            চালিয়ে_যাও;
+        }
+        
+        // Numbers (ASCII 48-57 = '0'-'9')
+        যদি (code >= ৪৮ && code <= ৫৭) {
+            ধরি numStr = "";
+            যতক্ষণ (i < len) {
+                ধরি digitCh = অক্ষর(source, i);
+                ধরি digitCode = কোড(digitCh);
+                যদি (digitCode >= ৪৮ && digitCode <= ৫৭) {
+                    numStr = numStr + digitCh;
+                    i = i + ১;
+                } নাহলে {
+                    বিরতি;
+                }
+            }
+            ধরি token = {"type": TOKEN_NUMBER, "value": numStr};
+            tokens = যোগ(tokens, token);
+            চালিয়ে_যাও;
+        }
+        
+        // Unknown character - skip
+        i = i + ১;
+    }
+    
+    // EOF token
+    ধরি eofToken = {"type": TOKEN_EOF, "value": ""};
+    tokens = যোগ(tokens, eofToken);
+    
+    ফেরত tokens;
+};
+
+// Test the lexer
+লেখ("Input: '12 + 34 - 5'");
+ধরি input = "12 + 34 - 5";
+ধরি tokens = lex(input);
+
+লেখ("\nTokens:");
+পর্যন্ত (ধরি i = ০; i < দৈর্ঘ্য(tokens); i = i + ১) {
+    ধরি token = tokens[i];
+    লেখ("  Type: " + token["type"] + ", Value: '" + token["value"] + "'");
+}
+
+লেখ("");
+লেখ("=== Lexer Demo Complete ===");
+লেখ("This demonstrates that Bhasa can now be used");
+লেখ("to write a compiler for itself (self-hosting)!");
