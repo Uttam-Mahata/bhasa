@@ -9,6 +9,7 @@ import (
 	"hash/fnv"
 	"math"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -911,6 +912,10 @@ var Builtins = []BuiltinDef{
 			}
 			
 			code := args[0].(*Integer).Value
+			// Validate Unicode code point range
+			if code < 0 || code > 0x10FFFF {
+				return &Error{Message: fmt.Sprintf("invalid Unicode code point: %d (must be 0-0x10FFFF)", code)}
+			}
 			return &String{Value: string(rune(code))}
 		}},
 	},
@@ -928,8 +933,7 @@ var Builtins = []BuiltinDef{
 			// Convert Bengali numerals to Arabic numerals
 			str = token.ConvertBengaliNumber(str)
 			
-			var result int64
-			_, err := fmt.Sscanf(str, "%d", &result)
+			result, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
 			if err != nil {
 				return &Error{Message: fmt.Sprintf("cannot parse '%s' as integer: %s", str, err)}
 			}
