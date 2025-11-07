@@ -48,6 +48,8 @@ const (
 	OpClosure                        // Create closure
 	OpGetFree                        // Get free variable
 	OpCurrentClosure                 // Get current closure
+	OpBreak                          // Break from loop
+	OpContinue                       // Continue loop
 )
 
 // Definition holds information about an opcode
@@ -91,6 +93,8 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:          {"OpClosure", []int{2, 1}},
 	OpGetFree:          {"OpGetFree", []int{1}},
 	OpCurrentClosure:   {"OpCurrentClosure", []int{}},
+	OpBreak:            {"OpBreak", []int{2}},    // jump address for break
+	OpContinue:         {"OpContinue", []int{2}}, // jump address for continue
 }
 
 // Lookup returns the definition for an opcode

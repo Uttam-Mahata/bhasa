@@ -357,3 +357,55 @@ func (hl *HashLiteral) String() string {
 	return out.String()
 }
 
+// ForStatement represents a for loop (পর্যন্ত)
+type ForStatement struct {
+	Token       token.Token // the পর্যন্ত token
+	Init        Statement   // initialization (can be LetStatement or AssignStatement)
+	Condition   Expression
+	Increment   Statement
+	Body        *BlockStatement
+}
+
+func (fs *ForStatement) statementNode()       {}
+func (fs *ForStatement) TokenLiteral() string { return fs.Token.Literal }
+func (fs *ForStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("for (")
+	if fs.Init != nil {
+		out.WriteString(fs.Init.String())
+	}
+	out.WriteString("; ")
+	if fs.Condition != nil {
+		out.WriteString(fs.Condition.String())
+	}
+	out.WriteString("; ")
+	if fs.Increment != nil {
+		out.WriteString(fs.Increment.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(fs.Body.String())
+	return out.String()
+}
+
+// BreakStatement represents a break statement (বিরতি)
+type BreakStatement struct {
+	Token token.Token // the বিরতি token
+}
+
+func (bs *BreakStatement) statementNode()       {}
+func (bs *BreakStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BreakStatement) String() string {
+	return bs.TokenLiteral() + ";"
+}
+
+// ContinueStatement represents a continue statement (চালিয়ে_যাও)
+type ContinueStatement struct {
+	Token token.Token // the চালিয়ে_যাও token
+}
+
+func (cs *ContinueStatement) statementNode()       {}
+func (cs *ContinueStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ContinueStatement) String() string {
+	return cs.TokenLiteral() + ";"
+}
+
