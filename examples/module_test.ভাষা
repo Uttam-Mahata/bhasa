@@ -1,0 +1,22 @@
+// Module System Test
+// Testing অন্তর্ভুক্ত (import) keyword
+
+লেখ("=== Module System Test ===");
+লেখ("");
+
+// Import the math module
+অন্তর্ভুক্ত "modules/গণিত";
+
+// Use functions from the module
+লেখ("Testing imported functions:");
+লেখ("Pi value:");
+লেখ(পাই);
+
+লেখ("Square of 5:");
+লেখ(বর্গ(5));
+
+লেখ("Cube of 3:");
+লেখ(ঘন(3));
+
+লেখ("");
+লেখ("=== Module test completed! ===");

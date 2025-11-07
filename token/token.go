@@ -51,31 +51,33 @@ const (
 	RBRACKET = "]"
 
 	// Keywords (Bengali)
-	LET      = "ধরি"      // let (variable declaration)
-	FUNCTION = "ফাংশন"    // function
-	IF       = "যদি"      // if
-	ELSE     = "নাহলে"    // else
-	RETURN   = "ফেরত"     // return
-	TRUE     = "সত্য"     // true
-	FALSE    = "মিথ্যা"   // false
-	WHILE    = "যতক্ষণ"   // while
-	FOR      = "পর্যন্ত"  // for
-	BREAK    = "বিরতি"    // break
-	CONTINUE = "চালিয়ে_যাও" // continue
+	LET      = "ধরি"         // let (variable declaration)
+	FUNCTION = "ফাংশন"       // function
+	IF       = "যদি"         // if
+	ELSE     = "নাহলে"       // else
+	RETURN   = "ফেরত"        // return
+	TRUE     = "সত্য"        // true
+	FALSE    = "মিথ্যা"      // false
+	WHILE    = "যতক্ষণ"      // while
+	FOR      = "পর্যন্ত"     // for
+	BREAK    = "বিরতি"       // break
+	CONTINUE = "চালিয়ে_যাও"  // continue
+	IMPORT   = "অন্তর্ভুক্ত"  // import/include
 )
 
 var keywords = map[string]TokenType{
-	"ধরি":        LET,
-	"ফাংশন":      FUNCTION,
-	"যদি":        IF,
-	"নাহলে":      ELSE,
-	"ফেরত":       RETURN,
-	"সত্য":       TRUE,
-	"মিথ্যা":     FALSE,
-	"যতক্ষণ":     WHILE,
-	"পর্যন্ত":    FOR,
-	"বিরতি":      BREAK,
-	"চালিয়ে_যাও": CONTINUE,
+	"ধরি":         LET,
+	"ফাংশন":       FUNCTION,
+	"যদি":         IF,
+	"নাহলে":       ELSE,
+	"ফেরত":        RETURN,
+	"সত্য":        TRUE,
+	"মিথ্যা":      FALSE,
+	"যতক্ষণ":      WHILE,
+	"পর্যন্ত":     FOR,
+	"বিরতি":       BREAK,
+	"চালিয়ে_যাও":  CONTINUE,
+	"অন্তর্ভুক্ত": IMPORT,
 }
 
 // LookupIdent checks if an identifier is a keyword

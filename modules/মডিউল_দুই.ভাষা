@@ -1,0 +1,6 @@
+// Module B (tries to import A - circular dependency)
+অন্তর্ভুক্ত "modules/মডিউল_এক";
+
+ধরি ফাংশন_দুই = ফাংশন() {
+    ফেরত 2;
+};

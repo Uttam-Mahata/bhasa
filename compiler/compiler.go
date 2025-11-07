@@ -3,18 +3,25 @@ package compiler
 import (
 	"bhasa/ast"
 	"bhasa/code"
+	"bhasa/lexer"
 	"bhasa/object"
+	"bhasa/parser"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 )
 
 // Compiler compiles AST to bytecode
 type Compiler struct {
-	constants   []object.Object
-	symbolTable *SymbolTable
-	scopes      []CompilationScope
-	scopeIndex  int
-	loopStack   []LoopContext // track nested loops for break/continue
+	constants    []object.Object
+	symbolTable  *SymbolTable
+	scopes       []CompilationScope
+	scopeIndex   int
+	loopStack    []LoopContext       // track nested loops for break/continue
+	moduleCache  map[string]bool     // track loaded modules to prevent circular imports
+	moduleLoader ModuleLoader        // function to load module files
 }
 
 // LoopContext tracks loop start and break positions
@@ -23,6 +30,9 @@ type LoopContext struct {
 	breakPositions []int
 	contPositions  []int
 }
+
+// ModuleLoader is a function type for loading module source code
+type ModuleLoader func(path string) (string, error)
 
 // CompilationScope tracks instructions and jump positions
 type CompilationScope struct {
@@ -59,10 +69,12 @@ func New() *Compiler {
 	}
 
 	return &Compiler{
-		constants:   []object.Object{},
-		symbolTable: symbolTable,
-		scopes:      []CompilationScope{mainScope},
-		scopeIndex:  0,
+		constants:    []object.Object{},
+		symbolTable:  symbolTable,
+		scopes:       []CompilationScope{mainScope},
+		scopeIndex:   0,
+		moduleCache:  make(map[string]bool),
+		moduleLoader: DefaultModuleLoader,
 	}
 }
 
@@ -391,6 +403,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 		ctx := &c.loopStack[len(c.loopStack)-1]
 		ctx.contPositions = append(ctx.contPositions, pos)
 
+	case *ast.ImportStatement:
+		// Evaluate the path expression (should be a string literal)
+		if pathLit, ok := node.Path.(*ast.StringLiteral); ok {
+			modulePath := pathLit.Value
+			// Load and compile the module
+			if err := c.LoadAndCompileModule(modulePath); err != nil {
+				return fmt.Errorf("error importing module: %v", err)
+			}
+		} else {
+			return fmt.Errorf("import path must be a string literal")
+		}
+
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
@@ -640,5 +664,76 @@ func (c *Compiler) loadSymbol(s Symbol) {
 	case FunctionScope:
 		c.emit(code.OpCurrentClosure)
 	}
+}
+
+// DefaultModuleLoader loads modules from the filesystem
+// Supports both .ভাষা (Bengali) and .bhasa extensions
+func DefaultModuleLoader(modulePath string) (string, error) {
+	// Try different file extensions
+	extensions := []string{".ভাষা", ".bhasa"}
+	
+	var fullPath string
+	var err error
+	
+	for _, ext := range extensions {
+		// Try with extension if not already present
+		testPath := modulePath
+		if !strings.HasSuffix(modulePath, ext) {
+			testPath = modulePath + ext
+		}
+		
+		// Check if file exists
+		if _, statErr := os.Stat(testPath); statErr == nil {
+			fullPath = testPath
+			break
+		}
+	}
+	
+	if fullPath == "" {
+		return "", fmt.Errorf("module not found: %s (tried .ভাষা and .bhasa extensions)", modulePath)
+	}
+	
+	// Read the file
+	content, err := os.ReadFile(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("error reading module %s: %v", fullPath, err)
+	}
+	
+	return string(content), nil
+}
+
+// LoadAndCompileModule loads a module file, parses it, and compiles it
+func (c *Compiler) LoadAndCompileModule(modulePath string) error {
+	// Resolve absolute path to prevent duplicate loading with different relative paths
+	absPath, err := filepath.Abs(modulePath)
+	if err != nil {
+		return fmt.Errorf("error resolving module path: %v", err)
+	}
+	
+	// Check if module is already loaded (circular dependency detection)
+	if c.moduleCache[absPath] {
+		return nil // Already loaded, skip
+	}
+	
+	// Mark as being loaded
+	c.moduleCache[absPath] = true
+	
+	// Load module source code
+	source, err := c.moduleLoader(absPath)
+	if err != nil {
+		return err
+	}
+	
+	// Parse the module
+	l := lexer.New(source)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) > 0 {
+		return fmt.Errorf("parser errors in module %s: %v", absPath, p.Errors())
+	}
+	
+	// Compile the module
+	return c.Compile(program)
 }
 

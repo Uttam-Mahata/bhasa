@@ -118,6 +118,24 @@ func (as *AssignmentStatement) String() string {
 	return out.String()
 }
 
+// ImportStatement represents an import/include statement (অন্তর্ভুক্ত)
+type ImportStatement struct {
+	Token token.Token // the অন্তর্ভুক্ত token
+	Path  Expression  // the module path (string literal)
+}
+
+func (is *ImportStatement) statementNode()       {}
+func (is *ImportStatement) TokenLiteral() string { return is.Token.Literal }
+func (is *ImportStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(is.TokenLiteral() + " ")
+	if is.Path != nil {
+		out.WriteString(is.Path.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
 // BlockStatement represents a block of statements
 type BlockStatement struct {
 	Token      token.Token // the { token
