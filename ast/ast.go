@@ -427,3 +427,78 @@ func (cs *ContinueStatement) String() string {
 	return cs.TokenLiteral() + ";"
 }
 
+// ClassStatement represents a class declaration (শ্রেণী)
+type ClassStatement struct {
+	Token   token.Token           // the শ্রেণী token
+	Name    *Identifier           // class name
+	Methods map[string]*FunctionLiteral // methods
+}
+
+func (cs *ClassStatement) statementNode()       {}
+func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ClassStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(cs.Name.String())
+	out.WriteString(" {\n")
+	for name, method := range cs.Methods {
+		out.WriteString("  " + name + ": ")
+		out.WriteString(method.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+// NewExpression represents object instantiation (নতুন শ্রেণী())
+type NewExpression struct {
+	Token     token.Token // the নতুন token
+	Class     Expression  // class identifier
+	Arguments []Expression
+}
+
+func (ne *NewExpression) expressionNode()      {}
+func (ne *NewExpression) TokenLiteral() string { return ne.Token.Literal }
+func (ne *NewExpression) String() string {
+	var out bytes.Buffer
+	args := []string{}
+	for _, a := range ne.Arguments {
+		args = append(args, a.String())
+	}
+	out.WriteString(ne.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(ne.Class.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+	return out.String()
+}
+
+// MemberAccessExpression represents member access (object.property or object.method())
+type MemberAccessExpression struct {
+	Token  token.Token // the . token
+	Object Expression  // left side (object)
+	Member *Identifier // right side (property/method name)
+}
+
+func (ma *MemberAccessExpression) expressionNode()      {}
+func (ma *MemberAccessExpression) TokenLiteral() string { return ma.Token.Literal }
+func (ma *MemberAccessExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString(ma.Object.String())
+	out.WriteString(".")
+	out.WriteString(ma.Member.String())
+	return out.String()
+}
+
+// ThisExpression represents the 'this' keyword (এই)
+type ThisExpression struct {
+	Token token.Token // the এই token
+}
+
+func (te *ThisExpression) expressionNode()      {}
+func (te *ThisExpression) TokenLiteral() string { return te.Token.Literal }
+func (te *ThisExpression) String() string {
+	return te.TokenLiteral()
+}
+

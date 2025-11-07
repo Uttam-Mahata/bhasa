@@ -296,6 +296,144 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpClass:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			err := vm.push(vm.constants[constIndex])
+			if err != nil {
+				return err
+			}
+
+		case code.OpNewInstance:
+			numArgs := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			// Pop arguments
+			args := make([]object.Object, numArgs)
+			for i := int(numArgs) - 1; i >= 0; i-- {
+				args[i] = vm.pop()
+			}
+
+			// Pop class
+			classObj := vm.pop()
+			
+			class, ok := classObj.(*object.Class)
+			if !ok {
+				return fmt.Errorf("expected class object, got %T", classObj)
+			}
+
+			// Create new instance
+			instance := &object.Instance{
+				Class:      class,
+				Properties: make(map[string]object.Object),
+			}
+
+			// Call constructor if exists
+			if constructor, exists := class.Methods["নির্মাণ"]; exists {
+				// Push instance as 'this'
+				err := vm.push(instance)
+				if err != nil {
+					return err
+				}
+
+				// Push constructor
+				err = vm.push(constructor)
+				if err != nil {
+					return err
+				}
+
+				// Push arguments
+				for _, arg := range args {
+					err = vm.push(arg)
+					if err != nil {
+						return err
+					}
+				}
+
+				// Call constructor
+				err = vm.executeCall(int(numArgs))
+				if err != nil {
+					return err
+				}
+
+				// Pop return value
+				vm.pop()
+			}
+
+			err := vm.push(instance)
+			if err != nil {
+				return err
+			}
+
+		case code.OpGetProperty:
+			// Pop property name
+			propName := vm.pop()
+			propNameStr, ok := propName.(*object.String)
+			if !ok {
+				return fmt.Errorf("property name must be string, got %T", propName)
+			}
+
+			// Pop object
+			obj := vm.pop()
+			instance, ok := obj.(*object.Instance)
+			if !ok {
+				return fmt.Errorf("expected instance, got %T", obj)
+			}
+
+			// Get property or method
+			if prop, exists := instance.Properties[propNameStr.Value]; exists {
+				err := vm.push(prop)
+				if err != nil {
+					return err
+				}
+			} else if method, exists := instance.Class.Methods[propNameStr.Value]; exists {
+				// Return bound method (method with instance context)
+				err := vm.push(method)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := vm.push(Null)
+				if err != nil {
+					return err
+				}
+			}
+
+		case code.OpSetProperty:
+			// Pop value
+			value := vm.pop()
+
+			// Pop property name
+			propName := vm.pop()
+			propNameStr, ok := propName.(*object.String)
+			if !ok {
+				return fmt.Errorf("property name must be string, got %T", propName)
+			}
+
+			// Pop object
+			obj := vm.pop()
+			instance, ok := obj.(*object.Instance)
+			if !ok {
+				return fmt.Errorf("expected instance, got %T", obj)
+			}
+
+			// Set property
+			instance.Properties[propNameStr.Value] = value
+
+			err := vm.push(value)
+			if err != nil {
+				return err
+			}
+
+		case code.OpThis:
+			// Push current instance from frame context
+			// For now, we'll push null - full implementation would need frame context
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

@@ -65,6 +65,10 @@ const (
 	BREAK    = "বিরতি"       // break
 	CONTINUE = "চালিয়ে_যাও"  // continue
 	IMPORT   = "অন্তর্ভুক্ত"  // import/include
+	CLASS    = "শ্রেণী"       // class
+	NEW      = "নতুন"         // new
+	THIS     = "এই"           // this/self
+	DOT      = "."            // dot for member access
 )
 
 var keywords = map[string]TokenType{
@@ -80,6 +84,9 @@ var keywords = map[string]TokenType{
 	"বিরতি":       BREAK,
 	"চালিয়ে_যাও":  CONTINUE,
 	"অন্তর্ভুক্ত": IMPORT,
+	"শ্রেণী":      CLASS,
+	"নতুন":        NEW,
+	"এই":          THIS,
 }
 
 // LookupIdent checks if an identifier is a keyword

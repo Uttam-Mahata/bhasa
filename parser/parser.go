@@ -21,6 +21,7 @@ const (
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
 	INDEX       // array[index]
+	MEMBER      // object.property
 )
 
 var precedences = map[token.TokenType]int{
@@ -39,6 +40,7 @@ var precedences = map[token.TokenType]int{
 	token.PERCENT:  PRODUCT,
 	token.LPAREN:   CALL,
 	token.LBRACKET: INDEX,
+	token.DOT:      MEMBER,
 }
 
 type (
@@ -79,6 +81,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.NEW, p.parseNewExpression)
+	p.registerPrefix(token.THIS, p.parseThisExpression)
 
 	// Register infix parse functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -97,6 +101,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
+	p.registerInfix(token.DOT, p.parseMemberAccessExpression)
 
 	// Read two tokens to initialize curToken and peekToken
 	p.nextToken()
@@ -159,6 +164,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseContinueStatement()
 	case token.IMPORT:
 		return p.parseImportStatement()
+	case token.CLASS:
+		return p.parseClassStatement()
 	case token.IDENT:
 		// Check if this is an assignment (identifier followed by =)
 		if p.peekTokenIs(token.ASSIGN) {
@@ -650,6 +657,97 @@ func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
+
+// parseClassStatement parses a class declaration
+func (p *Parser) parseClassStatement() *ast.ClassStatement {
+	stmt := &ast.ClassStatement{Token: p.curToken}
+	stmt.Methods = make(map[string]*ast.FunctionLiteral)
+
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	p.nextToken()
+
+	// Parse methods
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		if p.curTokenIs(token.IDENT) {
+			methodName := p.curToken.Literal
+			
+			if !p.expectPeek(token.ASSIGN) {
+				return nil
+			}
+
+			if !p.expectPeek(token.FUNCTION) {
+				return nil
+			}
+
+			methodFunc := p.parseFunctionLiteral()
+			if funcLit, ok := methodFunc.(*ast.FunctionLiteral); ok {
+				stmt.Methods[methodName] = funcLit
+			}
+
+			if p.peekTokenIs(token.SEMICOLON) {
+				p.nextToken()
+			}
+		}
+
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+// parseNewExpression parses object instantiation
+func (p *Parser) parseNewExpression() ast.Expression {
+	exp := &ast.NewExpression{Token: p.curToken}
+
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	exp.Class = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	exp.Arguments = p.parseExpressionList(token.RPAREN)
+
+	return exp
+}
+
+// parseMemberAccessExpression parses member access (object.property)
+func (p *Parser) parseMemberAccessExpression(left ast.Expression) ast.Expression {
+	exp := &ast.MemberAccessExpression{
+		Token:  p.curToken,
+		Object: left,
+	}
+
+	p.nextToken()
+
+	if !p.curTokenIs(token.IDENT) {
+		msg := fmt.Sprintf("expected identifier after '.', got %s instead", p.curToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	exp.Member = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	return exp
+}
+
+// parseThisExpression parses 'this' keyword
+func (p *Parser) parseThisExpression() ast.Expression {
+	return &ast.ThisExpression{Token: p.curToken}
+}
+
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)

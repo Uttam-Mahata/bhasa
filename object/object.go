@@ -27,6 +27,8 @@ const (
 	HASH_OBJ              = "HASH"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	CLOSURE_OBJ           = "CLOSURE"
+	CLASS_OBJ             = "CLASS"
+	INSTANCE_OBJ          = "INSTANCE"
 )
 
 // Object represents a value in the language
@@ -245,6 +247,28 @@ type Closure struct {
 func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
+}
+
+// Class represents a class definition
+type Class struct {
+	Name    string
+	Methods map[string]*Closure
+}
+
+func (c *Class) Type() ObjectType { return CLASS_OBJ }
+func (c *Class) Inspect() string {
+	return fmt.Sprintf("Class<%s>", c.Name)
+}
+
+// Instance represents an instance of a class
+type Instance struct {
+	Class      *Class
+	Properties map[string]Object
+}
+
+func (i *Instance) Type() ObjectType { return INSTANCE_OBJ }
+func (i *Instance) Inspect() string {
+	return fmt.Sprintf("Instance<%s>", i.Class.Name)
 }
 
 // BuiltinDef represents a builtin definition

@@ -48,6 +48,12 @@ const (
 	OpClosure                        // Create closure
 	OpGetFree                        // Get free variable
 	OpCurrentClosure                 // Get current closure
+	OpClass                          // Create class
+	OpNewInstance                    // Create instance
+	OpGetProperty                    // Get object property
+	OpSetProperty                    // Set object property
+	OpCallMethod                     // Call object method
+	OpThis                           // Get current instance
 )
 
 // Definition holds information about an opcode
@@ -91,6 +97,12 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:          {"OpClosure", []int{2, 1}},
 	OpGetFree:          {"OpGetFree", []int{1}},
 	OpCurrentClosure:   {"OpCurrentClosure", []int{}},
+	OpClass:            {"OpClass", []int{2}},           // class constant index
+	OpNewInstance:      {"OpNewInstance", []int{1}},     // num args
+	OpGetProperty:      {"OpGetProperty", []int{}},      // property name on stack
+	OpSetProperty:      {"OpSetProperty", []int{}},      // property name on stack
+	OpCallMethod:       {"OpCallMethod", []int{1}},      // num args
+	OpThis:             {"OpThis", []int{}},
 }
 
 // Lookup returns the definition for an opcode

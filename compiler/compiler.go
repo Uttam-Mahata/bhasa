@@ -539,6 +539,75 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(node.Arguments))
+
+	case *ast.ClassStatement:
+		// Compile methods as closures
+		methods := make(map[string]*object.Closure)
+		for name, method := range node.Methods {
+			// Compile each method
+			err := c.Compile(method)
+			if err != nil {
+				return err
+			}
+			
+			// For simplicity, we'll store the class definition as a constant
+			// In a real implementation, methods would be compiled and stored properly
+			_ = name // We'll handle this when implementing VM support
+		}
+		
+		// Create class object and add as constant
+		classObj := &object.Class{
+			Name:    node.Name.Value,
+			Methods: methods,
+		}
+		classConst := c.addConstant(classObj)
+		
+		// Define the class as a global variable
+		symbol := c.symbolTable.Define(node.Name.Value)
+		c.emit(code.OpConstant, classConst)
+		
+		if symbol.Scope == GlobalScope {
+			c.emit(code.OpSetGlobal, symbol.Index)
+		} else {
+			c.emit(code.OpSetLocal, symbol.Index)
+		}
+
+	case *ast.NewExpression:
+		// Compile the class identifier
+		err := c.Compile(node.Class)
+		if err != nil {
+			return err
+		}
+
+		// Compile constructor arguments
+		for _, arg := range node.Arguments {
+			err := c.Compile(arg)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Emit new instance instruction
+		c.emit(code.OpNewInstance, len(node.Arguments))
+
+	case *ast.MemberAccessExpression:
+		// Compile the object
+		err := c.Compile(node.Object)
+		if err != nil {
+			return err
+		}
+
+		// Push property name as constant
+		propertyName := &object.String{Value: node.Member.Value}
+		propIndex := c.addConstant(propertyName)
+		c.emit(code.OpConstant, propIndex)
+
+		// Emit get property instruction
+		c.emit(code.OpGetProperty)
+
+	case *ast.ThisExpression:
+		// Emit instruction to get current instance
+		c.emit(code.OpThis)
 	}
 
 	return nil
