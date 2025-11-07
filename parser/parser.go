@@ -12,6 +12,8 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	LOGICAL_OR  // ||
+	LOGICAL_AND // &&
 	EQUALS      // ==
 	LESSGREATER // > or <
 	SUM         // +
@@ -22,6 +24,8 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
+	token.OR:       LOGICAL_OR,
+	token.AND:      LOGICAL_AND,
 	token.EQ:       EQUALS,
 	token.NOT_EQ:   EQUALS,
 	token.LT:       LESSGREATER,
@@ -78,6 +82,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	// Register infix parse functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.OR, p.parseInfixExpression)
+	p.registerInfix(token.AND, p.parseInfixExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
@@ -105,9 +111,15 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
-		t, p.peekToken.Type)
+	msg := fmt.Sprintf("[Line %d, Col %d] expected next token to be %s, got %s instead",
+		p.peekToken.Line, p.peekToken.Column, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) error(msg string) {
+	fullMsg := fmt.Sprintf("[Line %d, Col %d] %s",
+		p.curToken.Line, p.curToken.Column, msg)
+	p.errors = append(p.errors, fullMsg)
 }
 
 func (p *Parser) nextToken() {
@@ -139,6 +151,14 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.WHILE:
 		return p.parseWhileStatement()
+	case token.FOR:
+		return p.parseForStatement()
+	case token.BREAK:
+		return p.parseBreakStatement()
+	case token.CONTINUE:
+		return p.parseContinueStatement()
+	case token.IMPORT:
+		return p.parseImportStatement()
 	case token.IDENT:
 		// Check if this is an assignment (identifier followed by =)
 		if p.peekTokenIs(token.ASSIGN) {
@@ -226,6 +246,95 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	}
 
 	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	stmt := &ast.ForStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// Parse initialization
+	p.nextToken()
+	if p.curToken.Type == token.LET {
+		stmt.Init = p.parseLetStatement()
+	} else if p.curToken.Type == token.IDENT {
+		stmt.Init = p.parseAssignmentStatement()
+	}
+	// If semicolon, skip it
+	if p.curToken.Type == token.SEMICOLON {
+		p.nextToken()
+	}
+
+	// Parse condition
+	if p.curToken.Type != token.SEMICOLON {
+		stmt.Condition = p.parseExpression(LOWEST)
+	}
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	// Parse increment
+	p.nextToken()
+	if p.curToken.Type != token.RPAREN {
+		if p.curToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN) {
+			stmt.Increment = p.parseAssignmentStatement()
+		} else {
+			// Could be an expression statement
+			exprStmt := &ast.ExpressionStatement{Token: p.curToken}
+			exprStmt.Expression = p.parseExpression(LOWEST)
+			stmt.Increment = exprStmt
+		}
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseBreakStatement() *ast.BreakStatement {
+	stmt := &ast.BreakStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
+	stmt := &ast.ContinueStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	stmt := &ast.ImportStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	// Parse the module path (should be a string literal)
+	stmt.Path = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 
 	return stmt
 }

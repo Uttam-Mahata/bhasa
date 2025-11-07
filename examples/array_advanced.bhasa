@@ -1,0 +1,34 @@
+// Advanced Array Methods (সাজাও)
+
+লেখ("=== Advanced Array Methods ===");
+লেখ("");
+
+// 1. Sort array
+লেখ("1. Sort array:");
+ধরি numbers = [5, 2, 8, 1, 9, 3];
+লেখ("Original:");
+লেখ(numbers);
+লেখ("Sorted:");
+লেখ(সাজাও(numbers));
+লেখ("");
+
+// 2. Sort with Bengali variable name
+লেখ("2. Sort with Bengali variable:");
+ধরি সংখ্যা_তালিকা = [50, 10, 30, 20, 40];
+লেখ("Original:");
+লেখ(সংখ্যা_তালিকা);
+লেখ("Sorted:");
+ধরি সাজানো = সাজাও(সংখ্যা_তালিকা);
+লেখ(সাজানো);
+লেখ("");
+
+// 3. Sort negative numbers
+লেখ("3. Sort with negative numbers:");
+ধরি mixed = [3, -1, 5, -3, 0, 2];
+লেখ("Original:");
+লেখ(mixed);
+লেখ("Sorted:");
+লেখ(সাজাও(mixed));
+লেখ("");
+
+লেখ("=== Array methods completed! ===");

@@ -1,0 +1,64 @@
+// Break and Continue Examples (বিরতি, চালিয়ে_যাও)
+
+লেখ("=== Break and Continue Examples ===");
+লেখ("");
+
+// 1. Break in for loop
+লেখ("1. Break when i reaches 3:");
+পর্যন্ত (ধরি i = 1; i <= 5; i = i + 1) {
+    যদি (i == 3) {
+        বিরতি;
+    }
+    লেখ(i);
+}
+লেখ("");
+
+// 2. Continue in for loop (skip even numbers)
+লেখ("2. Skip even numbers (print odd only):");
+পর্যন্ত (ধরি n = 1; n <= 6; n = n + 1) {
+    যদি (n % 2 == 0) {
+        চালিয়ে_যাও;
+    }
+    লেখ(n);
+}
+লেখ("");
+
+// 3. Break in while loop
+লেখ("3. While loop with break:");
+ধরি count = 0;
+যতক্ষণ (সত্য) {
+    count = count + 1;
+    যদি (count > 3) {
+        বিরতি;
+    }
+    লেখ(count);
+}
+লেখ("");
+
+// 4. Continue in while loop
+লেখ("4. While loop with continue (skip 2):");
+ধরি num = 0;
+যতক্ষণ (num < 5) {
+    num = num + 1;
+    যদি (num == 2) {
+        চালিয়ে_যাও;
+    }
+    লেখ(num);
+}
+লেখ("");
+
+// 5. Break and continue with Bengali variable names
+লেখ("5. Bengali variable names with break:");
+পর্যন্ত (ধরি সংখ্যা = 10; সংখ্যা <= 20; সংখ্যা = সংখ্যা + 1) {
+    যদি (সংখ্যা == 15) {
+        লেখ("Breaking at 15");
+        বিরতি;
+    }
+    যদি (সংখ্যা % 2 == 0) {
+        চালিয়ে_যাও;
+    }
+    লেখ(সংখ্যা);
+}
+লেখ("");
+
+লেখ("=== All break and continue examples completed! ===");

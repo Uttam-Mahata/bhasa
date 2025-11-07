@@ -3,18 +3,35 @@ package compiler
 import (
 	"bhasa/ast"
 	"bhasa/code"
+	"bhasa/lexer"
 	"bhasa/object"
+	"bhasa/parser"
 	"fmt"
+	"os"
 	"sort"
+	"strings"
 )
 
 // Compiler compiles AST to bytecode
 type Compiler struct {
-	constants   []object.Object
-	symbolTable *SymbolTable
-	scopes      []CompilationScope
-	scopeIndex  int
+	constants    []object.Object
+	symbolTable  *SymbolTable
+	scopes       []CompilationScope
+	scopeIndex   int
+	loopStack    []LoopContext       // track nested loops for break/continue
+	moduleCache  map[string]bool     // track loaded modules to prevent circular imports
+	moduleLoader ModuleLoader        // function to load module files
 }
+
+// LoopContext tracks loop start and break positions
+type LoopContext struct {
+	loopStart      int
+	breakPositions []int
+	contPositions  []int
+}
+
+// ModuleLoader is a function type for loading module source code
+type ModuleLoader func(path string) (string, error)
 
 // CompilationScope tracks instructions and jump positions
 type CompilationScope struct {
@@ -51,10 +68,12 @@ func New() *Compiler {
 	}
 
 	return &Compiler{
-		constants:   []object.Object{},
-		symbolTable: symbolTable,
-		scopes:      []CompilationScope{mainScope},
-		scopeIndex:  0,
+		constants:    []object.Object{},
+		symbolTable:  symbolTable,
+		scopes:       []CompilationScope{mainScope},
+		scopeIndex:   0,
+		moduleCache:  make(map[string]bool),
+		moduleLoader: DefaultModuleLoader,
 	}
 }
 
@@ -140,6 +159,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpEqual)
 		case "!=":
 			c.emit(code.OpNotEqual)
+		case "&&":
+			c.emit(code.OpAnd)
+		case "||":
+			c.emit(code.OpOr)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
@@ -238,6 +261,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.WhileStatement:
 		loopStart := len(c.currentInstructions())
 
+		// Push loop context for break/continue
+		loopCtx := LoopContext{loopStart: loopStart}
+		c.loopStack = append(c.loopStack, loopCtx)
+
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err
@@ -259,7 +286,133 @@ func (c *Compiler) Compile(node ast.Node) error {
 		afterLoopPos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterLoopPos)
 
+		// Patch all break statements
+		ctx := c.loopStack[len(c.loopStack)-1]
+		for _, pos := range ctx.breakPositions {
+			c.changeOperand(pos, afterLoopPos)
+		}
+
+		// Patch all continue statements (go back to loop start)
+		for _, pos := range ctx.contPositions {
+			c.changeOperand(pos, loopStart)
+		}
+
+		// Pop loop context
+		c.loopStack = c.loopStack[:len(c.loopStack)-1]
+
 		c.emit(code.OpNull)
+
+	case *ast.ForStatement:
+		// Compile initialization
+		if node.Init != nil {
+			err := c.Compile(node.Init)
+			if err != nil {
+				return err
+			}
+			// Pop the result if it's an expression statement
+			if _, ok := node.Init.(*ast.ExpressionStatement); ok {
+				c.emit(code.OpPop)
+			}
+		}
+
+		loopStart := len(c.currentInstructions())
+
+		// Push loop context
+		loopCtx := LoopContext{loopStart: loopStart}
+		c.loopStack = append(c.loopStack, loopCtx)
+
+		// Compile condition
+		var jumpNotTruthyPos int
+		if node.Condition != nil {
+			err := c.Compile(node.Condition)
+			if err != nil {
+				return err
+			}
+			jumpNotTruthyPos = c.emit(code.OpJumpNotTruthy, 9999)
+		}
+
+		// Compile body
+		err := c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.OpPop) {
+			c.removeLastPop()
+		}
+
+		// Continue statements jump here (before increment)
+		continueTarget := len(c.currentInstructions())
+
+		// Compile increment
+		if node.Increment != nil {
+			err := c.Compile(node.Increment)
+			if err != nil {
+				return err
+			}
+			// Pop the result
+			if _, ok := node.Increment.(*ast.ExpressionStatement); ok {
+				c.emit(code.OpPop)
+			}
+		}
+
+		// Jump back to condition check
+		c.emit(code.OpJump, loopStart)
+
+		afterLoopPos := len(c.currentInstructions())
+
+		// Patch condition jump
+		if node.Condition != nil {
+			c.changeOperand(jumpNotTruthyPos, afterLoopPos)
+		}
+
+		// Patch all break statements
+		ctx := c.loopStack[len(c.loopStack)-1]
+		for _, pos := range ctx.breakPositions {
+			c.changeOperand(pos, afterLoopPos)
+		}
+
+		// Patch all continue statements (go to increment)
+		for _, pos := range ctx.contPositions {
+			c.changeOperand(pos, continueTarget)
+		}
+
+		// Pop loop context
+		c.loopStack = c.loopStack[:len(c.loopStack)-1]
+
+		c.emit(code.OpNull)
+
+	case *ast.BreakStatement:
+		if len(c.loopStack) == 0 {
+			return fmt.Errorf("break statement outside loop")
+		}
+		// Emit a jump that will be patched later
+		pos := c.emit(code.OpJump, 9999)
+		// Record this position in the current loop context
+		ctx := &c.loopStack[len(c.loopStack)-1]
+		ctx.breakPositions = append(ctx.breakPositions, pos)
+
+	case *ast.ContinueStatement:
+		if len(c.loopStack) == 0 {
+			return fmt.Errorf("continue statement outside loop")
+		}
+		// Emit a jump that will be patched later
+		pos := c.emit(code.OpJump, 9999)
+		// Record this position in the current loop context
+		ctx := &c.loopStack[len(c.loopStack)-1]
+		ctx.contPositions = append(ctx.contPositions, pos)
+
+	case *ast.ImportStatement:
+		// Evaluate the path expression (should be a string literal)
+		if pathLit, ok := node.Path.(*ast.StringLiteral); ok {
+			modulePath := pathLit.Value
+			// Load and compile the module
+			if err := c.LoadAndCompileModule(modulePath); err != nil {
+				return fmt.Errorf("error importing module: %v", err)
+			}
+		} else {
+			return fmt.Errorf("import path must be a string literal")
+		}
 
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
@@ -510,5 +663,81 @@ func (c *Compiler) loadSymbol(s Symbol) {
 	case FunctionScope:
 		c.emit(code.OpCurrentClosure)
 	}
+}
+
+// DefaultModuleLoader loads modules from the filesystem
+// Supports both .ভাষা (Bengali) and .bhasa extensions
+func DefaultModuleLoader(modulePath string) (string, error) {
+	// Try different file extensions
+	extensions := []string{".ভাষা", ".bhasa"}
+	
+	// Try different search paths
+	searchPaths := []string{
+		modulePath,            // Direct path
+		"modules/" + modulePath, // modules directory
+	}
+	
+	var fullPath string
+	
+	for _, basePath := range searchPaths {
+		for _, ext := range extensions {
+			// Try with extension if not already present
+			testPath := basePath
+			if !strings.HasSuffix(basePath, ext) {
+				testPath = basePath + ext
+			}
+			
+			// Check if file exists
+			if _, statErr := os.Stat(testPath); statErr == nil {
+				fullPath = testPath
+				break
+			}
+		}
+		if fullPath != "" {
+			break
+		}
+	}
+	
+	if fullPath == "" {
+		return "", fmt.Errorf("module not found: %s (tried .ভাষা and .bhasa extensions in current dir and modules/ dir)", modulePath)
+	}
+	
+	// Read the file
+	content, err := os.ReadFile(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("error reading module %s: %v", fullPath, err)
+	}
+	
+	return string(content), nil
+}
+
+// LoadAndCompileModule loads a module file, parses it, and compiles it
+func (c *Compiler) LoadAndCompileModule(modulePath string) error {
+	// Load module source code first (this will search in multiple locations)
+	source, err := c.moduleLoader(modulePath)
+	if err != nil {
+		return err
+	}
+	
+	// Use module path as cache key (simple approach)
+	// Check if module is already loaded (circular dependency detection)
+	if c.moduleCache[modulePath] {
+		return nil // Already loaded, skip
+	}
+	
+	// Mark as being loaded
+	c.moduleCache[modulePath] = true
+	
+	// Parse the module
+	l := lexer.New(source)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	
+	if len(p.Errors()) > 0 {
+		return fmt.Errorf("parser errors in module %s: %v", modulePath, p.Errors())
+	}
+	
+	// Compile the module
+	return c.Compile(program)
 }
 

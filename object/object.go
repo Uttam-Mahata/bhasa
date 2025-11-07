@@ -3,8 +3,11 @@ package object
 import (
 	"bhasa/ast"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"math"
+	"os"
 	"strings"
 )
 
@@ -355,6 +358,502 @@ var Builtins = []BuiltinDef{
 			return &String{Value: string(args[0].Type())}
 		}},
 	},
+	// String methods
+	{
+		"বিভক্ত", // split
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "arguments to 'বিভক্ত' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			delimiter := args[1].(*String).Value
+			parts := strings.Split(str, delimiter)
+			elements := make([]Object, len(parts))
+			for i, part := range parts {
+				elements[i] = &String{Value: part}
+			}
+			return &Array{Elements: elements}
+		}},
+	},
+	{
+		"যুক্ত", // join
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "first argument must be ARRAY, second must be STRING"}
+			}
+			arr := args[0].(*Array)
+			delimiter := args[1].(*String).Value
+			parts := make([]string, len(arr.Elements))
+			for i, elem := range arr.Elements {
+				parts[i] = elem.Inspect()
+			}
+			return &String{Value: strings.Join(parts, delimiter)}
+		}},
+	},
+	{
+		"উপরে", // uppercase
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'উপরে' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.ToUpper(str)}
+		}},
+	},
+	{
+		"নিচে", // lowercase
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'নিচে' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.ToLower(str)}
+		}},
+	},
+	{
+		"ছাঁটো", // trim
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'ছাঁটো' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			return &String{Value: strings.TrimSpace(str)}
+		}},
+	},
+	{
+		"প্রতিস্থাপন", // replace
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 3 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=3", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ || args[2].Type() != STRING_OBJ {
+				return &Error{Message: "all arguments to 'প্রতিস্থাপন' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			old := args[1].(*String).Value
+			new := args[2].(*String).Value
+			return &String{Value: strings.ReplaceAll(str, old, new)}
+		}},
+	},
+	{
+		"খুঁজুন", // find/indexOf
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "arguments to 'খুঁজুন' must be STRING"}
+			}
+			str := args[0].(*String).Value
+			substr := args[1].(*String).Value
+			return &Integer{Value: int64(strings.Index(str, substr))}
+		}},
+	},
+	// Math functions
+	{
+		"শক্তি", // power
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'শক্তি' must be INTEGER"}
+			}
+			base := float64(args[0].(*Integer).Value)
+			exp := float64(args[1].(*Integer).Value)
+			result := math.Pow(base, exp)
+			return &Integer{Value: int64(result)}
+		}},
+	},
+	{
+		"বর্গমূল", // square root
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'বর্গমূল' must be INTEGER"}
+			}
+			n := float64(args[0].(*Integer).Value)
+			if n < 0 {
+				return &Error{Message: "cannot take square root of negative number"}
+			}
+			result := math.Sqrt(n)
+			return &Integer{Value: int64(result)}
+		}},
+	},
+	{
+		"পরম", // absolute value
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'পরম' must be INTEGER"}
+			}
+			n := args[0].(*Integer).Value
+			if n < 0 {
+				return &Integer{Value: -n}
+			}
+			return &Integer{Value: n}
+		}},
+	},
+	{
+		"সর্বোচ্চ", // max
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'সর্বোচ্চ' must be INTEGER"}
+			}
+			a := args[0].(*Integer).Value
+			b := args[1].(*Integer).Value
+			if a > b {
+				return &Integer{Value: a}
+			}
+			return &Integer{Value: b}
+		}},
+	},
+	{
+		"সর্বনিম্ন", // min
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ || args[1].Type() != INTEGER_OBJ {
+				return &Error{Message: "arguments to 'সর্বনিম্ন' must be INTEGER"}
+			}
+			a := args[0].(*Integer).Value
+			b := args[1].(*Integer).Value
+			if a < b {
+				return &Integer{Value: a}
+			}
+			return &Integer{Value: b}
+		}},
+	},
+	{
+		"গোলাকার", // round
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != INTEGER_OBJ {
+				return &Error{Message: "argument to 'গোলাকার' must be INTEGER"}
+			}
+			// For integers, round returns the same value
+			return args[0]
+		}},
+	},
+	// Array methods
+	{
+		"উল্টাও", // reverse
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: "argument to 'উল্টাও' must be ARRAY"}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			reversed := make([]Object, length)
+			for i := 0; i < length; i++ {
+				reversed[i] = arr.Elements[length-1-i]
+			}
+			return &Array{Elements: reversed}
+		}},
+	},
+	{
+		"সাজাও", // sort - sorts integers in ascending order
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: "argument to 'সাজাও' must be ARRAY"}
+			}
+			arr := args[0].(*Array)
+			length := len(arr.Elements)
+			
+			// Create a copy to avoid modifying original
+			sorted := make([]Object, length)
+			copy(sorted, arr.Elements)
+			
+			// Simple bubble sort for integers
+			for i := 0; i < length-1; i++ {
+				for j := 0; j < length-i-1; j++ {
+					// Only sort integers
+					if sorted[j].Type() == INTEGER_OBJ && sorted[j+1].Type() == INTEGER_OBJ {
+						v1 := sorted[j].(*Integer).Value
+						v2 := sorted[j+1].(*Integer).Value
+						if v1 > v2 {
+							sorted[j], sorted[j+1] = sorted[j+1], sorted[j]
+						}
+					}
+				}
+			}
+			return &Array{Elements: sorted}
+		}},
+	},
+	{
+		"ফিল্টার", // filter - filters array based on function
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: "first argument to 'ফিল্টার' must be ARRAY"}
+			}
+			if args[1].Type() != CLOSURE_OBJ {
+				return &Error{Message: "second argument to 'ফিল্টার' must be FUNCTION"}
+			}
+			
+			// Note: We can't actually execute the closure here since we don't have VM access
+			// This is a limitation - filter needs to be implemented differently
+			// For now, return error
+			return &Error{Message: "ফিল্টার: function execution not yet supported in built-ins"}
+		}},
+	},
+	{
+		"ম্যাপ", // map - applies function to each element
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return &Error{Message: "first argument to 'ম্যাপ' must be ARRAY"}
+			}
+			if args[1].Type() != CLOSURE_OBJ {
+				return &Error{Message: "second argument to 'ম্যাপ' must be FUNCTION"}
+			}
+			
+			// Note: Same limitation as filter - needs VM access to execute closures
+			return &Error{Message: "ম্যাপ: function execution not yet supported in built-ins"}
+		}},
+	},
+	// File I/O functions
+	{
+		"ফাইল_পড়ো", // read file
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'ফাইল_পড়ো' must be STRING"}
+			}
+			
+			filename := args[0].(*String).Value
+			content, err := os.ReadFile(filename)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("error reading file: %s", err)}
+			}
+			
+			return &String{Value: string(content)}
+		}},
+	},
+	{
+		"ফাইল_লেখো", // write file
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "both arguments to 'ফাইল_লেখো' must be STRING"}
+			}
+			
+			filename := args[0].(*String).Value
+			content := args[1].(*String).Value
+			
+			err := os.WriteFile(filename, []byte(content), 0644)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("error writing file: %s", err)}
+			}
+			
+			return &Null{}
+		}},
+	},
+	{
+		"ফাইল_যোগ", // append to file
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ || args[1].Type() != STRING_OBJ {
+				return &Error{Message: "both arguments to 'ফাইল_যোগ' must be STRING"}
+			}
+			
+			filename := args[0].(*String).Value
+			content := args[1].(*String).Value
+			
+			f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("error opening file: %s", err)}
+			}
+			defer f.Close()
+			
+			if _, err := f.WriteString(content); err != nil {
+				return &Error{Message: fmt.Sprintf("error appending to file: %s", err)}
+			}
+			
+			return &Null{}
+		}},
+	},
+	{
+		"ফাইল_আছে", // check if file exists
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'ফাইল_আছে' must be STRING"}
+			}
+			
+			filename := args[0].(*String).Value
+			_, err := os.Stat(filename)
+			
+			if os.IsNotExist(err) {
+				return &Boolean{Value: false}
+			}
+			return &Boolean{Value: true}
+		}},
+	},
+	// JSON functions
+	{
+		"JSON_পার্স", // parse JSON string
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != STRING_OBJ {
+				return &Error{Message: "argument to 'JSON_পার্স' must be STRING"}
+			}
+			
+			jsonStr := args[0].(*String).Value
+			var data interface{}
+			
+			err := json.Unmarshal([]byte(jsonStr), &data)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("error parsing JSON: %s", err)}
+			}
+			
+			// Convert JSON data to Bhasa objects
+			return jsonToObject(data)
+		}},
+	},
+	{
+		"JSON_স্ট্রিং", // stringify object to JSON
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			
+			// Convert Bhasa object to JSON-compatible structure
+			data := objectToJSON(args[0])
+			
+			jsonBytes, err := json.Marshal(data)
+			if err != nil {
+				return &Error{Message: fmt.Sprintf("error creating JSON: %s", err)}
+			}
+			
+			return &String{Value: string(jsonBytes)}
+		}},
+	},
+	// HashMap enhanced methods
+	{
+		"চাবিগুলো", // keys - returns array of hash keys
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "argument to 'চাবিগুলো' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			keys := make([]Object, 0, len(hash.Pairs))
+			for _, pair := range hash.Pairs {
+				keys = append(keys, pair.Key)
+			}
+			return &Array{Elements: keys}
+		}},
+	},
+	{
+		"মানগুলো", // values - returns array of hash values
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=1", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "argument to 'মানগুলো' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			values := make([]Object, 0, len(hash.Pairs))
+			for _, pair := range hash.Pairs {
+				values = append(values, pair.Value)
+			}
+			return &Array{Elements: values}
+		}},
+	},
+	{
+		"চাবি_আছে", // hasKey - checks if hash has key
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ {
+				return &Error{Message: "first argument to 'চাবি_আছে' must be HASH"}
+			}
+			hash := args[0].(*Hash)
+			
+			// Check if key is hashable
+			keyObj, ok := args[1].(Hashable)
+			if !ok {
+				return &Error{Message: "second argument must be a hashable type (INTEGER, STRING, or BOOLEAN)"}
+			}
+			
+			_, exists := hash.Pairs[keyObj.HashKey()]
+			return &Boolean{Value: exists}
+		}},
+	},
+	{
+		"একত্রিত", // merge - merges two hashes
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return &Error{Message: fmt.Sprintf("wrong number of arguments. got=%d, want=2", len(args))}
+			}
+			if args[0].Type() != HASH_OBJ || args[1].Type() != HASH_OBJ {
+				return &Error{Message: "both arguments to 'একত্রিত' must be HASH"}
+			}
+			hash1 := args[0].(*Hash)
+			hash2 := args[1].(*Hash)
+			
+			// Create new hash with pairs from both
+			newPairs := make(map[HashKey]HashPair)
+			for k, v := range hash1.Pairs {
+				newPairs[k] = v
+			}
+			for k, v := range hash2.Pairs {
+				newPairs[k] = v // hash2 overwrites hash1 if same key
+			}
+			
+			return &Hash{Pairs: newPairs}
+		}},
+	},
 }
 
 // GetBuiltinByName returns a builtin by name
@@ -365,5 +864,65 @@ func GetBuiltinByName(name string) *Builtin {
 		}
 	}
 	return nil
+}
+
+// jsonToObject converts JSON data to Bhasa objects
+func jsonToObject(data interface{}) Object {
+	switch v := data.(type) {
+	case nil:
+		return &Null{}
+	case bool:
+		return &Boolean{Value: v}
+	case float64:
+		return &Integer{Value: int64(v)}
+	case string:
+		return &String{Value: v}
+	case []interface{}:
+		elements := make([]Object, len(v))
+		for i, item := range v {
+			elements[i] = jsonToObject(item)
+		}
+		return &Array{Elements: elements}
+	case map[string]interface{}:
+		pairs := make(map[HashKey]HashPair)
+		for key, value := range v {
+			keyObj := &String{Value: key}
+			valueObj := jsonToObject(value)
+			pairs[keyObj.HashKey()] = HashPair{Key: keyObj, Value: valueObj}
+		}
+		return &Hash{Pairs: pairs}
+	default:
+		return &Null{}
+	}
+}
+
+// objectToJSON converts Bhasa objects to JSON-compatible structure
+func objectToJSON(obj Object) interface{} {
+	switch o := obj.(type) {
+	case *Null:
+		return nil
+	case *Boolean:
+		return o.Value
+	case *Integer:
+		return o.Value
+	case *String:
+		return o.Value
+	case *Array:
+		result := make([]interface{}, len(o.Elements))
+		for i, elem := range o.Elements {
+			result[i] = objectToJSON(elem)
+		}
+		return result
+	case *Hash:
+		result := make(map[string]interface{})
+		for _, pair := range o.Pairs {
+			if key, ok := pair.Key.(*String); ok {
+				result[key.Value] = objectToJSON(pair.Value)
+			}
+		}
+		return result
+	default:
+		return nil
+	}
 }
 

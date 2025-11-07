@@ -1,0 +1,91 @@
+// Bengali Variable Names Example
+
+লেখ("=== Bengali Variable Names Example ===");
+লেখ("");
+
+// 1. Simple Variables
+লেখ("1. Simple Variables:");
+ধরি নাম = "Karim";
+ধরি বয়স = 30;
+ধরি শহর = "Dhaka";
+
+লেখ("Name:");
+লেখ(নাম);
+লেখ("Age:");
+লেখ(বয়স);
+লেখ("City:");
+লেখ(শহর);
+লেখ("");
+
+// 2. Math Variables
+লেখ("2. Math Variables:");
+ধরি দৈর্ঘ্য = 10;
+ধরি প্রস্থ = 5;
+ধরি ক্ষেত্রফল = দৈর্ঘ্য * প্রস্থ;
+
+লেখ("Rectangle Area:");
+লেখ(ক্ষেত্রফল);
+লেখ("");
+
+// 3. Bengali Function Names
+লেখ("3. Bengali Function Names:");
+
+ধরি যোগফল_বের_করো = ফাংশন(ক, খ) {
+    ফেরত ক + খ;
+};
+
+ধরি গুণফল_বের_করো = ফাংশন(সংখ্যা_এক, সংখ্যা_দুই) {
+    ফেরত সংখ্যা_এক * সংখ্যা_দুই;
+};
+
+লেখ("10 + 20 =");
+লেখ(যোগফল_বের_করো(10, 20));
+
+লেখ("5 x 6 =");
+লেখ(গুণফল_বের_করো(5, 6));
+লেখ("");
+
+// 4. Complex Example - Student Info
+লেখ("4. Complex Example - Student Info:");
+
+ধরি ছাত্রের_নাম = "Sakib";
+ধরি বাংলা_নম্বর = 85;
+ধরি ইংরেজি_নম্বর = 90;
+ধরি গণিত_নম্বর = 95;
+ধরি মোট_নম্বর = বাংলা_নম্বর + ইংরেজি_নম্বর + গণিত_নম্বর;
+ধরি গড় = মোট_নম্বর / 3;
+
+লেখ("Student Name:");
+লেখ(ছাত্রের_নাম);
+লেখ("Total Marks:");
+লেখ(মোট_নম্বর);
+লেখ("Average:");
+লেখ(গড়);
+লেখ("");
+
+// 5. Conditionals with Bengali Variables
+লেখ("5. Conditionals with Bengali Variables:");
+
+ধরি পরীক্ষার_নম্বর = 75;
+ধরি উত্তীর্ণের_সীমা = 40;
+
+যদি (পরীক্ষার_নম্বর >= উত্তীর্ণের_সীমা) {
+    লেখ("Result: Passed");
+} নাহলে {
+    লেখ("Result: Failed");
+}
+লেখ("");
+
+// 6. Arrays with Bengali Names
+লেখ("6. Arrays with Bengali Names:");
+
+ধরি ছাত্রদের_নাম = ["Rahim", "Karim", "Jamal", "Salma"];
+ধরি নম্বর_তালিকা = [85, 90, 75, 95];
+
+লেখ("Student Names:");
+লেখ(ছাত্রদের_নাম);
+লেখ("Marks List:");
+লেখ(নম্বর_তালিকা);
+লেখ("");
+
+লেখ("=== All examples completed! ===");

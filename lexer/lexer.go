@@ -11,11 +11,17 @@ type Lexer struct {
 	position     int  // current position in input (points to current char)
 	readPosition int  // current reading position in input (after current char)
 	ch           rune // current char under examination
+	line         int  // current line number
+	column       int  // current column number
 }
 
 // New creates a new Lexer
 func New(input string) *Lexer {
-	l := &Lexer{input: []rune(input)}
+	l := &Lexer{
+		input:  []rune(input),
+		line:   1,
+		column: 0,
+	}
 	l.readChar()
 	return l
 }
@@ -29,6 +35,12 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition++
+	l.column++
+	
+	if l.ch == '\n' {
+		l.line++
+		l.column = 0
+	}
 }
 
 // peekChar looks ahead at the next character without advancing
@@ -44,90 +56,129 @@ func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
 	l.skipWhitespace()
+	
+	// Record position at start of token
+	tokLine := l.line
+	tokCol := l.column
 
 	switch l.ch {
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
+			tok = l.newTokenWithPos(token.EQ, string(ch)+string(l.ch))
 		} else {
-			tok = newToken(token.ASSIGN, l.ch)
+			tok = l.newTokenWithPos(token.ASSIGN, string(l.ch))
 		}
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = l.newTokenWithPos(token.PLUS, string(l.ch))
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		tok = l.newTokenWithPos(token.MINUS, string(l.ch))
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
+			tok = l.newTokenWithPos(token.NOT_EQ, string(ch)+string(l.ch))
 		} else {
-			tok = newToken(token.BANG, l.ch)
+			tok = l.newTokenWithPos(token.BANG, string(l.ch))
 		}
 	case '*':
-		tok = newToken(token.ASTERISK, l.ch)
+		tok = l.newTokenWithPos(token.ASTERISK, string(l.ch))
 	case '/':
 		if l.peekChar() == '/' {
 			l.skipComment()
 			return l.NextToken()
 		} else {
-			tok = newToken(token.SLASH, l.ch)
+			tok = l.newTokenWithPos(token.SLASH, string(l.ch))
 		}
 	case '%':
-		tok = newToken(token.PERCENT, l.ch)
+		tok = l.newTokenWithPos(token.PERCENT, string(l.ch))
 	case '<':
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.LTE, Literal: string(ch) + string(l.ch)}
+			tok = l.newTokenWithPos(token.LTE, string(ch)+string(l.ch))
 		} else {
-			tok = newToken(token.LT, l.ch)
+			tok = l.newTokenWithPos(token.LT, string(l.ch))
 		}
 	case '>':
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.GTE, Literal: string(ch) + string(l.ch)}
+			tok = l.newTokenWithPos(token.GTE, string(ch)+string(l.ch))
 		} else {
-			tok = newToken(token.GT, l.ch)
+			tok = l.newTokenWithPos(token.GT, string(l.ch))
+		}
+	case '&':
+		if l.peekChar() == '&' {
+			ch := l.ch
+			l.readChar()
+			tok = l.newTokenWithPos(token.AND, string(ch)+string(l.ch))
+		} else {
+			tok = l.newTokenWithPos(token.ILLEGAL, string(l.ch))
+		}
+	case '|':
+		if l.peekChar() == '|' {
+			ch := l.ch
+			l.readChar()
+			tok = l.newTokenWithPos(token.OR, string(ch)+string(l.ch))
+		} else {
+			tok = l.newTokenWithPos(token.ILLEGAL, string(l.ch))
 		}
 	case ',':
-		tok = newToken(token.COMMA, l.ch)
+		tok = l.newTokenWithPos(token.COMMA, string(l.ch))
 	case ';':
-		tok = newToken(token.SEMICOLON, l.ch)
+		tok = l.newTokenWithPos(token.SEMICOLON, string(l.ch))
 	case ':':
-		tok = newToken(token.COLON, l.ch)
+		tok = l.newTokenWithPos(token.COLON, string(l.ch))
 	case '(':
-		tok = newToken(token.LPAREN, l.ch)
+		tok = l.newTokenWithPos(token.LPAREN, string(l.ch))
 	case ')':
-		tok = newToken(token.RPAREN, l.ch)
+		tok = l.newTokenWithPos(token.RPAREN, string(l.ch))
 	case '{':
-		tok = newToken(token.LBRACE, l.ch)
+		tok = l.newTokenWithPos(token.LBRACE, string(l.ch))
 	case '}':
-		tok = newToken(token.RBRACE, l.ch)
+		tok = l.newTokenWithPos(token.RBRACE, string(l.ch))
 	case '[':
-		tok = newToken(token.LBRACKET, l.ch)
+		tok = l.newTokenWithPos(token.LBRACKET, string(l.ch))
 	case ']':
-		tok = newToken(token.RBRACKET, l.ch)
+		tok = l.newTokenWithPos(token.RBRACKET, string(l.ch))
 	case '"':
-		tok.Type = token.STRING
-		tok.Literal = l.readString()
+		literal := l.readString()
+		tok = token.Token{
+			Type:    token.STRING,
+			Literal: literal,
+			Line:    tokLine,
+			Column:  tokCol,
+		}
 	case 0:
-		tok.Literal = ""
-		tok.Type = token.EOF
+		tok = token.Token{
+			Type:    token.EOF,
+			Literal: "",
+			Line:    l.line,
+			Column:  l.column,
+		}
 	default:
 		if isLetter(l.ch) {
-			tok.Literal = l.readIdentifier()
-			tok.Type = token.LookupIdent(tok.Literal)
+			literal := l.readIdentifier()
+			tok = token.Token{
+				Type:    token.LookupIdent(literal),
+				Literal: literal,
+				Line:    tokLine,
+				Column:  tokCol,
+			}
 			return tok
 		} else if isDigit(l.ch) || isBengaliDigit(l.ch) {
-			tok.Type = token.INT
-			tok.Literal = l.readNumber()
+			literal := l.readNumber()
+			tok = token.Token{
+				Type:    token.INT,
+				Literal: literal,
+				Line:    tokLine,
+				Column:  tokCol,
+			}
 			return tok
 		} else {
-			tok = newToken(token.ILLEGAL, l.ch)
+			tok = l.newTokenWithPos(token.ILLEGAL, string(l.ch))
 		}
 	}
 
@@ -136,9 +187,11 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 // readIdentifier reads an identifier (variable name or keyword)
+// Identifiers can contain letters, underscores, and digits (but must start with a letter or underscore)
 func (l *Lexer) readIdentifier() string {
 	startPos := l.position
-	for isLetter(l.ch) {
+	// Read first character (must be letter or underscore)
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return string(l.input[startPos:l.position])
@@ -208,4 +261,14 @@ func isBengaliDigit(ch rune) bool {
 // newToken creates a new token
 func newToken(tokenType token.TokenType, ch rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+// newTokenWithPos creates a new token with position information
+func (l *Lexer) newTokenWithPos(tokenType token.TokenType, literal string) token.Token {
+	return token.Token{
+		Type:    tokenType,
+		Literal: literal,
+		Line:    l.line,
+		Column:  l.column - len([]rune(literal)) + 1,
+	}
 }

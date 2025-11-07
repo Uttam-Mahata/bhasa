@@ -1,0 +1,89 @@
+// New Features Showcase
+
+লেখ("=== Bhasa New Features ===");
+লেখ("");
+
+// Logical Operators
+লেখ("1. Logical Operators:");
+ধরি age = 25;
+ধরি income = 50000;
+
+যদি (age >= 18 && income > 30000) {
+    লেখ("✓ Eligible (AND)");
+}
+
+ধরি score = 95;
+যদি (score < 40 || score > 90) {
+    লেখ("✓ Special case (OR)");
+}
+লেখ("");
+
+// String Methods
+লেখ("2. String Methods:");
+
+ধরি text = "Bhasa Programming Language";
+ধরি words = বিভক্ত(text, " ");
+লেখ("Split:");
+লেখ(words);
+
+ধরি joined = যুক্ত(words, "-");
+লেখ("Join:");
+লেখ(joined);
+
+লেখ("Uppercase:");
+লেখ(উপরে("bhasa"));
+
+লেখ("Lowercase:");
+লেখ(নিচে("DHAKA"));
+
+লেখ("Trim:");
+লেখ(ছাঁটো("  hello  "));
+
+ধরি replaced = প্রতিস্থাপন(text, "Language", "Lang");
+লেখ("Replace:");
+লেখ(replaced);
+
+লেখ("IndexOf 'Programming':");
+লেখ(খুঁজুন(text, "Programming"));
+লেখ("");
+
+// Math Functions
+লেখ("3. Math Functions:");
+
+লেখ("Power 2^8:");
+লেখ(শক্তি(2, 8));
+
+লেখ("Square root of 144:");
+লেখ(বর্গমূল(144));
+
+লেখ("Absolute value of -42:");
+লেখ(পরম(-42));
+
+লেখ("Max(100, 250):");
+লেখ(সর্বোচ্চ(100, 250));
+
+লেখ("Min(100, 250):");
+লেখ(সর্বনিম্ন(100, 250));
+লেখ("");
+
+// Array Methods
+লেখ("4. Array Methods:");
+
+ধরি numbers = [1, 2, 3, 4, 5];
+লেখ("Original:");
+লেখ(numbers);
+
+লেখ("Reversed:");
+লেখ(উল্টাও(numbers));
+লেখ("");
+
+// Combined Example
+লেখ("5. Pythagorean Theorem:");
+ধরি a = 3;
+ধরি b = 4;
+ধরি c = বর্গমূল(শক্তি(a, 2) + শক্তি(b, 2));
+লেখ("a=3, b=4, c=");
+লেখ(c);
+লেখ("");
+
+লেখ("=== All features working! ===");

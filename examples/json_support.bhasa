@@ -1,0 +1,61 @@
+// JSON Support Examples
+
+লেখ("=== JSON Support Examples ===");
+লেখ("");
+
+// 1. Stringify array
+লেখ("1. Convert array to JSON:");
+ধরি numbers = [1, 2, 3, 4, 5];
+ধরি json_array = JSON_স্ট্রিং(numbers);
+লেখ("Array as JSON:");
+লেখ(json_array);
+লেখ("");
+
+// 2. Stringify hash
+লেখ("2. Convert hash to JSON:");
+ধরি person = {
+    "name": "Rahman",
+    "age": 30,
+    "city": "Dhaka"
+};
+ধরি json_person = JSON_স্ট্রিং(person);
+লেখ("Person as JSON:");
+লেখ(json_person);
+লেখ("");
+
+// 3. Parse JSON array
+লেখ("3. Parse JSON array:");
+ধরি json_text = "[10,20,30,40,50]";
+ধরি parsed_array = JSON_পার্স(json_text);
+লেখ("Parsed array:");
+লেখ(parsed_array);
+লেখ("First element:");
+লেখ(প্রথম(parsed_array));
+লেখ("");
+
+// 4. Round-trip test
+লেখ("4. Round-trip: object -> JSON -> object:");
+ধরি original = {
+    "id": 123
+};
+লেখ("Original:");
+লেখ(original);
+ধরি as_json = JSON_স্ট্রিং(original);
+লেখ("As JSON:");
+লেখ(as_json);
+ধরি restored = JSON_পার্স(as_json);
+লেখ("Restored:");
+লেখ(restored);
+লেখ("");
+
+// 5. JSON with Bengali variable names
+লেখ("5. JSON with Bengali variable names:");
+ধরি তথ্য = {
+    "data": "test"
+};
+ধরি json_output = JSON_স্ট্রিং(তথ্য);
+লেখ("Bengali variable as JSON:");
+লেখ(json_output);
+লেখ("");
+
+লেখ("=== JSON support examples completed! ===");
