@@ -57,6 +57,9 @@ const (
 	OpTypeCheck                      // Check if value matches type
 	OpTypeCast                       // Cast value to type
 	OpAssertType                     // Assert value is of type (runtime check)
+	OpStruct                         // Create struct instance
+	OpGetStructField                 // Get struct field
+	OpSetStructField                 // Set struct field
 )
 
 // Definition holds information about an opcode
@@ -109,6 +112,9 @@ var definitions = map[Opcode]*Definition{
 	OpTypeCheck:        {"OpTypeCheck", []int{2}},
 	OpTypeCast:         {"OpTypeCast", []int{2}},
 	OpAssertType:       {"OpAssertType", []int{2}},
+	OpStruct:           {"OpStruct", []int{2}},
+	OpGetStructField:   {"OpGetStructField", []int{}},
+	OpSetStructField:   {"OpSetStructField", []int{}},
 }
 
 // Lookup returns the definition for an opcode

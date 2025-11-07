@@ -499,3 +499,103 @@ func (tce *TypeCastExpression) String() string {
 	return out.String()
 }
 
+// StructField represents a field in a struct definition
+type StructField struct {
+	Name      string
+	TypeAnnot *TypeAnnotation
+}
+
+// StructDefinition represents a struct type definition
+// Example: ধরি ব্যক্তি = স্ট্রাক্ট { নাম: লেখা, বয়স: পূর্ণসংখ্যা }
+type StructDefinition struct {
+	Token  token.Token    // the স্ট্রাক্ট token
+	Name   *Identifier    // struct type name (from LetStatement)
+	Fields []*StructField // ordered list of fields
+}
+
+func (sd *StructDefinition) expressionNode()      {}
+func (sd *StructDefinition) TokenLiteral() string { return sd.Token.Literal }
+func (sd *StructDefinition) String() string {
+	var out bytes.Buffer
+	out.WriteString("স্ট্রাক্ট {")
+
+	fieldStrs := []string{}
+	for _, field := range sd.Fields {
+		fieldStr := field.Name + ": " + field.TypeAnnot.String()
+		fieldStrs = append(fieldStrs, fieldStr)
+	}
+	out.WriteString(strings.Join(fieldStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// StructLiteral represents creating a struct instance
+// Example: ব্যক্তি{নাম: "রহিম", বয়স: 30}
+type StructLiteral struct {
+	Token      token.Token            // the { token
+	StructType *Identifier            // struct type name
+	Fields     map[string]Expression  // field name -> value
+	FieldOrder []string               // preserve field order for output
+}
+
+func (sl *StructLiteral) expressionNode()      {}
+func (sl *StructLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *StructLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString(sl.StructType.String())
+	out.WriteString("{")
+
+	fieldStrs := []string{}
+	for _, fieldName := range sl.FieldOrder {
+		fieldValue := sl.Fields[fieldName]
+		fieldStrs = append(fieldStrs, fieldName+": "+fieldValue.String())
+	}
+	out.WriteString(strings.Join(fieldStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// MemberAccessExpression represents accessing a struct field
+// Example: person.নাম
+type MemberAccessExpression struct {
+	Token  token.Token // the . token
+	Object Expression  // the struct instance
+	Member *Identifier // the field name
+}
+
+func (mae *MemberAccessExpression) expressionNode()      {}
+func (mae *MemberAccessExpression) TokenLiteral() string { return mae.Token.Literal }
+func (mae *MemberAccessExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(mae.Object.String())
+	out.WriteString(".")
+	out.WriteString(mae.Member.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+// MemberAssignmentStatement represents assigning to a struct field
+// Example: person.নাম = "নতুন নাম"
+type MemberAssignmentStatement struct {
+	Token  token.Token // the identifier token
+	Object Expression  // the struct instance
+	Member *Identifier // the field name
+	Value  Expression  // the new value
+}
+
+func (mas *MemberAssignmentStatement) statementNode()       {}
+func (mas *MemberAssignmentStatement) TokenLiteral() string { return mas.Token.Literal }
+func (mas *MemberAssignmentStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(mas.Object.String())
+	out.WriteString(".")
+	out.WriteString(mas.Member.String())
+	out.WriteString(" = ")
+	if mas.Value != nil {
+		out.WriteString(mas.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+

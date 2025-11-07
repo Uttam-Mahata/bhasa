@@ -48,6 +48,7 @@ var precedences = map[token.TokenType]int{
 	token.PERCENT:  PRODUCT,
 	token.LPAREN:   CALL,
 	token.LBRACKET: INDEX,
+	token.DOT:      INDEX, // Member access has same precedence as index
 }
 
 type (
@@ -89,6 +90,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.STRUCT, p.parseStructDefinition)
 
 	// Register infix parse functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -113,6 +115,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	p.registerInfix(token.AS, p.parseTypeCastExpression)
+	p.registerInfix(token.DOT, p.parseMemberAccess)
 
 	// Read two tokens to initialize curToken and peekToken
 	p.nextToken()
@@ -176,6 +179,18 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.IMPORT:
 		return p.parseImportStatement()
 	case token.IDENT:
+		// Check if this is a member assignment (identifier.member = value)
+		if p.peekTokenIs(token.DOT) {
+			// Parse the member access expression
+			left := p.parseExpressionStatement()
+			// Check if it's actually an assignment
+			if memberAccess, ok := left.Expression.(*ast.MemberAccessExpression); ok {
+				if p.peekTokenIs(token.ASSIGN) {
+					return p.parseMemberAssignmentStatement(memberAccess)
+				}
+			}
+			return left
+		}
 		// Check if this is an assignment (identifier followed by =)
 		if p.peekTokenIs(token.ASSIGN) {
 			return p.parseAssignmentStatement()
@@ -223,6 +238,28 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 	stmt := &ast.AssignmentStatement{Token: p.curToken}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseMemberAssignmentStatement(memberAccess *ast.MemberAccessExpression) *ast.MemberAssignmentStatement {
+	stmt := &ast.MemberAssignmentStatement{
+		Token:  memberAccess.Token,
+		Object: memberAccess.Object,
+		Member: memberAccess.Member,
+	}
 
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
@@ -400,7 +437,14 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Check if this is a struct literal (Identifier followed by {)
+	if p.peekTokenIs(token.LBRACE) {
+		return p.parseStructLiteral(ident)
+	}
+
+	return ident
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
@@ -799,4 +843,234 @@ func (p *Parser) parseTypeCastExpression(left ast.Expression) ast.Expression {
 	}
 
 	return exp
+}
+
+// Struct parsing functions
+
+func (p *Parser) parseStructDefinition() ast.Expression {
+	// For now, parse struct literals directly: স্ট্রাক্ট {field: value, ...}
+	structToken := p.curToken
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	// Parse as struct literal
+	lit := &ast.StructLiteral{
+		Token:      structToken,
+		Fields:     make(map[string]ast.Expression),
+		FieldOrder: []string{},
+	}
+
+	// Empty struct
+	if p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		return lit
+	}
+
+	p.nextToken() // move to first field name
+
+	// Parse first field: name: value
+	if !p.curTokenIs(token.IDENT) {
+		p.error("expected field name")
+		return nil
+	}
+
+	fieldName := p.curToken.Literal
+
+	if !p.expectPeek(token.COLON) {
+		return nil
+	}
+
+	p.nextToken() // move to value
+	value := p.parseExpression(LOWEST)
+	if value == nil {
+		return nil
+	}
+
+	lit.Fields[fieldName] = value
+	lit.FieldOrder = append(lit.FieldOrder, fieldName)
+
+	// Parse remaining fields
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // consume comma
+		p.nextToken() // move to field name
+
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected field name")
+			return nil
+		}
+
+		fieldName := p.curToken.Literal
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken() // move to value
+		value := p.parseExpression(LOWEST)
+		if value == nil {
+			return nil
+		}
+
+		lit.Fields[fieldName] = value
+		lit.FieldOrder = append(lit.FieldOrder, fieldName)
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return lit
+}
+
+func (p *Parser) parseStructFields() []*ast.StructField {
+	fields := []*ast.StructField{}
+
+	if p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		return fields
+	}
+
+	p.nextToken()
+
+	// Parse first field: name: type
+	if !p.curTokenIs(token.IDENT) {
+		p.error("expected field name")
+		return nil
+	}
+
+	field := &ast.StructField{Name: p.curToken.Literal}
+
+	if !p.expectPeek(token.COLON) {
+		return nil
+	}
+
+	p.nextToken() // move to type
+	field.TypeAnnot = p.parseTypeAnnotation()
+	if field.TypeAnnot == nil {
+		return nil
+	}
+
+	fields = append(fields, field)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // consume comma
+		p.nextToken() // move to field name
+
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected field name")
+			return nil
+		}
+
+		field := &ast.StructField{Name: p.curToken.Literal}
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken() // move to type
+		field.TypeAnnot = p.parseTypeAnnotation()
+		if field.TypeAnnot == nil {
+			return nil
+		}
+
+		fields = append(fields, field)
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return fields
+}
+
+func (p *Parser) parseMemberAccess(left ast.Expression) ast.Expression {
+	exp := &ast.MemberAccessExpression{
+		Token:  p.curToken, // the . token
+		Object: left,
+	}
+
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	exp.Member = &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
+
+	return exp
+}
+
+func (p *Parser) parseStructLiteral(structType *ast.Identifier) ast.Expression {
+	lit := &ast.StructLiteral{
+		Token:      p.peekToken, // will be the { token
+		StructType: structType,
+		Fields:     make(map[string]ast.Expression),
+		FieldOrder: []string{},
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	if p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		return lit
+	}
+
+	p.nextToken()
+
+	// Parse first field: name: value
+	if !p.curTokenIs(token.IDENT) {
+		p.error("expected field name in struct literal")
+		return nil
+	}
+
+	fieldName := p.curToken.Literal
+
+	if !p.expectPeek(token.COLON) {
+		return nil
+	}
+
+	p.nextToken() // move to value
+	fieldValue := p.parseExpression(LOWEST)
+	if fieldValue == nil {
+		return nil
+	}
+
+	lit.Fields[fieldName] = fieldValue
+	lit.FieldOrder = append(lit.FieldOrder, fieldName)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // consume comma
+		p.nextToken() // move to field name
+
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected field name in struct literal")
+			return nil
+		}
+
+		fieldName := p.curToken.Literal
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken() // move to value
+		fieldValue := p.parseExpression(LOWEST)
+		if fieldValue == nil {
+			return nil
+		}
+
+		lit.Fields[fieldName] = fieldValue
+		lit.FieldOrder = append(lit.FieldOrder, fieldName)
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return lit
 }

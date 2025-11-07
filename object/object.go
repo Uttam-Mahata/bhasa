@@ -36,6 +36,7 @@ const (
 	HASH_OBJ              = "HASH"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	CLOSURE_OBJ           = "CLOSURE"
+	STRUCT_OBJ            = "STRUCT"
 )
 
 // Object represents a value in the language
@@ -338,6 +339,26 @@ type Closure struct {
 func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
+}
+
+// Struct represents a struct instance
+type Struct struct {
+	Fields     map[string]Object
+	FieldOrder []string // To maintain field order for display
+}
+
+func (s *Struct) Type() ObjectType { return STRUCT_OBJ }
+func (s *Struct) Inspect() string {
+	var out bytes.Buffer
+	pairs := []string{}
+	for _, fieldName := range s.FieldOrder {
+		value := s.Fields[fieldName]
+		pairs = append(pairs, fmt.Sprintf("%s: %s", fieldName, value.Inspect()))
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
 }
 
 // BuiltinDef represents a builtin definition
