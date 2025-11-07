@@ -1,10 +1,10 @@
 # ভাষা (Bhasa) - A Bengali Programming Language
 
-A **compiled** programming language that uses Bengali keywords, built with Go for India. 🇮🇳
+A **compiled** programming language that uses Bengali keywords, built with Go as a hobby project.
 
 ## Features
 
-- 🇮🇳 **Bengali keywords and syntax**
+- 📝 **Bengali keywords and syntax**
 - 🔤 **Bengali variable names** - Full Unicode support for identifiers
 - ⚡ **Bytecode compiler** (3-10x faster than interpretation!)
 - 🖥️ **Stack-based virtual machine**
