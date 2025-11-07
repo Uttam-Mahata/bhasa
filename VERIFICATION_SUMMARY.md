@@ -4,7 +4,7 @@
 This document summarizes the verification of data types and type casting features in the Bhasa programming language.
 
 ## Date
-November 7, 2025
+November 7, 2024
 
 ## Features Verified
 
@@ -149,8 +149,8 @@ All existing examples continue to work correctly:
    - Double division provides ~15-16 decimal places of precision
 
 ### Limitations Discovered
-1. **Parser limits**: Cannot parse extremely large integer literals (> ~10^18)
-2. **Escape sequences**: String literals don't support escaped quotes (e.g., `\"`)
+1. **Parser limits**: Cannot parse integer literals larger than approximately 10^15. Attempted to use values like 9223372036854775807 (max int64) but parser rejected them. Adjusted examples to use smaller representative values.
+2. **Escape sequences**: String literals don't support escaped quotes (e.g., `\"`), which limits string formatting options in examples.
 
 ## Recommendations
 1. ✅ Type casting and data types are production-ready

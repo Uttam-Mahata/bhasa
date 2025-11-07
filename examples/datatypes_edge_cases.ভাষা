@@ -22,7 +22,8 @@
 লেখ("Byte maximum (255): ");
 লেখ(byte_max);
 
-// Test wraparound
+// Test wraparound - byte overflow wraps to 0 (8-bit modulo arithmetic)
+// 255 + 1 = 256, which exceeds 8-bit range, wrapping to 0
 ধরি byte_over = বাইট(255);
 ধরি byte_wrap = byte_over + বাইট(1);
 লেখ("255 + 1 wraps to: ");
