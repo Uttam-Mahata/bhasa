@@ -207,6 +207,40 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpStruct:
+			numElements := int(code.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
+
+			structObj, err := vm.buildStruct(vm.sp-numElements, vm.sp)
+			if err != nil {
+				return err
+			}
+			vm.sp = vm.sp - numElements
+
+			err = vm.push(structObj)
+			if err != nil {
+				return err
+			}
+
+		case code.OpGetStructField:
+			fieldName := vm.pop()
+			structObj := vm.pop()
+
+			err := vm.executeGetStructField(structObj, fieldName)
+			if err != nil {
+				return err
+			}
+
+		case code.OpSetStructField:
+			value := vm.pop()
+			fieldName := vm.pop()
+			structObj := vm.pop()
+
+			err := vm.executeSetStructField(structObj, fieldName, value)
+			if err != nil {
+				return err
+			}
+
 		case code.OpIndex:
 			index := vm.pop()
 			left := vm.pop()
@@ -827,6 +861,75 @@ func (vm *VM) buildHash(startIndex, endIndex int) (object.Object, error) {
 	}
 
 	return &object.Hash{Pairs: hashedPairs}, nil
+}
+
+func (vm *VM) buildStruct(startIndex, endIndex int) (object.Object, error) {
+	fields := make(map[string]object.Object)
+	fieldOrder := make([]string, 0, (endIndex-startIndex)/2)
+
+	for i := startIndex; i < endIndex; i += 2 {
+		key := vm.stack[i]
+		value := vm.stack[i+1]
+
+		keyStr, ok := key.(*object.String)
+		if !ok {
+			return nil, fmt.Errorf("struct field name must be string, got %s", key.Type())
+		}
+
+		fields[keyStr.Value] = value
+		fieldOrder = append(fieldOrder, keyStr.Value)
+	}
+
+	return &object.Struct{Fields: fields, FieldOrder: fieldOrder}, nil
+}
+
+func (vm *VM) executeGetStructField(structObj, fieldName object.Object) error {
+	st, ok := structObj.(*object.Struct)
+	if !ok {
+		return fmt.Errorf("cannot access field on non-struct type: %s", structObj.Type())
+	}
+
+	fieldNameStr, ok := fieldName.(*object.String)
+	if !ok {
+		return fmt.Errorf("struct field name must be string, got %s", fieldName.Type())
+	}
+
+	value, exists := st.Fields[fieldNameStr.Value]
+	if !exists {
+		return fmt.Errorf("struct has no field named '%s'", fieldNameStr.Value)
+	}
+
+	return vm.push(value)
+}
+
+func (vm *VM) executeSetStructField(structObj, fieldName, value object.Object) error {
+	st, ok := structObj.(*object.Struct)
+	if !ok {
+		return fmt.Errorf("cannot set field on non-struct type: %s", structObj.Type())
+	}
+
+	fieldNameStr, ok := fieldName.(*object.String)
+	if !ok {
+		return fmt.Errorf("struct field name must be string, got %s", fieldName.Type())
+	}
+
+	// Set or update the field
+	st.Fields[fieldNameStr.Value] = value
+
+	// Add to field order if it's a new field
+	fieldExists := false
+	for _, name := range st.FieldOrder {
+		if name == fieldNameStr.Value {
+			fieldExists = true
+			break
+		}
+	}
+	if !fieldExists {
+		st.FieldOrder = append(st.FieldOrder, fieldNameStr.Value)
+	}
+
+	// Push the struct back (for chaining if needed)
+	return vm.push(st)
 }
 
 func (vm *VM) executeIndexExpression(left, index object.Object) error {
