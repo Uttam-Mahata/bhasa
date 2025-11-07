@@ -1,0 +1,25 @@
+// Minimal Type System Test
+
+লেখ("Test 1: Int with type annotation");
+ধরি x: পূর্ণসংখ্যা = ৪২;
+লেখ(x);
+
+লেখ("\nTest 2: Float with type annotation");
+ধরি y: দশমিক = ৩.১৪;
+লেখ(y);
+
+লেখ("\nTest 3: String with type annotation");
+ধরি name: লেখা = "ভাষা";
+লেখ(name);
+
+লেখ("\nTest 4: Untyped (backward compatibility)");
+ধরি z = ১০০;
+লেখ(z);
+
+লেখ("\nTest 5: Typed function");
+ধরি add = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a + b;
+};
+লেখ(add(৫, ৩));
+
+লেখ("\nAll tests passed!");

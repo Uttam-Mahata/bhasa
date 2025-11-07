@@ -112,6 +112,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
+	p.registerInfix(token.AS, p.parseTypeCastExpression)
 
 	// Read two tokens to initialize curToken and peekToken
 	p.nextToken()
@@ -193,6 +194,16 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Check for optional type annotation: ধরি x: পূর্ণসংখ্যা = 10
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume :
+		p.nextToken() // move to type token
+		stmt.TypeAnnot = p.parseTypeAnnotation()
+		if stmt.TypeAnnot == nil {
+			return nil
+		}
+	}
 
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
@@ -510,7 +521,17 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		return nil
 	}
 
-	lit.Parameters = p.parseFunctionParameters()
+	lit.Parameters, lit.ParameterTypes = p.parseFunctionParameters()
+
+	// Check for optional return type annotation: ফাংশন(x: পূর্ণসংখ্যা): দশমিক { ... }
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume :
+		p.nextToken() // move to type token
+		lit.ReturnType = p.parseTypeAnnotation()
+		if lit.ReturnType == nil {
+			return nil
+		}
+	}
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil
@@ -521,12 +542,13 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+func (p *Parser) parseFunctionParameters() ([]*ast.Identifier, []*ast.TypeAnnotation) {
 	identifiers := []*ast.Identifier{}
+	types := []*ast.TypeAnnotation{}
 
 	if p.peekTokenIs(token.RPAREN) {
 		p.nextToken()
-		return identifiers
+		return identifiers, types
 	}
 
 	p.nextToken()
@@ -534,18 +556,42 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	identifiers = append(identifiers, ident)
 
+	// Check for optional type annotation for parameter
+	var typeAnnot *ast.TypeAnnotation
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume :
+		p.nextToken() // move to type token
+		typeAnnot = p.parseTypeAnnotation()
+		if typeAnnot == nil {
+			return nil, nil
+		}
+	}
+	types = append(types, typeAnnot)
+
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
 		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		identifiers = append(identifiers, ident)
+
+		// Check for optional type annotation for parameter
+		var typeAnnot *ast.TypeAnnotation
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken() // consume :
+			p.nextToken() // move to type token
+			typeAnnot = p.parseTypeAnnotation()
+			if typeAnnot == nil {
+				return nil, nil
+			}
+		}
+		types = append(types, typeAnnot)
 	}
 
 	if !p.expectPeek(token.RPAREN) {
-		return nil
+		return nil, nil
 	}
 
-	return identifiers
+	return identifiers, types
 }
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
@@ -669,4 +715,88 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
 	p.errors = append(p.errors, msg)
+}
+
+// Type annotation parsing functions
+
+func (p *Parser) isTypeToken(t token.TokenType) bool {
+	return t == token.TYPE_BYTE ||
+		t == token.TYPE_SHORT ||
+		t == token.TYPE_INT ||
+		t == token.TYPE_LONG ||
+		t == token.TYPE_FLOAT ||
+		t == token.TYPE_DOUBLE ||
+		t == token.TYPE_CHAR ||
+		t == token.TYPE_STRING ||
+		t == token.TYPE_BOOLEAN ||
+		t == token.TYPE_ARRAY ||
+		t == token.TYPE_HASH
+}
+
+func (p *Parser) parseTypeAnnotation() *ast.TypeAnnotation {
+	if !p.isTypeToken(p.curToken.Type) {
+		p.error(fmt.Sprintf("expected type annotation, got %s", p.curToken.Type))
+		return nil
+	}
+
+	typeAnnot := &ast.TypeAnnotation{
+		Token:    p.curToken,
+		TypeName: p.curToken.Literal,
+	}
+
+	// Check for generic type parameters (e.g., তালিকা<পূর্ণসংখ্যা> or ম্যাপ<লেখা, পূর্ণসংখ্যা>)
+	if p.peekTokenIs(token.LT) {
+		p.nextToken() // consume <
+
+		// For hash types (ম্যাপ), we expect: <keyType, valueType>
+		// For array types (তালিকা), we expect: <elementType>
+		if p.curToken.Type == token.TYPE_HASH {
+			p.nextToken() // move to first type
+			if !p.isTypeToken(p.curToken.Type) {
+				p.error(fmt.Sprintf("expected type for hash key, got %s", p.curToken.Type))
+				return nil
+			}
+			typeAnnot.KeyType = p.parseTypeAnnotation()
+
+			if !p.expectPeek(token.COMMA) {
+				return nil
+			}
+
+			p.nextToken() // move to value type
+			if !p.isTypeToken(p.curToken.Type) {
+				p.error(fmt.Sprintf("expected type for hash value, got %s", p.curToken.Type))
+				return nil
+			}
+			typeAnnot.ElementType = p.parseTypeAnnotation()
+		} else if p.curToken.Type == token.TYPE_ARRAY {
+			p.nextToken() // move to element type
+			if !p.isTypeToken(p.curToken.Type) {
+				p.error(fmt.Sprintf("expected type for array element, got %s", p.curToken.Type))
+				return nil
+			}
+			typeAnnot.ElementType = p.parseTypeAnnotation()
+		}
+
+		if !p.expectPeek(token.GT) {
+			return nil
+		}
+	}
+
+	return typeAnnot
+}
+
+func (p *Parser) parseTypeCastExpression(left ast.Expression) ast.Expression {
+	exp := &ast.TypeCastExpression{
+		Token:      p.curToken, // the 'as' token
+		Expression: left,
+	}
+
+	p.nextToken() // move to type token
+
+	exp.TargetType = p.parseTypeAnnotation()
+	if exp.TargetType == nil {
+		return nil
+	}
+
+	return exp
 }

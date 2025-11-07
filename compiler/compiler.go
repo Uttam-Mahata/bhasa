@@ -241,10 +241,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.LetStatement:
-		symbol := c.symbolTable.Define(node.Name.Value)
+		// Define symbol with type annotation if present
+		var symbol Symbol
+		if node.TypeAnnot != nil {
+			symbol = c.symbolTable.DefineWithType(node.Name.Value, node.TypeAnnot)
+		} else {
+			symbol = c.symbolTable.Define(node.Name.Value)
+		}
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
+		}
+
+		// If type annotation is present, emit type check
+		if node.TypeAnnot != nil {
+			typeConstIndex := c.addConstant(&object.String{Value: node.TypeAnnot.String()})
+			c.emit(code.OpAssertType, typeConstIndex)
 		}
 
 		if symbol.Scope == GlobalScope {
@@ -536,6 +549,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpReturnValue)
+
+	case *ast.TypeCastExpression:
+		// Compile the expression to cast
+		err := c.Compile(node.Expression)
+		if err != nil {
+			return err
+		}
+
+		// Emit type cast opcode with target type
+		typeConstIndex := c.addConstant(&object.String{Value: node.TargetType.String()})
+		c.emit(code.OpTypeCast, typeConstIndex)
 
 	case *ast.CallExpression:
 		err := c.Compile(node.Function)
