@@ -1,0 +1,291 @@
+// Edge Cases and Boundary Testing for Data Types
+// This example tests boundary conditions and special cases
+
+লেখ("==================================================");
+লেখ("    Data Types - Edge Cases and Boundary Tests");
+লেখ("==================================================");
+লেখ("");
+
+// ===========================================
+// 1. Byte Boundaries (0-255 for unsigned, -128 to 127 for signed)
+// ===========================================
+লেখ("1. Byte Type Boundaries");
+লেখ("------------------------");
+
+// Minimum value
+ধরি byte_min = বাইট(0);
+লেখ("Byte minimum (0): ");
+লেখ(byte_min);
+
+// Maximum valid unsigned value
+ধরি byte_max = বাইট(255);
+লেখ("Byte maximum (255): ");
+লেখ(byte_max);
+
+// Test wraparound
+ধরি byte_over = বাইট(255);
+ধরি byte_wrap = byte_over + বাইট(1);
+লেখ("255 + 1 wraps to: ");
+লেখ(byte_wrap);
+
+// Mid-range value
+ধরি byte_mid = বাইট(128);
+লেখ("Byte value 128: ");
+লেখ(byte_mid);
+লেখ("");
+
+// ===========================================
+// 2. Short Boundaries (-32768 to 32767)
+// ===========================================
+লেখ("2. Short Type Boundaries");
+লেখ("-------------------------");
+
+// Minimum value
+ধরি short_min = ছোট_সংখ্যা(-32768);
+লেখ("Short minimum (-32768): ");
+লেখ(short_min);
+
+// Maximum value
+ধরি short_max = ছোট_সংখ্যা(32767);
+লেখ("Short maximum (32767): ");
+লেখ(short_max);
+
+// Near zero
+ধরি short_zero = ছোট_সংখ্যা(0);
+লেখ("Short zero: ");
+লেখ(short_zero);
+
+// Negative value
+ধরি short_neg = ছোট_সংখ্যা(-1000);
+লেখ("Short negative (-1000): ");
+লেখ(short_neg);
+লেখ("");
+
+// ===========================================
+// 3. Int Boundaries
+// ===========================================
+লেখ("3. Int Type Boundaries");
+লেখ("----------------------");
+
+// Large positive
+ধরি int_large_pos = পূর্ণসংখ্যা(2147483647);
+লেখ("Int max (2147483647): ");
+লেখ(int_large_pos);
+
+// Large negative
+ধরি int_large_neg = পূর্ণসংখ্যা(-2147483648);
+লেখ("Int min (-2147483648): ");
+লেখ(int_large_neg);
+
+// Zero
+ধরি int_zero = পূর্ণসংখ্যা(0);
+লেখ("Int zero: ");
+লেখ(int_zero);
+লেখ("");
+
+// ===========================================
+// 4. Long Type Tests (64-bit)
+// ===========================================
+লেখ("4. Long Type Large Values");
+লেখ("-------------------------");
+
+// Very large positive (use smaller value that can be parsed)
+ধরি long_huge = দীর্ঘ_সংখ্যা(922337203685477);
+লেখ("Long large value: ");
+লেখ(long_huge);
+
+// Very large negative
+ধরি long_huge_neg = দীর্ঘ_সংখ্যা(-922337203685477);
+লেখ("Long large negative: ");
+লেখ(long_huge_neg);
+
+// Billion
+ধরি long_billion = দীর্ঘ_সংখ্যা(1000000000);
+লেখ("One billion: ");
+লেখ(long_billion);
+লেখ("");
+
+// ===========================================
+// 5. Float Precision Tests
+// ===========================================
+লেখ("5. Float Type Precision");
+লেখ("------------------------");
+
+// Basic float
+ধরি float_basic = দশমিক(1);
+লেখ("Float(1): ");
+লেখ(float_basic);
+
+// Division precision
+ধরি float_div = দশমিক(1) / দশমিক(3);
+লেখ("1 / 3 (Float): ");
+লেখ(float_div);
+
+// Large float
+ধরি float_large = দশমিক(999999);
+লেখ("Float(999999): ");
+লেখ(float_large);
+
+// Small float
+ধরি float_small = দশমিক(1) / দশমিক(100);
+লেখ("1 / 100 (Float): ");
+লেখ(float_small);
+লেখ("");
+
+// ===========================================
+// 6. Double Precision Tests
+// ===========================================
+লেখ("6. Double Type Precision");
+লেখ("-------------------------");
+
+// Basic double
+ধরি double_basic = দশমিক_দ্বিগুণ(1);
+লেখ("Double(1): ");
+লেখ(double_basic);
+
+// Division precision
+ধরি double_div = দশমিক_দ্বিগুণ(1) / দশমিক_দ্বিগুণ(3);
+লেখ("1 / 3 (Double): ");
+লেখ(double_div);
+
+// Very precise division
+ধরি double_precise = দশমিক_দ্বিগুণ(22) / দশমিক_দ্বিগুণ(7);
+লেখ("22 / 7 (Pi approximation): ");
+লেখ(double_precise);
+
+// Large double
+ধরি double_large = দশমিক_দ্বিগুণ(123456789);
+লেখ("Double(123456789): ");
+লেখ(double_large);
+লেখ("");
+
+// ===========================================
+// 7. Character Tests
+// ===========================================
+লেখ("7. Character Type Tests");
+লেখ("-----------------------");
+
+// English letters
+ধরি char_lower = অক্ষর_রূপান্তর("a");
+লেখ("Lowercase a: ");
+লেখ(char_lower);
+
+ধরি char_upper = অক্ষর_রূপান্তর("Z");
+লেখ("Uppercase Z: ");
+লেখ(char_upper);
+
+// Digit character
+ধরি char_digit = অক্ষর_রূপান্তর("9");
+লেখ("Digit 9: ");
+লেখ(char_digit);
+
+// Special character
+ধরি char_special = অক্ষর_রূপান্তর("@");
+লেখ("Special char @: ");
+লেখ(char_special);
+
+// Bengali characters
+ধরি char_bangla_vowel = অক্ষর_রূপান্তর("অ");
+লেখ("Bengali vowel অ: ");
+লেখ(char_bangla_vowel);
+
+ধরি char_bangla_consonant = অক্ষর_রূপান্তর("ক");
+লেখ("Bengali consonant ক: ");
+লেখ(char_bangla_consonant);
+লেখ("");
+
+// ===========================================
+// 8. Zero Value Tests
+// ===========================================
+লেখ("8. Zero Value Tests");
+লেখ("-------------------");
+
+ধরি zero_byte = বাইট(0);
+লেখ("বাইট(0): ");
+লেখ(zero_byte);
+
+ধরি zero_short = ছোট_সংখ্যা(0);
+লেখ("ছোট_সংখ্যা(0): ");
+লেখ(zero_short);
+
+ধরি zero_int = পূর্ণসংখ্যা(0);
+লেখ("পূর্ণসংখ্যা(0): ");
+লেখ(zero_int);
+
+ধরি zero_long = দীর্ঘ_সংখ্যা(0);
+লেখ("দীর্ঘ_সংখ্যা(0): ");
+লেখ(zero_long);
+
+ধরি zero_float = দশমিক(0);
+লেখ("দশমিক(0): ");
+লেখ(zero_float);
+
+ধরি zero_double = দশমিক_দ্বিগুণ(0);
+লেখ("দশমিক_দ্বিগুণ(0): ");
+লেখ(zero_double);
+লেখ("");
+
+// ===========================================
+// 9. Negative Number Tests
+// ===========================================
+লেখ("9. Negative Number Tests");
+লেখ("------------------------");
+
+ধরি neg_short = ছোট_সংখ্যা(-100);
+লেখ("Negative Short (-100): ");
+লেখ(neg_short);
+
+ধরি neg_int = পূর্ণসংখ্যা(-50000);
+লেখ("Negative Int (-50000): ");
+লেখ(neg_int);
+
+ধরি neg_long = দীর্ঘ_সংখ্যা(-1000000);
+লেখ("Negative Long (-1000000): ");
+লেখ(neg_long);
+
+ধরি neg_float = দশমিক(-1) * দশমিক(5);
+লেখ("Negative Float (-5): ");
+লেখ(neg_float);
+
+ধরি neg_double = দশমিক_দ্বিগুণ(-1) * দশমিক_দ্বিগুণ(10);
+লেখ("Negative Double (-10): ");
+লেখ(neg_double);
+লেখ("");
+
+// ===========================================
+// 10. Arithmetic Edge Cases
+// ===========================================
+লেখ("10. Arithmetic Edge Cases");
+লেখ("--------------------------");
+
+// Division by different types
+ধরি div_int = পূর্ণসংখ্যা(10) / পূর্ণসংখ্যা(3);
+লেখ("10 / 3 (Int): ");
+লেখ(div_int);
+
+ধরি div_float = দশমিক(10) / দশমিক(3);
+লেখ("10 / 3 (Float): ");
+লেখ(div_float);
+
+ধরি div_double = দশমিক_দ্বিগুণ(10) / দশমিক_দ্বিগুণ(3);
+লেখ("10 / 3 (Double): ");
+লেখ(div_double);
+
+// Multiplication edge cases
+ধরি mult_small = ছোট_সংখ্যা(1) * ছোট_সংখ্যা(1);
+লেখ("1 * 1 (Short): ");
+লেখ(mult_small);
+
+ধরি mult_large = দীর্ঘ_সংখ্যা(1000000) * দীর্ঘ_সংখ্যা(1000);
+লেখ("1000000 * 1000 (Long): ");
+লেখ(mult_large);
+
+// Subtraction with negatives
+ধরি sub_result = পূর্ণসংখ্যা(10) - পূর্ণসংখ্যা(20);
+লেখ("10 - 20 (Int): ");
+লেখ(sub_result);
+লেখ("");
+
+লেখ("==================================================");
+লেখ("    All Edge Case Tests Complete!");
+লেখ("==================================================");
