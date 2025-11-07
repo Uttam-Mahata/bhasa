@@ -331,8 +331,10 @@ func (vm *VM) Run() error {
 			}
 
 			// Call constructor if exists
+			// NOTE: Current limitation - constructor calling needs proper context binding
 			if constructor, exists := class.Methods["নির্মাণ"]; exists {
-				// Push instance as 'this'
+				// TODO: This needs proper implementation with instance binding
+				// Push instance as 'this' - but this needs frame context support
 				err := vm.push(instance)
 				if err != nil {
 					return err
@@ -353,6 +355,7 @@ func (vm *VM) Run() error {
 				}
 
 				// Call constructor
+				// BUG: This doesn't account for instance already on stack
 				err = vm.executeCall(int(numArgs))
 				if err != nil {
 					return err
@@ -389,7 +392,9 @@ func (vm *VM) Run() error {
 					return err
 				}
 			} else if method, exists := instance.Class.Methods[propNameStr.Value]; exists {
-				// Return bound method (method with instance context)
+				// Return method - NOTE: This doesn't bind the instance as 'this'
+				// TODO: Need to create a bound method that captures the instance
+				// so that 'this' refers to the correct instance during method execution
 				err := vm.push(method)
 				if err != nil {
 					return err
@@ -429,7 +434,10 @@ func (vm *VM) Run() error {
 
 		case code.OpThis:
 			// Push current instance from frame context
-			// For now, we'll push null - full implementation would need frame context
+			// TODO: This needs proper implementation with frame context
+			// The current frame should store a reference to the instance (this)
+			// so that we can push it here. For now, pushing Null.
+			// A proper implementation would add a 'this' field to the Frame struct
 			err := vm.push(Null)
 			if err != nil {
 				return err

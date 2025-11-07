@@ -542,23 +542,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 	case *ast.ClassStatement:
 		// Compile methods as closures
+		// NOTE: Current limitation - methods are compiled but not captured as closures
+		// A full implementation would require refactoring to capture compiled functions
+		// as closure objects that can be stored in the methods map
 		methods := make(map[string]*object.Closure)
 		for name, method := range node.Methods {
-			// Compile each method
+			// Compile each method (produces bytecode but doesn't return closure)
 			err := c.Compile(method)
 			if err != nil {
 				return err
 			}
 			
-			// For simplicity, we'll store the class definition as a constant
-			// In a real implementation, methods would be compiled and stored properly
-			_ = name // We'll handle this when implementing VM support
+			// TODO: Capture the compiled function as a closure and store in methods[name]
+			// This requires changes to how Compile returns values
+			_ = name // Silence unused variable warning
 		}
 		
 		// Create class object and add as constant
 		classObj := &object.Class{
 			Name:    node.Name.Value,
-			Methods: methods,
+			Methods: methods, // Currently empty - methods need proper capture
 		}
 		classConst := c.addConstant(classObj)
 		

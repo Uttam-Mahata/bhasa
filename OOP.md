@@ -60,16 +60,23 @@ Reference the current instance using the `এই` keyword:
 
 ✅ **Implemented:**
 - Class declarations with method definitions
-- Object instantiation
-- Member access syntax parsing
+- Object instantiation (`নতুন` keyword)
+- Member access syntax parsing (`.` operator)
 - Instance type in object system
 - Basic OOP infrastructure (AST, compiler, VM opcodes)
+- Class and Instance object types
 
 🚧 **Partially Implemented:**
-- Method calls on instances (infrastructure in place, needs refinement)
-- Property access and modification
-- Constructor methods
-- `this` keyword context binding
+- Method compilation and storage (methods are parsed but not yet callable)
+- Property access and modification (syntax supported, execution needs work)
+- Constructor methods (infrastructure in place)
+- `this` keyword context binding (needs frame context support)
+
+⚠️ **Known Limitations:**
+- Method calls on instances require additional frame context implementation
+- `this` keyword needs proper instance binding in VM frames
+- Constructor parameters need proper argument passing mechanism
+- Methods need to be properly captured as closures during class compilation
 
 📋 **Future Enhancements:**
 - Full `this` context in method calls
