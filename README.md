@@ -22,6 +22,7 @@ A **compiled** programming language that uses Bengali keywords, built with Go as
 - 📝 **String manipulation** (split, join, uppercase, lowercase, trim, replace)
 - 🔢 **Multiple numeric types** (Byte, Short, Int, Long, Float, Double) with type casting
 - 📦 **Module system** with `অন্তর্ভুক্ত` (import) support
+- 🎨 **Optional static typing** - Add type annotations for better code safety!
 
 ## Bengali Keywords
 
@@ -41,10 +42,22 @@ A **compiled** programming language that uses Bengali keywords, built with Go as
 | null | নাল | Null value |
 | import | অন্তর্ভুক্ত | Import module |
 
+## Type Keywords (Optional Static Typing)
+
+| Type | Bengali | Usage |
+|------|---------|-------|
+| integer | পূর্ণসংখ্যা | Integer type annotation |
+| string | লেখা | String type annotation |
+| boolean | বুলিয়ান | Boolean type annotation |
+| array | তালিকা | Array type annotation |
+| hash | হ্যাশ | Hash type annotation |
+| function | ফাংশন_টাইপ | Function type annotation |
+
 ## Quick Links
 
 - 📖 [**Self-Hosting Compiler Guide**](SELF_HOSTING.md) - Learn how the Bhasa compiler is written in Bhasa
 - 🔧 [**Compiler API Documentation**](COMPILER_API.md) - Complete API reference for the self-hosted compiler
+- 🎨 [**Static Typing Guide**](STATIC_TYPING.md) - Learn about optional type annotations
 - 🧪 [**Test Suite**](tests/) - Comprehensive tests for lexer, parser, compiler, and bootstrap
 
 ## Installation

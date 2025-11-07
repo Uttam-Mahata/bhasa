@@ -1,0 +1,123 @@
+// Comprehensive Static Typing Example
+// Demonstrates mixing typed and untyped code in a real application
+
+লেখ("=== পরিসংখ্যান ক্যালকুলেটর (Statistics Calculator) ===");
+লেখ("");
+
+// Type-annotated data structure for statistics
+ধরি numbers: তালিকা = [১০, ২০, ৩০, ৪০, ৫০, ৬০, ৭০, ৮০, ৯০, ১০০];
+
+// Typed function to calculate sum
+ধরি sum = ফাংশন(arr: তালিকা): পূর্ণসংখ্যা {
+    ধরি total: পূর্ণসংখ্যা = ০;
+    ধরি i: পূর্ণসংখ্যা = ০;
+    
+    যতক্ষণ (i < দৈর্ঘ্য(arr)) {
+        total = total + arr[i];
+        i = i + ১;
+    }
+    
+    ফেরত total;
+};
+
+// Typed function to calculate average
+ধরি average = ফাংশন(arr: তালিকা): পূর্ণসংখ্যা {
+    ধরি total: পূর্ণসংখ্যা = sum(arr);
+    ধরি length: পূর্ণসংখ্যা = দৈর্ঘ্য(arr);
+    ফেরত total / length;
+};
+
+// Typed function to find minimum
+ধরি minimum = ফাংশন(arr: তালিকা): পূর্ণসংখ্যা {
+    ধরি min: পূর্ণসংখ্যা = arr[০];
+    ধরি i: পূর্ণসংখ্যা = ১;
+    
+    যতক্ষণ (i < দৈর্ঘ্য(arr)) {
+        যদি (arr[i] < min) {
+            min = arr[i];
+        }
+        i = i + ১;
+    }
+    
+    ফেরত min;
+};
+
+// Typed function to find maximum
+ধরি maximum = ফাংশন(arr: তালিকা): পূর্ণসংখ্যা {
+    ধরি max: পূর্ণসংখ্যা = arr[০];
+    ধরি i: পূর্ণসংখ্যা = ১;
+    
+    যতক্ষণ (i < দৈর্ঘ্য(arr)) {
+        যদি (arr[i] > max) {
+            max = arr[i];
+        }
+        i = i + ১;
+    }
+    
+    ফেরত max;
+};
+
+// Typed function to count elements
+ধরি count = ফাংশন(arr: তালিকা): পূর্ণসংখ্যা {
+    ফেরত দৈর্ঘ্য(arr);
+};
+
+// Calculate statistics
+লেখ("ডেটা: ");
+লেখ(numbers);
+লেখ("");
+
+ধরি totalSum: পূর্ণসংখ্যা = sum(numbers);
+লেখ("মোট যোগফল: ");
+লেখ(totalSum);
+
+ধরি avg: পূর্ণসংখ্যা = average(numbers);
+লেখ("গড়: ");
+লেখ(avg);
+
+ধরি min: পূর্ণসংখ্যা = minimum(numbers);
+লেখ("ক্ষুদ্রতম: ");
+লেখ(min);
+
+ধরি max: পূর্ণসংখ্যা = maximum(numbers);
+লেখ("বৃহত্তম: ");
+লেখ(max);
+
+ধরি range: পূর্ণসংখ্যা = max - min;
+লেখ("পরিসীমা: ");
+লেখ(range);
+
+লেখ("");
+লেখ("=== গণনা সম্পূর্ণ ===");
+
+// Demonstration of mixed typing
+লেখ("");
+লেখ("=== মিশ্র টাইপিং উদাহরণ ===");
+
+// Untyped function (dynamic)
+ধরি multiply = ফাংশন(a, b) {
+    ফেরত a * b;
+};
+
+// Typed function calling untyped function
+ধরি doubleValue = ফাংশন(x: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত multiply(x, ২);
+};
+
+লেখ("দ্বিগুণ ১৫: ");
+লেখ(doubleValue(১৫));
+
+// Higher-order typed function
+ধরি applyOperation: ফাংশন_টাইপ = ফাংশন(op: ফাংশন_টাইপ, x: পূর্ণসংখ্যা, y: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত op(x, y);
+};
+
+ধরি add = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a + b;
+};
+
+লেখ("১০ + ২০ = ");
+লেখ(applyOperation(add, ১০, ২০));
+
+লেখ("");
+লেখ("=== সফলভাবে সম্পন্ন! ===");
