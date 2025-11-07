@@ -255,9 +255,9 @@ go build -o bhasa
 - ✅ Optimized for performance
 
 ### Cultural
-- ✅ Created a Bengali programming language for India
+- ✅ Created a Bengali programming language as a hobby project
 - ✅ Preserved Bengali script and culture in code
-- ✅ Made programming accessible to Bengali speakers in India
+- ✅ Made programming accessible to Bengali speakers
 - ✅ Demonstrated technical capability in native language
 
 ## 🔮 Future Possibilities
@@ -295,14 +295,14 @@ go build -o bhasa
 **ভাষা (Bhasa)** is now a fully-functional, compiled programming language featuring:
 
 - ⚡ **High performance** (bytecode compiled)
-- 🇮🇳 **Bengali keywords** (native language support)
+- 📝 **Bengali keywords** (native language support)
 - 🎯 **Modern features** (closures, first-class functions)
 - 📚 **Well documented** (7 documentation files)
 - ✅ **Production ready** (all tests pass)
 
 From a simple idea to a sophisticated compiler and VM - **we built a complete programming language!** 
 
-🚀 **Congratulations on creating Bhasa!** 🇮🇳
+🚀 **Congratulations on creating Bhasa!** 🚀
 
 ---
 
