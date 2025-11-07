@@ -87,6 +87,12 @@ const (
 	TYPE_ARRAY   = "তালিকা"         // array type
 	TYPE_HASH    = "ম্যাপ"          // hash/map type
 	AS           = "as"            // type casting keyword
+
+	// Struct and Enum keywords
+	STRUCT = "স্ট্রাক্ট" // struct keyword
+	ENUM   = "enum"     // enum keyword
+	DOT    = "."        // dot for field access
+	ARROW  = "=>"       // arrow for pattern matching
 )
 
 var keywords = map[string]TokenType{
@@ -115,6 +121,9 @@ var keywords = map[string]TokenType{
 	"তালিকা":         TYPE_ARRAY,
 	"ম্যাপ":          TYPE_HASH,
 	"as":            AS,
+	// Struct and Enum keywords
+	"স্ট্রাক্ট": STRUCT,
+	"enum":     ENUM,
 }
 
 // LookupIdent checks if an identifier is a keyword
