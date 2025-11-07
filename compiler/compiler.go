@@ -163,6 +163,16 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpAnd)
 		case "||":
 			c.emit(code.OpOr)
+		case "&":
+			c.emit(code.OpBitAnd)
+		case "|":
+			c.emit(code.OpBitOr)
+		case "^":
+			c.emit(code.OpBitXor)
+		case "<<":
+			c.emit(code.OpLeftShift)
+		case ">>":
+			c.emit(code.OpRightShift)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
@@ -178,6 +188,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpBang)
 		case "-":
 			c.emit(code.OpMinus)
+		case "~":
+			c.emit(code.OpBitNot)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
