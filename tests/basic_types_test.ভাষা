@@ -1,0 +1,83 @@
+// Basic Type Annotations Test
+// Tests type annotations without type casting
+
+লেখ("=== Type Annotations Test ===\n");
+
+// Test 1: Byte type
+ধরি b: বাইট = ১০;
+লেখ("Byte:", b);
+
+// Test 2: Short type
+ধরি s: ছোট_সংখ্যা = ১০০০;
+লেখ("Short:", s);
+
+// Test 3: Int type
+ধরি i: পূর্ণসংখ্যা = ১০০০০০;
+লেখ("Int:", i);
+
+// Test 4: Long type
+ধরি l: দীর্ঘ_সংখ্যা = ১০০০০০০০০০;
+লেখ("Long:", l);
+
+// Test 5: Float type
+ধরি f: দশমিক = ৩.১৪;
+লেখ("Float:", f);
+
+// Test 6: Double type
+ধরি d: দশমিক_দ্বিগুণ = ২.৭১৮২৮;
+লেখ("Double:", d);
+
+// Test 7: String type
+ধরি str: লেখা = "হ্যালো বিশ্ব";
+লেখ("String:", str);
+
+// Test 8: Boolean type
+ধরি flag: বুলিয়ান = সত্য;
+লেখ("Boolean:", flag);
+
+লেখ("\n=== Typed Functions ===\n");
+
+// Function with int parameters and return type
+ধরি যোগ = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a + b;
+};
+
+লেখ("যোগ(৫, ৩) =", যোগ(৫, ৩));
+
+// Function with float parameters
+ধরি গুণ = ফাংশন(x: দশমিক, y: দশমিক): দশমিক {
+    ফেরত x * y;
+};
+
+লেখ("গুণ(২.৫, ৪.০) =", গুণ(২.৫, ৪.০));
+
+// Function with mixed parameter types
+ধরি মিশ্র = ফাংশন(a: পূর্ণসংখ্যা, b: দশমিক): দশমিক {
+    ফেরত পূর্ণসংখ্যা(a) + b;
+};
+
+লেখ("\n=== Backward Compatibility ===\n");
+
+// Untyped variables still work
+ধরি untyped = ৪২;
+লেখ("Untyped variable:", untyped);
+
+// Untyped functions still work
+ধরি old_func = ফাংশন(x, y) {
+    ফেরত x + y;
+};
+
+লেখ("Untyped function:", old_func(১০, ২০));
+
+লেখ("\n=== Arithmetic with Typed Variables ===\n");
+
+ধরি num1: পূর্ণসংখ্যা = ২০;
+ধরি num2: পূর্ণসংখ্যা = ৩;
+
+লেখ("Addition:", num1 + num2);
+লেখ("Subtraction:", num1 - num2);
+লেখ("Multiplication:", num1 * num2);
+লেখ("Division:", num1 / num2);
+লেখ("Modulo:", num1 % num2);
+
+লেখ("\nAll type annotation tests completed successfully!");

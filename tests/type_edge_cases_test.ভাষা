@@ -1,0 +1,137 @@
+// Type System Edge Cases and Error Testing
+// Tests edge cases, boundary values, and type safety
+
+লেখ("=== Boundary Value Tests ===");
+
+// Byte boundaries
+ধরি byteZero: বাইট = ০;
+ধরি byteMax: বাইট = ২৫৫;
+লেখ("Byte range: [", byteZero, ",", byteMax, "]");
+
+// Short boundaries
+ধরি shortMin: ছোট_সংখ্যা = -৩২৭৬৮;
+ধরি shortMax: ছোট_সংখ্যা = ৩২৭৬৭;
+লেখ("Short range: [", shortMin, ",", shortMax, "]");
+
+// Int boundaries
+ধরি intMin: পূর্ণসংখ্যা = -২১৪৭৪৮৩৬৪৮;
+ধরি intMax: পূর্ণসংখ্যা = ২১৪৭৪৮৩৬৪৭;
+লেখ("Int range: [", intMin, ",", intMax, "]");
+
+লেখ("\n=== Type Coercion in Operations ===");
+ধরি smallInt: বাইট = ৫;
+ধরি largeInt: দীর্ঘ_সংখ্যা = ১০০০০০;
+ধরি coerced = (smallInt as দীর্ঘ_সংখ্যা) + largeInt;
+লেখ("Byte + Long (coerced):", smallInt, "+", largeInt, "=", coerced);
+
+লেখ("\n=== Precision Tests ===");
+ধরি f32: দশমিক = ১.২৩৪৫৬৭৮৯;
+ধরি f64: দশমিক_দ্বিগুণ = ১.২৩৪৫৬৭৮৯০১২৩৪৫৬;
+লেখ("Float precision:", f32);
+লেখ("Double precision:", f64);
+
+লেখ("\n=== Negative Number Tests ===");
+ধরি negByte: বাইট = -১২৮;
+ধরি negShort: ছোট_সংখ্যা = -১০০০;
+ধরি negInt: পূর্ণসংখ্যা = -৫০০০০;
+ধরি negLong: দীর্ঘ_সংখ্যা = -১০০০০০০০;
+ধরি negFloat: দশমিক = -৩.১৪;
+ধরি negDouble: দশমিক_দ্বিগুণ = -২.৭১৮;
+
+লেখ("Negative byte:", negByte);
+লেখ("Negative short:", negShort);
+লেখ("Negative int:", negInt);
+লেখ("Negative long:", negLong);
+লেখ("Negative float:", negFloat);
+লেখ("Negative double:", negDouble);
+
+লেখ("\n=== Zero Division Prevention ===");
+ধরি safeDivide = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    যদি (b == ০) {
+        লেখ("Error: Division by zero!");
+        ফেরত ০;
+    }
+    ফেরত a / b;
+};
+
+লেখ("safeDivide(10, 2):", safeDivide(১০, ২));
+লেখ("safeDivide(10, 0):", safeDivide(১০, ০));
+
+লেখ("\n=== Type Casting Chain ===");
+ধরি original: বাইট = ১০০;
+ধরি toShort = original as ছোট_সংখ্যা;
+ধরি toInt = toShort as পূর্ণসংখ্যা;
+ধরি toLong = toInt as দীর্ঘ_সংখ্যা;
+ধরি toFloat = toLong as দশমিক;
+ধরি toDouble = toFloat as দশমিক_দ্বিগুণ;
+ধরি backToInt = toDouble as পূর্ণসংখ্যা;
+
+লেখ("Original (byte):", original);
+লেখ("After chain cast back to int:", backToInt);
+লেখ("Values equal:", original == backToInt);
+
+লেখ("\n=== Float to Int Truncation ===");
+ধরি pi: দশমিক = ৩.১৪১৫৯;
+ধরি piInt = pi as পূর্ণসংখ্যা;
+লেখ("Float", pi, "truncated to int:", piInt);
+
+ধরি negPi: দশমিক = -৩.১৪১৫৯;
+ধরি negPiInt = negPi as পূর্ণসংখ্যা;
+লেখ("Negative float", negPi, "truncated to int:", negPiInt);
+
+লেখ("\n=== Large Number Operations ===");
+ধরি large1: দীর্ঘ_সংখ্যা = ১০০০০০০০০;
+ধরি large2: দীর্ঘ_সংখ্যা = ২০০০০০০০০;
+ধরি largeSum = large1 + large2;
+ধরি largeProduct = large1 / ১০০০০;
+
+লেখ("Large sum:", large1, "+", large2, "=", largeSum);
+লেখ("Large division:", large1, "/ 10000 =", largeProduct);
+
+লেখ("\n=== Boolean Type Tests ===");
+ধরি trueBool: বুলিয়ান = সত্য;
+ধরি falseBool: বুলিয়ান = মিথ্যা;
+
+লেখ("Boolean AND:", trueBool, "&&", falseBool, "=", trueBool && falseBool);
+লেখ("Boolean OR:", trueBool, "||", falseBool, "=", trueBool || falseBool);
+লেখ("Boolean NOT:", "!", trueBool, "=", !trueBool);
+
+লেখ("\n=== String Type Tests ===");
+ধরি str1: লেখা = "হ্যালো";
+ধরি str2: লেখা = "বিশ্ব";
+ধরি strConcat: লেখা = str1 + " " + str2;
+লেখ("String concatenation:", strConcat);
+
+লেখ("\n=== Polymorphic Functions ===");
+ধরি পরম_মান = ফাংশন(n: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    যদি (n < ০) {
+        ফেরত -n;
+    }
+    ফেরত n;
+};
+
+লেখ("পরম_মান(৫):", পরম_মান(৫));
+লেখ("পরম_মান(-৫):", পরম_মান(-৫));
+
+ধরি সর্বোচ্চ = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    যদি (a > b) {
+        ফেরত a;
+    }
+    ফেরত b;
+};
+
+লেখ("সর্বোচ্চ(১০, ২০):", সর্বোচ্চ(১০, ২০));
+লেখ("সর্বোচ্চ(৩০, ১৫):", সর্বোচ্চ(৩০, ১৫));
+
+লেখ("\n=== Recursive Function with Types ===");
+ধরি ফ্যাক্টরিয়াল = ফাংশন(n: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    যদি (n <= ১) {
+        ফেরত ১;
+    }
+    ফেরত n * ফ্যাক্টরিয়াল(n - ১);
+};
+
+লেখ("ফ্যাক্টরিয়াল(৫):", ফ্যাক্টরিয়াল(৫));
+লেখ("ফ্যাক্টরিয়াল(১০):", ফ্যাক্টরিয়াল(১০));
+
+লেখ("\nসকল এজ কেস পরীক্ষা সম্পন্ন!");

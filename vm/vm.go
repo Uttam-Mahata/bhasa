@@ -303,6 +303,61 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpAssertType:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			expectedType := vm.constants[constIndex].(*object.String).Value
+			value := vm.pop()
+
+			if !vm.checkType(value, expectedType) {
+				return fmt.Errorf("type error: expected %s, got %s", expectedType, vm.getTypeName(value))
+			}
+
+			// Push value back on stack after type check
+			err := vm.push(value)
+			if err != nil {
+				return err
+			}
+
+		case code.OpTypeCast:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			targetType := vm.constants[constIndex].(*object.String).Value
+			value := vm.pop()
+
+			castedValue, err := vm.castType(value, targetType)
+			if err != nil {
+				return err
+			}
+
+			err = vm.push(castedValue)
+			if err != nil {
+				return err
+			}
+
+		case code.OpTypeCheck:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			expectedType := vm.constants[constIndex].(*object.String).Value
+			value := vm.pop()
+
+			// Push boolean result of type check
+			result := vm.checkType(value, expectedType)
+			if result {
+				err := vm.push(True)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := vm.push(False)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -891,4 +946,98 @@ func (vm *VM) pushFrame(f *Frame) {
 func (vm *VM) popFrame() *Frame {
 	vm.framesIndex--
 	return vm.frames[vm.framesIndex]
+}
+
+// Type checking and casting functions
+
+func (vm *VM) getTypeName(obj object.Object) string {
+	switch obj.Type() {
+	case object.BYTE_OBJ:
+		return "বাইট"
+	case object.SHORT_OBJ:
+		return "ছোট_সংখ্যা"
+	case object.INT_OBJ:
+		return "পূর্ণসংখ্যা"
+	case object.LONG_OBJ, object.INTEGER_OBJ:
+		return "দীর্ঘ_সংখ্যা"
+	case object.FLOAT_OBJ:
+		return "দশমিক"
+	case object.DOUBLE_OBJ:
+		return "দশমিক_দ্বিগুণ"
+	case object.CHAR_OBJ:
+		return "অক্ষর"
+	case object.STRING_OBJ:
+		return "লেখা"
+	case object.BOOLEAN_OBJ:
+		return "বুলিয়ান"
+	case object.ARRAY_OBJ:
+		return "তালিকা"
+	case object.HASH_OBJ:
+		return "ম্যাপ"
+	default:
+		return string(obj.Type())
+	}
+}
+
+func (vm *VM) checkType(obj object.Object, expectedType string) bool {
+	actualType := vm.getTypeName(obj)
+	return actualType == expectedType
+}
+
+func (vm *VM) castType(obj object.Object, targetType string) (object.Object, error) {
+	// If already the correct type, return as-is
+	if vm.checkType(obj, targetType) {
+		return obj, nil
+	}
+
+	switch targetType {
+	case "বাইট":
+		val := vm.toInt64(obj)
+		if val < 0 || val > 255 {
+			return nil, fmt.Errorf("value %d out of range for byte (0-255)", val)
+		}
+		return &object.Byte{Value: int8(val)}, nil
+
+	case "ছোট_সংখ্যা":
+		val := vm.toInt64(obj)
+		if val < -32768 || val > 32767 {
+			return nil, fmt.Errorf("value %d out of range for short (-32768 to 32767)", val)
+		}
+		return &object.Short{Value: int16(val)}, nil
+
+	case "পূর্ণসংখ্যা":
+		val := vm.toInt64(obj)
+		if val < -2147483648 || val > 2147483647 {
+			return nil, fmt.Errorf("value %d out of range for int", val)
+		}
+		return &object.Int{Value: int32(val)}, nil
+
+	case "দীর্ঘ_সংখ্যা":
+		val := vm.toInt64(obj)
+		return &object.Long{Value: val}, nil
+
+	case "দশমিক":
+		val := vm.toFloat64(obj)
+		return &object.Float{Value: float32(val)}, nil
+
+	case "দশমিক_দ্বিগুণ":
+		val := vm.toFloat64(obj)
+		return &object.Double{Value: val}, nil
+
+	case "লেখা":
+		return &object.String{Value: obj.Inspect()}, nil
+
+	case "অক্ষর":
+		str, ok := obj.(*object.String)
+		if !ok {
+			return nil, fmt.Errorf("cannot cast %s to char", obj.Type())
+		}
+		if len([]rune(str.Value)) != 1 {
+			return nil, fmt.Errorf("string must be exactly one character to cast to char")
+		}
+		return &object.Char{Value: []rune(str.Value)[0]}, nil
+
+	default:
+		return nil, fmt.Errorf("cannot cast to type %s", targetType)
+	}
 }
