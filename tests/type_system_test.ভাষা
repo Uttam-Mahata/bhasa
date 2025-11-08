@@ -1,0 +1,87 @@
+// Type System Tests for Bhasa Language
+// This file tests the dynamic type system with type annotations
+
+// Test 1: Byte type annotation
+ধরি বাইটসংখ্যা: বাইট = ২৫৫;
+লেখ("বাইটসংখ্যা:", বাইটসংখ্যা);
+
+// Test 2: Short type annotation
+ধরি ছোটসংখ্যা: ছোট_সংখ্যা = ৩২৭৬৭;
+লেখ("ছোটসংখ্যা:", ছোটসংখ্যা);
+
+// Test 3: Int type annotation
+ধরি পূর্ণসংখ্যা: পূর্ণসংখ্যা = ২১৪৭৪৮৩৬৪৭;
+লেখ("পূর্ণসংখ্যা:", পূর্ণসংখ্যা);
+
+// Test 4: Long type annotation
+ধরি দীর্ঘসংখ্যা: দীর্ঘ_সংখ্যা = ৯২২৩৩৭২০৩৬৮৫৪৭৭৫৮০৭;
+লেখ("দীর্ঘসংখ্যা:", দীর্ঘসংখ্যা);
+
+// Test 5: Float type annotation
+ধরি দশমিকসংখ্যা: দশমিক = ৩.১৪;
+লেখ("দশমিকসংখ্যা:", দশমিকসংখ্যা);
+
+// Test 6: Double type annotation
+ধরি দ্বিগুণদশমিক: দশমিক_দ্বিগুণ = ৩.১৪১৫৯২৬৫৩৫৮৯৭৯;
+লেখ("দ্বিগুণদশমিক:", দ্বিগুণদশমিক);
+
+// Test 7: String type annotation
+ধরি লেখাটেক্সট: লেখা = "হ্যালো বিশ্ব";
+লেখ("লেখাটেক্সট:", লেখাটেক্সট);
+
+// Test 8: Boolean type annotation
+ধরি বুলিয়ানমান: বুলিয়ান = সত্য;
+লেখ("বুলিয়ানমান:", বুলিয়ানমান);
+
+// Test 9: Type casting - int to float
+ধরি x = ১০;
+ধরি y = x as দশমিক;
+লেখ("Type cast int to float:", y);
+
+// Test 10: Type casting - float to int
+ধরি a = ৩.১৪;
+ধরি b = a as পূর্ণসংখ্যা;
+লেখ("Type cast float to int:", b);
+
+// Test 11: Type casting - byte to long
+ধরি byteVal = ১০০;
+ধরি longVal = byteVal as দীর্ঘ_সংখ্যা;
+লেখ("Type cast byte to long:", longVal);
+
+// Test 12: Function with typed parameters and return type
+ধরি যোগফল = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a + b;
+};
+লেখ("যোগফল(৫, ৩):", যোগফল(৫, ৩));
+
+// Test 13: Function with typed parameters and different return type
+ধরি গড় = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): দশমিক {
+    ফেরত (a + b) as দশমিক / ২.০;
+};
+লেখ("গড়(১০, ২০):", গড়(১০, ২০));
+
+// Test 14: Type annotations with expressions
+ধরি ফলাফল: পূর্ণসংখ্যা = ৫ + ৩ * ২;
+লেখ("ফলাফল:", ফলাফল);
+
+// Test 15: Type casting in complex expressions
+ধরি জটিল = (১০ as দশমিক) / ৩.০;
+লেখ("জটিল:", জটিল);
+
+// Test 16: Multiple type casts
+ধরি মাল্টিকাস্ট = ((১০০ as দশমিক) / ৩.০) as পূর্ণসংখ্যা;
+লেখ("মাল্টিকাস্ট:", মাল্টিকাস্ট);
+
+// Test 17: Function without type annotations (backward compatibility)
+ধরি পুরাতনফাংশন = ফাংশন(x, y) {
+    ফেরত x * y;
+};
+লেখ("পুরাতনফাংশন(৪, ৫):", পুরাতনফাংশন(৪, ৫));
+
+// Test 18: Mixed typed and untyped parameters
+ধরি মিশ্রফাংশন = ফাংশন(a: পূর্ণসংখ্যা, b) {
+    ফেরত a + b;
+};
+লেখ("মিশ্রফাংশন(৫, ৭):", মিশ্রফাংশন(৫, ৭));
+
+লেখ("\nসকল টাইপ সিস্টেম পরীক্ষা সম্পন্ন!");

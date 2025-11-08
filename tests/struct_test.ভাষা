@@ -1,0 +1,84 @@
+// Comprehensive Struct Tests for Bhasa Language
+
+লেখ("=== Struct Test Suite ===\n");
+
+// Test 1: Simple struct literal
+লেখ("Test 1: Simple struct literal creation");
+ধরি person1 = স্ট্রাক্ট {নাম: "রহিম", বয়স: ২৫};
+লেখ("person1 created:");
+লেখ(person1);
+
+// Test 2: Access struct fields
+লেখ("\nTest 2: Access struct fields");
+লেখ("Name:");
+লেখ(person1.নাম);
+লেখ("Age:");
+লেখ(person1.বয়স);
+
+// Test 3: Modify struct fields
+লেখ("\nTest 3: Modify struct fields");
+person1.নাম = "করিম";
+person1.বয়স = ৩০;
+লেখ("After modification:");
+লেখ(person1);
+
+// Test 4: Multiple struct instances
+লেখ("\nTest 4: Multiple struct instances");
+ধরি person2 = স্ট্রাক্ট {নাম: "সালমা", বয়স: ২২};
+ধরি person3 = স্ট্রাক্ট {নাম: "জামাল", বয়স: ৩৫};
+লেখ("person2:");
+লেখ(person2);
+লেখ("person3:");
+লেখ(person3);
+
+// Test 5: Struct with different field order
+লেখ("\nTest 5: Different field order");
+ধরি person4 = স্ট্রাক্ট {বয়স: ২৮, নাম: "আকতার"};
+লেখ("person4:");
+লেখ(person4);
+
+// Test 6: Struct with string values
+লেখ("\nTest 6: Struct with various string values");
+ধরি address = স্ট্রাক্ট {শহর: "ঢাকা", দেশ: "বাংলাদেশ"};
+লেখ("Address:");
+লেখ(address);
+লেখ("City:");
+লেখ(address.শহর);
+
+// Test 7: Struct with numbers
+লেখ("\nTest 7: Struct with numbers");
+ধরি point = স্ট্রাক্ট {x: ১০, y: ২০};
+লেখ("Point:");
+লেখ(point);
+লেখ("X coordinate:");
+লেখ(point.x);
+লেখ("Y coordinate:");
+লেখ(point.y);
+
+// Test 8: Empty struct
+লেখ("\nTest 8: Empty struct");
+ধরি empty = স্ট্রাক্ট {};
+লেখ("Empty struct:");
+লেখ(empty);
+
+// Test 9: Struct field reassignment
+লেখ("\nTest 9: Multiple reassignments");
+ধরি config = স্ট্রাক্ট {mode: "default", level: ০};
+লেখ("Initial config:");
+লেখ(config);
+config.mode = "advanced";
+লেখ("After mode change:");
+লেখ(config);
+config.level = ৫;
+লেখ("After level change:");
+লেখ(config);
+
+// Test 10: Struct with boolean
+লেখ("\nTest 10: Struct with boolean");
+ধরি status = স্ট্রাক্ট {active: সত্য, completed: মিথ্যা};
+লেখ("Status:");
+লেখ(status);
+লেখ("Is active:");
+লেখ(status.active);
+
+লেখ("\n=== All Struct Tests Completed ===");

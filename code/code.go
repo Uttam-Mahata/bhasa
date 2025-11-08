@@ -54,6 +54,13 @@ const (
 	OpClosure                        // Create closure
 	OpGetFree                        // Get free variable
 	OpCurrentClosure                 // Get current closure
+	OpTypeCheck                      // Check if value matches type
+	OpTypeCast                       // Cast value to type
+	OpAssertType                     // Assert value is of type (runtime check)
+	OpStruct                         // Create struct instance
+	OpGetStructField                 // Get struct field
+	OpSetStructField                 // Set struct field
+	OpEnum                           // Create enum variant
 )
 
 // Definition holds information about an opcode
@@ -103,6 +110,13 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:          {"OpClosure", []int{2, 1}},
 	OpGetFree:          {"OpGetFree", []int{1}},
 	OpCurrentClosure:   {"OpCurrentClosure", []int{}},
+	OpTypeCheck:        {"OpTypeCheck", []int{2}},
+	OpTypeCast:         {"OpTypeCast", []int{2}},
+	OpAssertType:       {"OpAssertType", []int{2}},
+	OpStruct:           {"OpStruct", []int{2}},
+	OpGetStructField:   {"OpGetStructField", []int{}},
+	OpSetStructField:   {"OpSetStructField", []int{}},
+	OpEnum:             {"OpEnum", []int{2, 2}}, // enum type index, variant index
 }
 
 // Lookup returns the definition for an opcode

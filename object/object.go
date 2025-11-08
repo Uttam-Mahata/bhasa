@@ -36,6 +36,9 @@ const (
 	HASH_OBJ              = "HASH"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	CLOSURE_OBJ           = "CLOSURE"
+	STRUCT_OBJ            = "STRUCT"
+	ENUM_OBJ              = "ENUM"
+	ENUM_TYPE_OBJ         = "ENUM_TYPE"
 )
 
 // Object represents a value in the language
@@ -338,6 +341,60 @@ type Closure struct {
 func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
+}
+
+// Struct represents a struct instance
+type Struct struct {
+	Fields     map[string]Object
+	FieldOrder []string // To maintain field order for display
+}
+
+func (s *Struct) Type() ObjectType { return STRUCT_OBJ }
+func (s *Struct) Inspect() string {
+	var out bytes.Buffer
+	pairs := []string{}
+	for _, fieldName := range s.FieldOrder {
+		value := s.Fields[fieldName]
+		pairs = append(pairs, fmt.Sprintf("%s: %s", fieldName, value.Inspect()))
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// EnumType represents an enum type definition
+type EnumType struct {
+	Name     string         // enum type name
+	Variants map[string]int // variant name -> integer value
+}
+
+func (et *EnumType) Type() ObjectType { return ENUM_TYPE_OBJ }
+func (et *EnumType) Inspect() string {
+	var out bytes.Buffer
+	out.WriteString("গণনা ")
+	out.WriteString(et.Name)
+	out.WriteString(" { ")
+
+	variants := []string{}
+	for name, value := range et.Variants {
+		variants = append(variants, fmt.Sprintf("%s = %d", name, value))
+	}
+	out.WriteString(strings.Join(variants, ", "))
+	out.WriteString(" }")
+	return out.String()
+}
+
+// Enum represents an enum variant value
+type Enum struct {
+	EnumType    string // the enum type name
+	VariantName string // the variant name
+	Value       int    // the variant's integer value
+}
+
+func (e *Enum) Type() ObjectType { return ENUM_OBJ }
+func (e *Enum) Inspect() string {
+	return fmt.Sprintf("%s.%s", e.EnumType, e.VariantName)
 }
 
 // BuiltinDef represents a builtin definition

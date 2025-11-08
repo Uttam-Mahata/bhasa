@@ -1,0 +1,145 @@
+// Comprehensive Numeric Types Test
+// Tests all numeric data types with operations and conversions
+
+লেখ("=== Byte Type Tests ===");
+ধরি b1: বাইট = ১০;
+ধরি b2: বাইট = ২০;
+ধরি bSum: বাইট = b1 + b2;
+লেখ("Byte addition:", b1, "+", b2, "=", bSum);
+
+ধরি bMax: বাইট = ২৫৫;
+লেখ("Max byte value:", bMax);
+
+লেখ("\n=== Short Type Tests ===");
+ধরি s1: ছোট_সংখ্যা = ১০০০;
+ধরি s2: ছোট_সংখ্যা = ২০০০;
+ধরি sSum: ছোট_সংখ্যা = s1 + s2;
+লেখ("Short addition:", s1, "+", s2, "=", sSum);
+
+ধরি sMax: ছোট_সংখ্যা = ৩২৭৬৭;
+ধরি sMin: ছোট_সংখ্যা = -৩২৭৬৮;
+লেখ("Max short:", sMax, ", Min short:", sMin);
+
+লেখ("\n=== Int Type Tests ===");
+ধরি i1: পূর্ণসংখ্যা = ১০০০০০;
+ধরি i2: পূর্ণসংখ্যা = ২০০০০০;
+ধরি iSum: পূর্ণসংখ্যা = i1 + i2;
+লেখ("Int addition:", i1, "+", i2, "=", iSum);
+
+ধরি iMult: পূর্ণসংখ্যা = i1 * ২;
+লেখ("Int multiplication:", i1, "* 2 =", iMult);
+
+লেখ("\n=== Long Type Tests ===");
+ধরি l1: দীর্ঘ_সংখ্যা = ১০০০০০০০০০;
+ধরি l2: দীর্ঘ_সংখ্যা = ২০০০০০০০০০;
+ধরি lSum: দীর্ঘ_সংখ্যা = l1 + l2;
+লেখ("Long addition:", l1, "+", l2, "=", lSum);
+
+লেখ("\n=== Float Type Tests ===");
+ধরি f1: দশমিক = ৩.১৪;
+ধরি f2: দশমিক = ২.৭১;
+ধরি fSum: দশমিক = f1 + f2;
+লেখ("Float addition:", f1, "+", f2, "=", fSum);
+
+ধরি fDiv: দশমিক = ১০.০ / ৩.০;
+লেখ("Float division: 10.0 / 3.0 =", fDiv);
+
+লেখ("\n=== Double Type Tests ===");
+ধরি d1: দশমিক_দ্বিগুণ = ৩.১৪১৫৯২৬৫৩৫;
+ধরি d2: দশমিক_দ্বিগুণ = ২.৭১৮২৮১৮২৮৪;
+ধরি dSum: দশমিক_দ্বিগুণ = d1 + d2;
+লেখ("Double addition:", d1, "+", d2, "=", dSum);
+
+লেখ("\n=== Type Conversions ===");
+// Byte to other types
+ধরি byteToShort = b1 as ছোট_সংখ্যা;
+ধরি byteToInt = b1 as পূর্ণসংখ্যা;
+ধরি byteToLong = b1 as দীর্ঘ_সংখ্যা;
+ধরি byteToFloat = b1 as দশমিক;
+ধরি byteToDouble = b1 as দশমিক_দ্বিগুণ;
+লেখ("Byte", b1, "converted to:");
+লেখ("  Short:", byteToShort);
+লেখ("  Int:", byteToInt);
+লেখ("  Long:", byteToLong);
+লেখ("  Float:", byteToFloat);
+লেখ("  Double:", byteToDouble);
+
+// Float to integer types
+লেখ("\nFloat", f1, "converted to:");
+ধরি floatToByte = f1 as বাইট;
+ধরি floatToShort = f1 as ছোট_সংখ্যা;
+ধরি floatToInt = f1 as পূর্ণসংখ্যা;
+ধরি floatToLong = f1 as দীর্ঘ_সংখ্যা;
+লেখ("  Byte:", floatToByte);
+লেখ("  Short:", floatToShort);
+লেখ("  Int:", floatToInt);
+লেখ("  Long:", floatToLong);
+
+// Int to float types
+লেখ("\nInt", i1, "converted to:");
+ধরি intToFloat = i1 as দশমিক;
+ধরি intToDouble = i1 as দশমিক_দ্বিগুণ;
+লেখ("  Float:", intToFloat);
+লেখ("  Double:", intToDouble);
+
+লেখ("\n=== Arithmetic Operations ===");
+ধরি n1: পূর্ণসংখ্যা = ২০;
+ধরি n2: পূর্ণসংখ্যা = ৩;
+
+লেখ("Addition:", n1, "+", n2, "=", n1 + n2);
+লেখ("Subtraction:", n1, "-", n2, "=", n1 - n2);
+লেখ("Multiplication:", n1, "*", n2, "=", n1 * n2);
+লেখ("Division:", n1, "/", n2, "=", n1 / n2);
+লেখ("Modulo:", n1, "%", n2, "=", n1 % n2);
+
+লেখ("\n=== Comparison Operations ===");
+লেখ(n1, ">", n2, ":", n1 > n2);
+লেখ(n1, "<", n2, ":", n1 < n2);
+লেখ(n1, "==", n2, ":", n1 == n2);
+লেখ(n1, "!=", n2, ":", n1 != n2);
+লেখ(n1, ">=", n2, ":", n1 >= n2);
+লেখ(n1, "<=", n2, ":", n1 <= n2);
+
+লেখ("\n=== Bitwise Operations ===");
+ধরি bit1: পূর্ণসংখ্যা = ১৫;  // 0b1111
+ধরি bit2: পূর্ণসংখ্যা = ৭;   // 0b0111
+
+লেখ("Bitwise AND:", bit1, "&", bit2, "=", bit1 & bit2);
+লেখ("Bitwise OR:", bit1, "|", bit2, "=", bit1 | bit2);
+লেখ("Bitwise XOR:", bit1, "^", bit2, "=", bit1 ^ bit2);
+লেখ("Left shift:", bit1, "<<", ১, "=", bit1 << ১);
+লেখ("Right shift:", bit1, ">>", ১, "=", bit1 >> ১);
+
+লেখ("\n=== Functions with Typed Parameters ===");
+ধরি গুণফল = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a * b;
+};
+
+ধরি ভাগফল = ফাংশন(a: দশমিক, b: দশমিক): দশমিক {
+    ফেরত a / b;
+};
+
+ধরি শক্তি = ফাংশন(base: পূর্ণসংখ্যা, exp: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    যদি (exp == ০) {
+        ফেরত ১;
+    }
+    ধরি result = base;
+    ধরি i = ১;
+    যতক্ষণ (i < exp) {
+        result = result * base;
+        i = i + ১;
+    }
+    ফেরত result;
+};
+
+লেখ("গুণফল(৫, ৭):", গুণফল(৫, ৭));
+লেখ("ভাগফল(১০.০, ৩.০):", ভাগফল(১০.০, ৩.০));
+লেখ("শক্তি(২, ১০):", শক্তি(২, ১০));
+
+লেখ("\n=== Mixed Type Arithmetic ===");
+ধরি mixInt: পূর্ণসংখ্যা = ১০;
+ধরি mixFloat: দশমিক = ৩.৫;
+ধরি mixResult = (mixInt as দশমিক) * mixFloat;
+লেখ("Mixed arithmetic:", mixInt, "* (as float)", mixFloat, "=", mixResult);
+
+লেখ("\nসকল সংখ্যা টাইপ পরীক্ষা সম্পন্ন!");
