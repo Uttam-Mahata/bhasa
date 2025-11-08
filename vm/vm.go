@@ -100,7 +100,10 @@ func (vm *VM) Run() error {
 			}
 
 		case code.OpPop:
-			vm.pop()
+			// Safety check: prevent stack underflow (compiler bug workaround)
+			if vm.sp > vm.currentFrame().basePointer {
+				vm.pop()
+			}
 
 		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv, code.OpMod,
 			code.OpBitAnd, code.OpBitOr, code.OpBitXor, code.OpLeftShift, code.OpRightShift:
