@@ -92,6 +92,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.STRUCT, p.parseStructDefinition)
 	p.registerPrefix(token.ENUM, p.parseEnumDefinition)
+	// OOP prefix parsers
+	p.registerPrefix(token.NEW, p.parseNewExpression)
+	p.registerPrefix(token.THIS, p.parseThisExpression)
+	p.registerPrefix(token.SUPER, p.parseSuperExpression)
 
 	// Register infix parse functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -179,6 +183,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseContinueStatement()
 	case token.IMPORT:
 		return p.parseImportStatement()
+	case token.CLASS, token.ABSTRACT:
+		return p.parseClassDefinition()
+	case token.INTERFACE:
+		return p.parseInterfaceDefinition()
 	case token.IDENT:
 		// Check if this is a member assignment (identifier.member = value)
 		if p.peekTokenIs(token.DOT) {
@@ -1166,4 +1174,452 @@ func (p *Parser) parseStructLiteral(structType *ast.Identifier) ast.Expression {
 	}
 
 	return lit
+}
+
+// ============================================================================
+// OOP Parsing Functions
+// ============================================================================
+
+// parseClassDefinition parses a class definition
+// Syntax: [বিমূর্ত] [চূড়ান্ত] শ্রেণী ClassName [প্রসারিত ParentClass] [বাস্তবায়ন Interface1, Interface2] { ... }
+func (p *Parser) parseClassDefinition() *ast.ClassDefinition {
+	classDef := &ast.ClassDefinition{
+		Token:        p.curToken,
+		Fields:       []*ast.ClassField{},
+		Methods:      []*ast.MethodDefinition{},
+		Constructors: []*ast.ConstructorDefinition{},
+		Interfaces:   []*ast.Identifier{},
+	}
+
+	// Check for abstract modifier
+	if p.curTokenIs(token.ABSTRACT) {
+		classDef.IsAbstract = true
+		p.nextToken() // move to CLASS or FINAL
+	}
+
+	// Check for final modifier
+	if p.curTokenIs(token.FINAL) {
+		classDef.IsFinal = true
+		p.nextToken() // move to CLASS
+	}
+
+	if !p.curTokenIs(token.CLASS) {
+		p.error("expected শ্রেণী keyword")
+		return nil
+	}
+
+	// Get class name
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	classDef.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Check for extends (প্রসারিত)
+	if p.peekTokenIs(token.EXTENDS) {
+		p.nextToken() // move to EXTENDS
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		classDef.SuperClass = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	}
+
+	// Check for implements (বাস্তবায়ন)
+	if p.peekTokenIs(token.IMPLEMENTS) {
+		p.nextToken() // move to IMPLEMENTS
+		for {
+			if !p.expectPeek(token.IDENT) {
+				return nil
+			}
+			classDef.Interfaces = append(classDef.Interfaces, &ast.Identifier{
+				Token: p.curToken,
+				Value: p.curToken.Literal,
+			})
+
+			if !p.peekTokenIs(token.COMMA) {
+				break
+			}
+			p.nextToken() // skip comma
+		}
+	}
+
+	// Expect class body
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	p.nextToken() // move past {
+
+	// Parse class body (fields, constructors, methods)
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		// Check for access modifiers
+		access := ast.PUBLIC // default
+		isStatic := false
+		isFinal := false
+		isAbstract := false
+		isOverride := false
+
+		// Parse modifiers
+		for p.curTokenIs(token.PUBLIC) || p.curTokenIs(token.PRIVATE) || p.curTokenIs(token.PROTECTED) ||
+			p.curTokenIs(token.STATIC) || p.curTokenIs(token.FINAL) || p.curTokenIs(token.ABSTRACT) ||
+			p.curTokenIs(token.OVERRIDE) {
+
+			switch p.curToken.Type {
+			case token.PUBLIC:
+				access = ast.PUBLIC
+			case token.PRIVATE:
+				access = ast.PRIVATE
+			case token.PROTECTED:
+				access = ast.PROTECTED
+			case token.STATIC:
+				isStatic = true
+			case token.FINAL:
+				isFinal = true
+			case token.ABSTRACT:
+				isAbstract = true
+			case token.OVERRIDE:
+				isOverride = true
+			}
+			p.nextToken()
+		}
+
+		// Check what follows
+		if p.curTokenIs(token.CONSTRUCTOR) {
+			// Parse constructor
+			constructor := p.parseConstructorDefinition()
+			if constructor != nil {
+				constructor.Access = access
+				classDef.Constructors = append(classDef.Constructors, constructor)
+			}
+		} else if p.curTokenIs(token.METHOD) {
+			// Parse method
+			method := p.parseMethodDefinition()
+			if method != nil {
+				method.Access = access
+				method.IsStatic = isStatic
+				method.IsFinal = isFinal
+				method.IsAbstract = isAbstract
+				method.IsOverride = isOverride
+				classDef.Methods = append(classDef.Methods, method)
+			}
+		} else if p.curTokenIs(token.IDENT) {
+			// Parse field
+			field := p.parseClassField()
+			if field != nil {
+				field.Access = access
+				field.IsStatic = isStatic
+				field.IsFinal = isFinal
+				classDef.Fields = append(classDef.Fields, field)
+			}
+		} else {
+			p.error(fmt.Sprintf("unexpected token in class body: %s", p.curToken.Literal))
+			p.nextToken()
+		}
+	}
+
+	if !p.curTokenIs(token.RBRACE) {
+		p.error("expected } at end of class definition")
+		return nil
+	}
+
+	return classDef
+}
+
+// parseClassField parses a class field declaration
+// Syntax: fieldName: TypeAnnotation;
+func (p *Parser) parseClassField() *ast.ClassField {
+	field := &ast.ClassField{}
+
+	field.Name = p.curToken.Literal
+
+	if !p.expectPeek(token.COLON) {
+		return nil
+	}
+
+	p.nextToken() // move to type
+	field.TypeAnnot = p.parseTypeAnnotation()
+
+	// Expect semicolon
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return field
+}
+
+// parseMethodDefinition parses a method definition
+// Syntax: পদ্ধতি methodName(param1: Type1, param2: Type2): ReturnType { ... }
+func (p *Parser) parseMethodDefinition() *ast.MethodDefinition {
+	method := &ast.MethodDefinition{
+		Token:          p.curToken,
+		Parameters:     []*ast.Identifier{},
+		ParameterTypes: []*ast.TypeAnnotation{},
+	}
+
+	// Expect method name
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	method.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Parse parameters
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken() // move past (
+
+	// Parse parameter list
+	for !p.curTokenIs(token.RPAREN) && !p.curTokenIs(token.EOF) {
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected parameter name")
+			return nil
+		}
+
+		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		method.Parameters = append(method.Parameters, param)
+
+		// Expect type annotation
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken() // move to type
+		paramType := p.parseTypeAnnotation()
+		method.ParameterTypes = append(method.ParameterTypes, paramType)
+
+		if p.peekTokenIs(token.COMMA) {
+			p.nextToken() // skip comma
+			p.nextToken() // move to next parameter
+		} else {
+			p.nextToken() // move to )
+			break
+		}
+	}
+
+	if !p.curTokenIs(token.RPAREN) {
+		p.error("expected ) after parameters")
+		return nil
+	}
+
+	// Check for return type
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // move to :
+		p.nextToken() // move to return type
+		method.ReturnType = p.parseTypeAnnotation()
+	}
+
+	// For abstract methods, no body
+	if method.IsAbstract {
+		if p.peekTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+		return method
+	}
+
+	// Parse method body
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	method.Body = p.parseBlockStatement()
+
+	return method
+}
+
+// parseConstructorDefinition parses a constructor definition
+// Syntax: নির্মাতা(param1: Type1, param2: Type2) { ... }
+func (p *Parser) parseConstructorDefinition() *ast.ConstructorDefinition {
+	constructor := &ast.ConstructorDefinition{
+		Token:          p.curToken,
+		Parameters:     []*ast.Identifier{},
+		ParameterTypes: []*ast.TypeAnnotation{},
+	}
+
+	// Parse parameters
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken() // move past (
+
+	// Parse parameter list
+	for !p.curTokenIs(token.RPAREN) && !p.curTokenIs(token.EOF) {
+		if !p.curTokenIs(token.IDENT) {
+			p.error("expected parameter name")
+			return nil
+		}
+
+		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		constructor.Parameters = append(constructor.Parameters, param)
+
+		// Expect type annotation
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken() // move to type
+		paramType := p.parseTypeAnnotation()
+		constructor.ParameterTypes = append(constructor.ParameterTypes, paramType)
+
+		if p.peekTokenIs(token.COMMA) {
+			p.nextToken() // skip comma
+			p.nextToken() // move to next parameter
+		} else {
+			p.nextToken() // move to )
+			break
+		}
+	}
+
+	if !p.curTokenIs(token.RPAREN) {
+		p.error("expected ) after parameters")
+		return nil
+	}
+
+	// Parse constructor body
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	constructor.Body = p.parseBlockStatement()
+
+	return constructor
+}
+
+// parseInterfaceDefinition parses an interface definition
+// Syntax: চুক্তি InterfaceName { পদ্ধতি method1(Type1): ReturnType; ... }
+func (p *Parser) parseInterfaceDefinition() *ast.InterfaceDefinition {
+	interfaceDef := &ast.InterfaceDefinition{
+		Token:   p.curToken,
+		Methods: []*ast.InterfaceMethod{},
+	}
+
+	// Get interface name
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	interfaceDef.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Expect interface body
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	p.nextToken() // move past {
+
+	// Parse interface methods
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		if !p.curTokenIs(token.METHOD) {
+			p.error("expected পদ্ধতি in interface")
+			p.nextToken()
+			continue
+		}
+
+		method := &ast.InterfaceMethod{
+			Parameters:     []*ast.Identifier{},
+			ParameterTypes: []*ast.TypeAnnotation{},
+		}
+
+		// Expect method name
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		method.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		// Parse parameters
+		if !p.expectPeek(token.LPAREN) {
+			return nil
+		}
+
+		p.nextToken() // move past (
+
+		// Parse parameter list
+		for !p.curTokenIs(token.RPAREN) && !p.curTokenIs(token.EOF) {
+			if !p.curTokenIs(token.IDENT) {
+				p.error("expected parameter name")
+				return nil
+			}
+
+			param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			method.Parameters = append(method.Parameters, param)
+
+			// Expect type annotation
+			if !p.expectPeek(token.COLON) {
+				return nil
+			}
+
+			p.nextToken() // move to type
+			paramType := p.parseTypeAnnotation()
+			method.ParameterTypes = append(method.ParameterTypes, paramType)
+
+			if p.peekTokenIs(token.COMMA) {
+				p.nextToken() // skip comma
+				p.nextToken() // move to next parameter
+			} else {
+				p.nextToken() // move to )
+				break
+			}
+		}
+
+		if !p.curTokenIs(token.RPAREN) {
+			p.error("expected ) after parameters")
+			return nil
+		}
+
+		// Check for return type
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken() // move to :
+			p.nextToken() // move to return type
+			method.ReturnType = p.parseTypeAnnotation()
+		}
+
+		// Expect semicolon
+		if p.peekTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+
+		interfaceDef.Methods = append(interfaceDef.Methods, method)
+		p.nextToken()
+	}
+
+	if !p.curTokenIs(token.RBRACE) {
+		p.error("expected } at end of interface definition")
+		return nil
+	}
+
+	return interfaceDef
+}
+
+// parseNewExpression parses a new instance expression
+// Syntax: নতুন ClassName(arg1, arg2, ...)
+func (p *Parser) parseNewExpression() ast.Expression {
+	newExpr := &ast.NewExpression{
+		Token:     p.curToken,
+		Arguments: []ast.Expression{},
+	}
+
+	// Expect class name
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	newExpr.ClassName = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// Expect (
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// Parse arguments
+	newExpr.Arguments = p.parseExpressionList(token.RPAREN)
+
+	return newExpr
+}
+
+// parseThisExpression parses the 'this' keyword (এই)
+func (p *Parser) parseThisExpression() ast.Expression {
+	return &ast.ThisExpression{Token: p.curToken}
+}
+
+// parseSuperExpression parses the 'super' keyword (উর্ধ্ব)
+func (p *Parser) parseSuperExpression() ast.Expression {
+	return &ast.SuperExpression{Token: p.curToken}
 }
