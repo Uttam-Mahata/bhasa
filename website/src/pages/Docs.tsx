@@ -44,7 +44,7 @@ export default function Docs() {
     {
       title: 'Language Features',
       icon: Code2,
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-green-500 to-emerald-500',
       docs: [
         {
           name: 'Features Overview',

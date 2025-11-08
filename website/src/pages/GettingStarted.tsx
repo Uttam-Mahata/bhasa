@@ -22,8 +22,8 @@ export default function GettingStarted() {
     {
       number: 2,
       title: 'Build the Compiler',
-      description: 'Compile the Go source code',
-      command: 'go build -o bhasa',
+      description: 'Build using Go directly or use Makefile for cross-platform binaries',
+      command: '# Simple build for current platform\ngo build -o bhasa\n\n# OR using Makefile for optimized binary\nmake build\n\n# Build for all platforms (Linux, Windows, macOS)\nmake all\n\n# Build for specific platform\nmake linux-amd64    # Linux 64-bit\nmake windows-amd64  # Windows 64-bit\nmake darwin-arm64   # macOS Apple Silicon',
       icon: Terminal
     },
     {
@@ -217,7 +217,7 @@ export default function GettingStarted() {
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <Terminal className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+            <Terminal className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
               Interactive REPL
             </h2>
@@ -231,6 +231,73 @@ export default function GettingStarted() {
           </div>
 
           <CodeBlock code={replMode} language="bash" title="REPL Session Example" />
+        </div>
+      </section>
+
+      {/* Cross-Platform Builds */}
+      <section className="py-12 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <Code2 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              Cross-Platform Binary Builds
+            </h2>
+            <p className="text-lg text-slate-600">
+              Build optimized binaries for multiple platforms using the included Makefile
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+              <h3 className="font-bold text-slate-900 mb-3 flex items-center space-x-2">
+                <Terminal className="h-5 w-5 text-blue-600" />
+                <span>Available Platforms</span>
+              </h3>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Linux (AMD64, ARM64)</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Windows (AMD64, ARM64)</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>macOS (Intel, Apple Silicon)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+              <h3 className="font-bold text-slate-900 mb-3 flex items-center space-x-2">
+                <Download className="h-5 w-5 text-green-600" />
+                <span>Build Options</span>
+              </h3>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Optimized with -ldflags for smaller binaries</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>All binaries output to bin/ directory</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Run 'make help' for all available targets</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-xl p-6">
+            <h3 className="text-white font-bold mb-3">Quick Build Commands</h3>
+            <CodeBlock
+              code="# Build for all platforms\nmake all\n\n# Build for specific platforms\nmake linux        # All Linux binaries\nmake windows      # All Windows binaries\nmake darwin       # All macOS binaries\n\n# Clean build artifacts\nmake clean"
+              language="bash"
+            />
+          </div>
         </div>
       </section>
 
@@ -274,9 +341,9 @@ export default function GettingStarted() {
 
               <a
                 href="/features"
-                className="group p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 hover:shadow-lg transition-all text-center"
+                className="group p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200 hover:shadow-lg transition-all text-center"
               >
-                <Book className="h-10 w-10 text-purple-600 mx-auto mb-3" />
+                <Book className="h-10 w-10 text-green-600 mx-auto mb-3" />
                 <h4 className="font-bold text-slate-900 mb-2">Language Features</h4>
                 <p className="text-sm text-slate-600">
                   Discover all Bhasa capabilities
