@@ -82,7 +82,7 @@ const (
 	TYPE_FLOAT   = "দশমিক"          // float type
 	TYPE_DOUBLE  = "দশমিক_দ্বিগুণ"  // double type
 	TYPE_CHAR    = "অক্ষর"          // char type
-	TYPE_STRING  = "লেখা"           // string type
+	TYPE_STRING  = "পাঠ্য"          // string type (textual - different from লেখা toString function)
 	TYPE_BOOLEAN = "বুলিয়ান"       // boolean type
 	TYPE_ARRAY   = "তালিকা"         // array type
 	TYPE_HASH    = "ম্যাপ"          // hash/map type
@@ -134,7 +134,7 @@ var keywords = map[string]TokenType{
 	"দশমিক":          TYPE_FLOAT,
 	"দশমিক_দ্বিগুণ":  TYPE_DOUBLE,
 	"অক্ষর":          TYPE_CHAR,
-	"লেখা":           TYPE_STRING,
+	"পাঠ্য":          TYPE_STRING,  // textual/text type (different from লেখা toString function)
 	"বুলিয়ান":       TYPE_BOOLEAN,
 	"তালিকা":         TYPE_ARRAY,
 	"ম্যাপ":          TYPE_HASH,
