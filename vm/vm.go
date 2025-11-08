@@ -1226,10 +1226,13 @@ func (vm *VM) executeGetStructField(obj, fieldName object.Object) error {
 
 		// If not a field, check if it's a method in the class
 		if method, exists := instance.Class.Methods[fieldNameStr.Value]; exists {
-			// Create a bound method (closure with 'this' bound to the instance)
-			// For now, just return the method's closure
-			// TODO: We should bind 'this' to the instance
-			return vm.push(method.Closure)
+			// Create a bound method that wraps the closure and the instance
+			// When called, the instance will be automatically passed as 'this'
+			boundMethod := &object.BoundMethod{
+				Receiver: instance,
+				Method:   method.Closure,
+			}
+			return vm.push(boundMethod)
 		}
 
 		return fmt.Errorf("class instance has no field or method named '%s'", fieldNameStr.Value)
@@ -1340,6 +1343,33 @@ func (vm *VM) executeCall(numArgs int) error {
 		return vm.callClosure(callee, numArgs)
 	case *object.Builtin:
 		return vm.callBuiltin(callee, numArgs)
+	case *object.BoundMethod:
+		// For bound methods, we need to inject the receiver as the first argument
+		// Stack currently: [boundMethod, arg1, arg2, ..., argN]
+		// We need: [boundMethod, receiver, arg1, arg2, ..., argN]
+
+		// Pop all arguments
+		args := make([]object.Object, numArgs)
+		for i := numArgs - 1; i >= 0; i-- {
+			args[i] = vm.pop()
+		}
+
+		// Pop the bound method
+		vm.pop()
+
+		// Push the bound method back as callee placeholder
+		vm.push(callee)
+
+		// Push receiver as first argument (this)
+		vm.push(callee.Receiver)
+
+		// Push the other arguments
+		for _, arg := range args {
+			vm.push(arg)
+		}
+
+		// Call the underlying method closure with numArgs+1 (for receiver)
+		return vm.callClosure(callee.Method, numArgs+1)
 	default:
 		return fmt.Errorf("calling non-function and non-builtin")
 	}
