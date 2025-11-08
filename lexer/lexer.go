@@ -209,7 +209,7 @@ func (l *Lexer) NextToken() token.Token {
 func (l *Lexer) readIdentifier() string {
 	startPos := l.position
 	// Read first character (must be letter or underscore)
-	for isLetter(l.ch) || isDigit(l.ch) {
+	for isLetter(l.ch) || isDigit(l.ch) || isBengaliDigit(l.ch) {
 		l.readChar()
 	}
 	return string(l.input[startPos:l.position])

@@ -1,0 +1,7 @@
+লেখ("Starting simple OOP test");
+
+শ্রেণী Person {
+    সার্বজনীন নাম: পাঠ্য;
+}
+
+লেখ("Class defined successfully");
