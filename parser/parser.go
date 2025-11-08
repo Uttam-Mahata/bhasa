@@ -1342,18 +1342,18 @@ func (p *Parser) parseClassDefinition() *ast.ClassDefinition {
 }
 
 // parseClassField parses a class field declaration
-// Syntax: fieldName: TypeAnnotation;
+// Syntax: fieldName: TypeAnnotation; OR fieldName; (type annotation optional)
 func (p *Parser) parseClassField() *ast.ClassField {
 	field := &ast.ClassField{}
 
 	field.Name = p.curToken.Literal
 
-	if !p.expectPeek(token.COLON) {
-		return nil
+	// Check for optional type annotation
+	if p.peekTokenIs(token.COLON) {
+		p.nextToken() // consume :
+		p.nextToken() // move to type
+		field.TypeAnnot = p.parseTypeAnnotation()
 	}
-
-	p.nextToken() // move to type
-	field.TypeAnnot = p.parseTypeAnnotation()
 
 	// Expect semicolon
 	if p.peekTokenIs(token.SEMICOLON) {
@@ -1395,13 +1395,13 @@ func (p *Parser) parseMethodDefinition() *ast.MethodDefinition {
 		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		method.Parameters = append(method.Parameters, param)
 
-		// Expect type annotation
-		if !p.expectPeek(token.COLON) {
-			return nil
+		// Check for optional type annotation
+		var paramType *ast.TypeAnnotation
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken() // consume :
+			p.nextToken() // move to type
+			paramType = p.parseTypeAnnotation()
 		}
-
-		p.nextToken() // move to type
-		paramType := p.parseTypeAnnotation()
 		method.ParameterTypes = append(method.ParameterTypes, paramType)
 
 		if p.peekTokenIs(token.COMMA) {
@@ -1469,13 +1469,13 @@ func (p *Parser) parseConstructorDefinition() *ast.ConstructorDefinition {
 		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		constructor.Parameters = append(constructor.Parameters, param)
 
-		// Expect type annotation
-		if !p.expectPeek(token.COLON) {
-			return nil
+		// Check for optional type annotation
+		var paramType *ast.TypeAnnotation
+		if p.peekTokenIs(token.COLON) {
+			p.nextToken() // consume :
+			p.nextToken() // move to type
+			paramType = p.parseTypeAnnotation()
 		}
-
-		p.nextToken() // move to type
-		paramType := p.parseTypeAnnotation()
 		constructor.ParameterTypes = append(constructor.ParameterTypes, paramType)
 
 		if p.peekTokenIs(token.COMMA) {
