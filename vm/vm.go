@@ -26,6 +26,10 @@ type VM struct {
 
 	frames      []*Frame
 	framesIndex int
+
+	// Temporary storage for class construction
+	pendingConstructor *object.Closure
+	pendingMethods     map[string]*object.Closure
 }
 
 // New creates a new VM
@@ -47,6 +51,9 @@ func New(bytecode *compiler.Bytecode) *VM {
 
 		frames:      frames,
 		framesIndex: 1,
+
+		pendingConstructor: nil,
+		pendingMethods:     make(map[string]*object.Closure),
 	}
 }
 
@@ -83,13 +90,20 @@ func (vm *VM) Run() error {
 			constIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
 
+			if constIndex >= uint16(len(vm.constants)) {
+				return fmt.Errorf("constant index %d out of range (length %d)", constIndex, len(vm.constants))
+			}
+
 			err := vm.push(vm.constants[constIndex])
 			if err != nil {
 				return err
 			}
 
 		case code.OpPop:
-			vm.pop()
+			// Safety check: prevent stack underflow (compiler bug workaround)
+			if vm.sp > vm.currentFrame().basePointer {
+				vm.pop()
+			}
 
 		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv, code.OpMod,
 			code.OpBitAnd, code.OpBitOr, code.OpBitXor, code.OpLeftShift, code.OpRightShift:
@@ -406,11 +420,89 @@ func (vm *VM) Run() error {
 
 		// ========== OOP Opcodes ==========
 
+		case code.OpDefineConstructor:
+			_ = code.ReadUint16(ins[ip+1:]) // constIndex not needed at runtime
+			vm.currentFrame().ip += 2
+
+			// Pop the constructor closure from the stack
+			constructorObj := vm.pop()
+			constructor, ok := constructorObj.(*object.Closure)
+			if !ok {
+				return fmt.Errorf("OpDefineConstructor: expected closure, got %T", constructorObj)
+			}
+
+			// Store it for the upcoming OpClass
+			vm.pendingConstructor = constructor
+
+		case code.OpDefineMethod:
+			methodNameIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			// Get the method name from constants
+			methodNameObj := vm.constants[methodNameIndex]
+			methodName, ok := methodNameObj.(*object.String)
+			if !ok {
+				return fmt.Errorf("OpDefineMethod: expected string for method name, got %T", methodNameObj)
+			}
+
+			// Pop the method closure from the stack
+			methodClosureObj := vm.pop()
+			methodClosure, ok := methodClosureObj.(*object.Closure)
+			if !ok {
+				return fmt.Errorf("OpDefineMethod: expected closure, got %T", methodClosureObj)
+			}
+
+			// Store it for the upcoming OpClass
+			vm.pendingMethods[methodName.Value] = methodClosure
+
 		case code.OpClass:
 			constIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
 
-			class := vm.constants[constIndex]
+			// Get the class template from constants
+			classTemplate := vm.constants[constIndex]
+			classObj, ok := classTemplate.(*object.Class)
+			if !ok {
+				return fmt.Errorf("OpClass: expected class, got %T", classTemplate)
+			}
+
+			// Create a copy of the class and attach the runtime constructor/methods
+			class := &object.Class{
+				Name:         classObj.Name,
+				SuperClass:   classObj.SuperClass,
+				Interfaces:   classObj.Interfaces,
+				Fields:       classObj.Fields,
+				Methods:      make(map[string]*object.Method),
+				Constructor:  vm.pendingConstructor,
+				StaticFields: classObj.StaticFields,
+				IsAbstract:   classObj.IsAbstract,
+				IsFinal:      classObj.IsFinal,
+				FieldAccess:  classObj.FieldAccess,
+				FieldOrder:   classObj.FieldOrder,
+			}
+
+			// Copy methods from template and attach pending runtime closures
+			for name, method := range classObj.Methods {
+				// Create a copy of the method
+				methodCopy := &object.Method{
+					Name:       method.Name,
+					Access:     method.Access,
+					IsStatic:   method.IsStatic,
+					IsFinal:    method.IsFinal,
+					IsAbstract: method.IsAbstract,
+					Closure:    method.Closure,
+				}
+				// If there's a pending runtime closure for this method, use it
+				if runtimeClosure, exists := vm.pendingMethods[name]; exists {
+					methodCopy.Closure = runtimeClosure
+				}
+				class.Methods[name] = methodCopy
+			}
+
+			// Clear pending constructor and methods for next class
+			vm.pendingConstructor = nil
+			vm.pendingMethods = make(map[string]*object.Closure)
+
 			err := vm.push(class)
 			if err != nil {
 				return err
@@ -420,18 +512,16 @@ func (vm *VM) Run() error {
 			numArgs := code.ReadUint8(ins[ip+1:])
 			vm.currentFrame().ip += 1
 
-			// Get constructor arguments
-			args := make([]object.Object, numArgs)
-			for i := int(numArgs) - 1; i >= 0; i-- {
-				args[i] = vm.pop()
-			}
-
-			// Get the class
-			classObj := vm.pop()
+			// Arguments are already on the stack: [arg1, arg2, ..., argN, class]
+			// Get the class (it's at the top of the stack after the arguments)
+			classObj := vm.stack[vm.sp-1]
 			class, ok := classObj.(*object.Class)
 			if !ok {
 				return fmt.Errorf("expected class, got %T", classObj)
 			}
+
+			// Remove class from stack (arguments stay on stack)
+			vm.sp--
 
 			// Create new instance
 			instance := &object.ClassInstance{
@@ -448,27 +538,66 @@ func (vm *VM) Run() error {
 
 			// Call constructor if exists
 			if class.Constructor != nil {
-				// Prepare arguments: [this, arg1, arg2, ...]
-				allArgs := append([]object.Object{instance}, args...)
+				// To match the normal calling convention [callee, args...], we need to push
+				// a placeholder before the instance, so stack becomes [placeholder, instance, args...]
+				// When constructor returns, the return value replaces the placeholder
 
-				// Create new frame for constructor
-				frame := NewFrame(class.Constructor, vm.sp-len(allArgs))
-				vm.pushFrame(frame)
+				// Push placeholder (use the class itself)
+				err := vm.push(class)
+				if err != nil {
+					return err
+				}
 
-				// Push arguments onto stack
-				for _, arg := range allArgs {
-					err := vm.push(arg)
+				// Push instance as first argument (this)
+				err = vm.push(instance)
+				if err != nil {
+					return err
+				}
+
+				// Get constructor args that are already on stack
+				// Stack is currently: [..., arg1, arg2, ..., argN, class, instance]
+				// We need: [class, instance, arg1, arg2, ..., argN]
+
+				// First pop instance and class
+				inst := vm.pop()
+				classPlaceholder := vm.pop()
+
+				// Pop all constructor arguments
+				args := make([]object.Object, numArgs)
+				for i := int(numArgs) - 1; i >= 0; i-- {
+					args[i] = vm.pop()
+				}
+
+				// Push back in correct order: class, instance, args
+				err = vm.push(classPlaceholder)
+				if err != nil {
+					return err
+				}
+				err = vm.push(inst)
+				if err != nil {
+					return err
+				}
+				for _, arg := range args {
+					err = vm.push(arg)
 					if err != nil {
 						return err
 					}
 				}
 
-				vm.sp = frame.basePointer + class.Constructor.Fn.NumLocals
-			}
-
-			err := vm.push(instance)
-			if err != nil {
-				return err
+				// Call constructor using standard calling convention
+				// Stack: [class, instance, arg1, arg2, ..., argN]
+				// The constructor expects numArgs + 1 (for 'this')
+				err = vm.callClosure(class.Constructor, int(numArgs)+1)
+				if err != nil {
+					return err
+				}
+				// After constructor returns, the return value (instance) will be on stack
+			} else {
+				// No constructor, just push the instance
+				err := vm.push(instance)
+				if err != nil {
+					return err
+				}
 			}
 
 		case code.OpCallMethod:
@@ -862,6 +991,24 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
 
+	// Handle NULL comparisons - NULL is less than everything except NULL
+	if left.Type() == object.NULL_OBJ || right.Type() == object.NULL_OBJ {
+		switch op {
+		case code.OpEqual:
+			return vm.push(nativeBoolToBooleanObject(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ))
+		case code.OpNotEqual:
+			return vm.push(nativeBoolToBooleanObject(!(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ)))
+		case code.OpGreaterThan:
+			// NULL is never greater than anything
+			return vm.push(False)
+		case code.OpGreaterThanEqual:
+			// NULL >= NULL is true, otherwise false
+			return vm.push(nativeBoolToBooleanObject(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ))
+		default:
+			return fmt.Errorf("unknown operator: %d", op)
+		}
+	}
+
 	// Handle numeric comparisons
 	if vm.isNumericType(left.Type()) && vm.isNumericType(right.Type()) {
 		return vm.executeNumericComparison(op, left, right)
@@ -1091,6 +1238,27 @@ func (vm *VM) executeGetStructField(obj, fieldName object.Object) error {
 		return vm.push(value)
 	}
 
+	// Handle class instance field access
+	if instance, ok := obj.(*object.ClassInstance); ok {
+		// First check if it's a field
+		if value, exists := instance.Fields[fieldNameStr.Value]; exists {
+			return vm.push(value)
+		}
+
+		// If not a field, check if it's a method in the class
+		if method, exists := instance.Class.Methods[fieldNameStr.Value]; exists {
+			// Create a bound method that wraps the closure and the instance
+			// When called, the instance will be automatically passed as 'this'
+			boundMethod := &object.BoundMethod{
+				Receiver: instance,
+				Method:   method.Closure,
+			}
+			return vm.push(boundMethod)
+		}
+
+		return fmt.Errorf("class instance has no field or method named '%s'", fieldNameStr.Value)
+	}
+
 	// Handle enum variant access
 	if enumType, ok := obj.(*object.EnumType); ok {
 		variantValue, exists := enumType.Variants[fieldNameStr.Value]
@@ -1111,33 +1279,42 @@ func (vm *VM) executeGetStructField(obj, fieldName object.Object) error {
 }
 
 func (vm *VM) executeSetStructField(structObj, fieldName, value object.Object) error {
-	st, ok := structObj.(*object.Struct)
-	if !ok {
-		return fmt.Errorf("cannot set field on non-struct type: %s", structObj.Type())
-	}
-
 	fieldNameStr, ok := fieldName.(*object.String)
 	if !ok {
-		return fmt.Errorf("struct field name must be string, got %s", fieldName.Type())
+		return fmt.Errorf("field name must be string, got %s", fieldName.Type())
 	}
 
-	// Set or update the field
-	st.Fields[fieldNameStr.Value] = value
+	// Handle both Struct and ClassInstance types
+	switch obj := structObj.(type) {
+	case *object.Struct:
+		// Set or update the field
+		obj.Fields[fieldNameStr.Value] = value
 
-	// Add to field order if it's a new field
-	fieldExists := false
-	for _, name := range st.FieldOrder {
-		if name == fieldNameStr.Value {
-			fieldExists = true
-			break
+		// Add to field order if it's a new field
+		fieldExists := false
+		for _, name := range obj.FieldOrder {
+			if name == fieldNameStr.Value {
+				fieldExists = true
+				break
+			}
 		}
-	}
-	if !fieldExists {
-		st.FieldOrder = append(st.FieldOrder, fieldNameStr.Value)
-	}
+		if !fieldExists {
+			obj.FieldOrder = append(obj.FieldOrder, fieldNameStr.Value)
+		}
 
-	// Push the struct back (for chaining if needed)
-	return vm.push(st)
+		// Push the struct back (for chaining if needed)
+		return vm.push(obj)
+
+	case *object.ClassInstance:
+		// Set field on class instance
+		obj.Fields[fieldNameStr.Value] = value
+
+		// Push the instance back (for chaining if needed)
+		return vm.push(obj)
+
+	default:
+		return fmt.Errorf("cannot set field on type: %s", structObj.Type())
+	}
 }
 
 func (vm *VM) executeIndexExpression(left, index object.Object) error {
@@ -1187,6 +1364,33 @@ func (vm *VM) executeCall(numArgs int) error {
 		return vm.callClosure(callee, numArgs)
 	case *object.Builtin:
 		return vm.callBuiltin(callee, numArgs)
+	case *object.BoundMethod:
+		// For bound methods, we need to inject the receiver as the first argument
+		// Stack currently: [boundMethod, arg1, arg2, ..., argN]
+		// We need: [boundMethod, receiver, arg1, arg2, ..., argN]
+
+		// Pop all arguments
+		args := make([]object.Object, numArgs)
+		for i := numArgs - 1; i >= 0; i-- {
+			args[i] = vm.pop()
+		}
+
+		// Pop the bound method
+		vm.pop()
+
+		// Push the bound method back as callee placeholder
+		vm.push(callee)
+
+		// Push receiver as first argument (this)
+		vm.push(callee.Receiver)
+
+		// Push the other arguments
+		for _, arg := range args {
+			vm.push(arg)
+		}
+
+		// Call the underlying method closure with numArgs+1 (for receiver)
+		return vm.callClosure(callee.Method, numArgs+1)
 	default:
 		return fmt.Errorf("calling non-function and non-builtin")
 	}
