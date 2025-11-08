@@ -93,6 +93,24 @@ const (
 	ENUM   = "গণনা"     // enum keyword (enumeration in Bengali)
 	DOT    = "."        // dot for field access
 	ARROW  = "=>"       // arrow for pattern matching
+
+	// OOP keywords (Bengali - meaningful, not transliteration)
+	CLASS       = "শ্রেণী"       // class (category/class in Bengali)
+	METHOD      = "পদ্ধতি"       // method (procedure/method)
+	CONSTRUCTOR = "নির্মাতা"     // constructor (creator/builder)
+	THIS        = "এই"          // this (reference to current object)
+	NEW         = "নতুন"        // new (for creating instances)
+	EXTENDS     = "প্রসারিত"     // extends (extended/expanded)
+	PUBLIC      = "সার্বজনীন"   // public (for all people)
+	PRIVATE     = "ব্যক্তিগত"   // private (personal/individual)
+	PROTECTED   = "সুরক্ষিত"    // protected (safeguarded)
+	STATIC      = "স্থির"       // static (fixed/stationary)
+	ABSTRACT    = "বিমূর্ত"      // abstract (conceptual)
+	INTERFACE   = "চুক্তি"       // interface (contract/agreement)
+	IMPLEMENTS  = "বাস্তবায়ন"   // implements (implementation)
+	SUPER       = "উর্ধ্ব"       // super (upper/higher - for parent class)
+	OVERRIDE    = "পুনর্সংজ্ঞা"  // override (redefine)
+	FINAL       = "চূড়ান্ত"     // final (ultimate/conclusive)
 )
 
 var keywords = map[string]TokenType{
@@ -124,6 +142,23 @@ var keywords = map[string]TokenType{
 	// Struct and Enum keywords
 	"স্ট্রাক্ট": STRUCT,
 	"গণনা":     ENUM,
+	// OOP keywords
+	"শ্রেণী":      CLASS,
+	"পদ্ধতি":      METHOD,
+	"নির্মাতা":    CONSTRUCTOR,
+	"এই":         THIS,
+	"নতুন":       NEW,
+	"প্রসারিত":    EXTENDS,
+	"সার্বজনীন":  PUBLIC,
+	"ব্যক্তিগত":  PRIVATE,
+	"সুরক্ষিত":   PROTECTED,
+	"স্থির":      STATIC,
+	"বিমূর্ত":     ABSTRACT,
+	"চুক্তি":      INTERFACE,
+	"বাস্তবায়ন":  IMPLEMENTS,
+	"উর্ধ্ব":      SUPER,
+	"পুনর্সংজ্ঞা": OVERRIDE,
+	"চূড়ান্ত":    FINAL,
 }
 
 // LookupIdent checks if an identifier is a keyword

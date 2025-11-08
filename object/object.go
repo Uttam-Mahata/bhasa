@@ -39,6 +39,12 @@ const (
 	STRUCT_OBJ            = "STRUCT"
 	ENUM_OBJ              = "ENUM"
 	ENUM_TYPE_OBJ         = "ENUM_TYPE"
+
+	// OOP object types
+	CLASS_OBJ          = "CLASS"
+	CLASS_INSTANCE_OBJ = "CLASS_INSTANCE"
+	METHOD_OBJ         = "METHOD"
+	INTERFACE_OBJ      = "INTERFACE"
 )
 
 // Object represents a value in the language
@@ -395,6 +401,142 @@ type Enum struct {
 func (e *Enum) Type() ObjectType { return ENUM_OBJ }
 func (e *Enum) Inspect() string {
 	return fmt.Sprintf("%s.%s", e.EnumType, e.VariantName)
+}
+
+// ====== OOP Object Types ======
+
+// Method represents a method attached to a class
+type Method struct {
+	Name           string
+	Access         string // সার্বজনীন, ব্যক্তিগত, সুরক্ষিত
+	IsStatic       bool
+	IsFinal        bool
+	IsAbstract     bool
+	Closure        *Closure // The method implementation as a closure
+}
+
+func (m *Method) Type() ObjectType { return METHOD_OBJ }
+func (m *Method) Inspect() string {
+	return fmt.Sprintf("পদ্ধতি %s", m.Name)
+}
+
+// Interface represents an interface definition (চুক্তি)
+type Interface struct {
+	Name           string
+	MethodSignatures map[string][]string // method name -> parameter type names
+}
+
+func (i *Interface) Type() ObjectType { return INTERFACE_OBJ }
+func (i *Interface) Inspect() string {
+	return fmt.Sprintf("চুক্তি %s", i.Name)
+}
+
+// Class represents a class definition (শ্রেণী)
+type Class struct {
+	Name         string
+	SuperClass   *Class                // Parent class (প্রসারিত)
+	Interfaces   []*Interface          // Implemented interfaces (বাস্তবায়ন)
+	Fields       map[string]string     // field name -> field type (for type checking)
+	Methods      map[string]*Method    // method name -> method
+	Constructor  *Closure              // Constructor function (নির্মাতা)
+	StaticFields map[string]Object     // static fields (স্থির)
+	IsAbstract   bool                  // বিমূর্ত
+	IsFinal      bool                  // চূড়ান্ত
+	FieldAccess  map[string]string     // field name -> access modifier
+	FieldOrder   []string              // To maintain field order
+}
+
+func (c *Class) Type() ObjectType { return CLASS_OBJ }
+func (c *Class) Inspect() string {
+	var out bytes.Buffer
+	if c.IsAbstract {
+		out.WriteString("বিমূর্ত ")
+	}
+	if c.IsFinal {
+		out.WriteString("চূড়ান্ত ")
+	}
+	out.WriteString("শ্রেণী ")
+	out.WriteString(c.Name)
+	if c.SuperClass != nil {
+		out.WriteString(" প্রসারিত ")
+		out.WriteString(c.SuperClass.Name)
+	}
+	return out.String()
+}
+
+// GetMethod retrieves a method from the class or its parent chain
+func (c *Class) GetMethod(name string) *Method {
+	if method, ok := c.Methods[name]; ok {
+		return method
+	}
+	if c.SuperClass != nil {
+		return c.SuperClass.GetMethod(name)
+	}
+	return nil
+}
+
+// HasField checks if the class or its parents have a field
+func (c *Class) HasField(name string) bool {
+	if _, ok := c.Fields[name]; ok {
+		return true
+	}
+	if c.SuperClass != nil {
+		return c.SuperClass.HasField(name)
+	}
+	return false
+}
+
+// ImplementsInterface checks if the class implements an interface
+func (c *Class) ImplementsInterface(iface *Interface) bool {
+	// Check all required methods exist
+	for methodName := range iface.MethodSignatures {
+		if c.GetMethod(methodName) == nil {
+			return false
+		}
+	}
+	return true
+}
+
+// ClassInstance represents an instance of a class (created with নতুন)
+type ClassInstance struct {
+	Class  *Class
+	Fields map[string]Object // instance field values
+	This   Object            // reference to self (for method calls)
+}
+
+func (ci *ClassInstance) Type() ObjectType { return CLASS_INSTANCE_OBJ }
+func (ci *ClassInstance) Inspect() string {
+	var out bytes.Buffer
+	out.WriteString(ci.Class.Name)
+	out.WriteString("{")
+
+	pairs := []string{}
+	for _, fieldName := range ci.Class.FieldOrder {
+		if value, ok := ci.Fields[fieldName]; ok {
+			// Check field access - only show public and protected fields
+			access := ci.Class.FieldAccess[fieldName]
+			if access == "সার্বজনীন" || access == "সুরক্ষিত" {
+				pairs = append(pairs, fmt.Sprintf("%s: %s", fieldName, value.Inspect()))
+			}
+		}
+	}
+
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// GetField retrieves a field value from the instance or its class hierarchy
+func (ci *ClassInstance) GetField(name string) (Object, bool) {
+	if val, ok := ci.Fields[name]; ok {
+		return val, true
+	}
+	return nil, false
+}
+
+// SetField sets a field value on the instance
+func (ci *ClassInstance) SetField(name string, value Object) {
+	ci.Fields[name] = value
 }
 
 // BuiltinDef represents a builtin definition
