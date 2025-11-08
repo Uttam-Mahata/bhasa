@@ -49,9 +49,59 @@ A **compiled** programming language that uses Bengali keywords, built with Go as
 
 ## Installation
 
+### Quick Build (Current Platform)
 ```bash
 go build -o bhasa
 ./bhasa
+```
+
+### Building for Multiple Platforms
+
+You can build binaries for different platforms using the provided Makefile:
+
+```bash
+# Build for all platforms
+make all
+
+# Build for specific platform
+make linux-amd64      # Linux AMD64
+make linux-arm64      # Linux ARM64
+make windows-amd64    # Windows AMD64
+make windows-arm64    # Windows ARM64
+make darwin-amd64     # macOS Intel
+make darwin-arm64     # macOS Apple Silicon
+
+# Build for all Linux platforms
+make linux
+
+# Build for all Windows platforms
+make windows
+
+# Build for all macOS platforms
+make darwin
+
+# Clean build artifacts
+make clean
+```
+
+Binaries will be created in the `bin/` directory with platform-specific names:
+- `bhasa-linux-amd64`
+- `bhasa-linux-arm64`
+- `bhasa-windows-amd64.exe`
+- `bhasa-windows-arm64.exe`
+- `bhasa-darwin-amd64`
+- `bhasa-darwin-arm64`
+
+You can also build manually using Go:
+```bash
+# Linux AMD64
+GOOS=linux GOARCH=amd64 go build -o bin/bhasa-linux-amd64
+
+# Windows AMD64
+GOOS=windows GOARCH=amd64 go build -o bin/bhasa-windows-amd64.exe
+
+# macOS ARM64 (Apple Silicon)
+GOOS=darwin GOARCH=arm64 go build -o bin/bhasa-darwin-arm64
 ```
 
 ## Example Programs
