@@ -1,4 +1,4 @@
-import { Code2, Sparkles, Play } from 'lucide-react';
+import { Code2, Sparkles, Play, Binary, FileInput, RefreshCw, Cpu } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 import { useState } from 'react';
 
@@ -295,6 +295,21 @@ export default function Examples() {
 লেখ("শুরু!");`
       },
       {
+        title: 'For Loops',
+        description: 'C-style for loops with initialization and increment',
+        code: `// Simple for loop
+পর্যন্ত (ধরি i = ০; i < ৫; i = i + ১) {
+    লেখ("Iteration: " + i);
+}
+
+// Nested for loops - Multiplication table
+পর্যন্ত (ধরি i = ১; i <= ৫; i = i + ১) {
+    পর্যন্ত (ধরি j = ১; j <= ৫; j = j + ১) {
+        লেখ(i + " × " + j + " = " + (i * j));
+    }
+}`
+      },
+      {
         title: 'Break and Continue',
         description: 'Loop control with break and continue',
         code: `ধরি i = ০;
@@ -315,6 +330,187 @@ export default function Examples() {
     }
 }`
       }
+    ],
+    bitwise: [
+      {
+        title: 'Bitwise Operations',
+        description: 'Binary operations on integers',
+        code: `ধরি a = ১২;  // 1100 in binary
+ধরি b = ১০;  // 1010 in binary
+
+লেখ("a & b = " + (a & b));   // AND: 8
+লেখ("a | b = " + (a | b));   // OR: 14
+লেখ("a ^ b = " + (a ^ b));   // XOR: 6
+লেখ("~a = " + (~a));         // NOT: -13
+
+লেখ("a << ১ = " + (a << ১)); // Left shift: 24
+লেখ("a >> ১ = " + (a >> ১)); // Right shift: 6`
+      },
+      {
+        title: 'Bit Manipulation in Functions',
+        description: 'Using bitwise operators in functions',
+        code: `// Check if a number is power of 2
+ধরি isPowerOfTwo = ফাংশন(n) {
+    ফেরত n > ০ && ((n & (n - ১)) == ০);
+};
+
+লেখ(isPowerOfTwo(১৬));  // true
+লেখ(isPowerOfTwo(১৮));  // false
+
+// Count set bits (1s in binary)
+ধরি countSetBits = ফাংশন(n) {
+    ধরি count = ০;
+    যতক্ষণ (n > ০) {
+        count = count + (n & ১);
+        n = n >> ১;
+    }
+    ফেরত count;
+};
+
+লেখ(countSetBits(১৫));  // 4 (1111 in binary)`
+      }
+    ],
+    fileio: [
+      {
+        title: 'File Write and Read',
+        description: 'Basic file I/O operations',
+        code: `// Write to a file
+ফাইল_লেখো("/tmp/message.txt", "নমস্কার বিশ্ব!");
+
+// Read from file
+ধরি content = ফাইল_পড়ো("/tmp/message.txt");
+লেখ("File content: " + content);
+
+// Check if file exists
+যদি (ফাইল_আছে("/tmp/message.txt")) {
+    লেখ("File exists!");
+}`
+      },
+      {
+        title: 'Append to File',
+        description: 'Appending content to existing files',
+        code: `// Create initial file
+ফাইল_লেখো("/tmp/log.txt", "Log entry 1\\n");
+
+// Append more entries
+ফাইল_যোগ("/tmp/log.txt", "Log entry 2\\n");
+ফাইল_যোগ("/tmp/log.txt", "Log entry 3\\n");
+
+// Read all content
+ধরি logs = ফাইল_পড়ো("/tmp/log.txt");
+লেখ(logs);`
+      }
+    ],
+    typecasting: [
+      {
+        title: 'Type Conversion',
+        description: 'Converting between different types',
+        code: `// String to number
+ধরি str = "১২৩";
+ধরি num = সংখ্যা(str);
+লেখ(num + ১০);  // 133
+
+// Number to string
+ধরি n = ৪২;
+ধরি s = লেখা(n);
+লেখ("Number as string: " + s);
+
+// Type checking
+লেখ(টাইপ(num));    // INTEGER
+লেখ(টাইপ(str));    // STRING`
+      },
+      {
+        title: 'Numeric Type Casting',
+        description: 'Casting to different numeric types',
+        code: `// Cast to byte (0-255)
+ধরি b = বাইট(২৫৫);
+লেখ("Byte: " + b);
+
+// Cast to float
+ধরি f = দশমিক(৩.১৪);
+লেখ("Float: " + f);
+
+// Cast to double
+ধরি d = দশমিক_দ্বিগুণ(৩.১৪১৫৯২৬৫);
+লেখ("Double: " + d);
+
+// Integer conversion
+ধরি i = পূর্ণসংখ্যা(৪২.৭);
+লেখ("Integer: " + i);`
+      }
+    ],
+    algorithms: [
+      {
+        title: 'Bubble Sort',
+        description: 'Classic bubble sort algorithm',
+        code: `ধরি bubbleSort = ফাংশন(arr) {
+    ধরি n = দৈর্ঘ্য(arr);
+
+    পর্যন্ত (ধরি i = ০; i < n - ১; i = i + ১) {
+        পর্যন্ত (ধরি j = ০; j < n - i - ১; j = j + ১) {
+            যদি (arr[j] > arr[j + ১]) {
+                // Swap
+                ধরি temp = arr[j];
+                arr[j] = arr[j + ১];
+                arr[j + ১] = temp;
+            }
+        }
+    }
+    ফেরত arr;
+};
+
+ধরি numbers = [৬৪, ৩৪, ২৫, ১২, ২২, ১১, ৯০];
+লেখ(bubbleSort(numbers));`
+      },
+      {
+        title: 'Binary Search',
+        description: 'Efficient search in sorted arrays',
+        code: `ধরি binarySearch = ফাংশন(arr, target) {
+    ধরি left = ০;
+    ধরি right = দৈর্ঘ্য(arr) - ১;
+
+    যতক্ষণ (left <= right) {
+        ধরি mid = (left + right) / ২;
+
+        যদি (arr[mid] == target) {
+            ফেরত mid;
+        } নাহলে {
+            যদি (arr[mid] < target) {
+                left = mid + ১;
+            } নাহলে {
+                right = mid - ১;
+            }
+        }
+    }
+    ফেরত -১;
+};
+
+ধরি sorted = [১, ৩, ৫, ৭, ৯, ১১, ১৩];
+লেখ(binarySearch(sorted, ৭));  // 3
+লেখ(binarySearch(sorted, ৬));  // -1`
+      },
+      {
+        title: 'Greatest Common Divisor',
+        description: 'Euclidean algorithm for GCD',
+        code: `ধরি gcd = ফাংশন(a, b) {
+    যতক্ষণ (b != ০) {
+        ধরি temp = b;
+        b = a % b;
+        a = temp;
+    }
+    ফেরত a;
+};
+
+লেখ("GCD(৪৮, ১৮) = " + gcd(৪৮, ১৮));  // 6
+লেখ("GCD(৫৬, ৯৮) = " + gcd(৫৬, ৯৮));  // 14
+
+// LCM using GCD
+ধরি lcm = ফাংশন(a, b) {
+    ফেরত (a * b) / gcd(a, b);
+};
+
+লেখ("LCM(১২, ১৮) = " + lcm(১২, ১৮));  // 36`
+      }
     ]
   };
 
@@ -325,7 +521,11 @@ export default function Examples() {
     { id: 'arrays', label: 'Arrays', icon: Code2 },
     { id: 'hashes', label: 'Hash Maps', icon: Sparkles },
     { id: 'strings', label: 'Strings', icon: Play },
-    { id: 'controlflow', label: 'Control Flow', icon: Code2 }
+    { id: 'controlflow', label: 'Control Flow', icon: Code2 },
+    { id: 'bitwise', label: 'Bitwise Ops', icon: Binary },
+    { id: 'fileio', label: 'File I/O', icon: FileInput },
+    { id: 'typecasting', label: 'Type Casting', icon: RefreshCw },
+    { id: 'algorithms', label: 'Algorithms', icon: Cpu }
   ];
 
   return (
