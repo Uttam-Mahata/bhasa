@@ -194,7 +194,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 
-	case *ast.IfExpression:
+case *ast.IfExpression:
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err
@@ -207,8 +207,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
+		// If-else is an expression that MUST leave a value. If consequence doesn't
+		// end with OpPop (meaning it's a statement, not expression), emit OpNull.
 		if c.lastInstructionIs(code.OpPop) {
 			c.removeLastPop()
+		} else {
+			c.emit(code.OpNull)
 		}
 
 		jumpPos := c.emit(code.OpJump, 9999)
@@ -216,6 +220,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		afterConsequencePos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
 
+		// Same for alternative - must leave a value
 		if node.Alternative == nil {
 			c.emit(code.OpNull)
 		} else {
@@ -226,11 +231,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 			if c.lastInstructionIs(code.OpPop) {
 				c.removeLastPop()
+			} else {
+				c.emit(code.OpNull)
 			}
 		}
 
 		afterAlternativePos := len(c.currentInstructions())
 		c.changeOperand(jumpPos, afterAlternativePos)
+
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
