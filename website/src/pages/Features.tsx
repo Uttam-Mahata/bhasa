@@ -25,7 +25,7 @@ export default function Features() {
       icon: Variable,
       title: 'Variables & Scoping',
       description: 'Lexical scoping with block-level variable declarations',
-      example: `ধরি নাম = "আহমেদ";
+      example: `ধরি নাম = "রোহিত";
 ধরি বয়স = ৩০;
 ধরি সক্রিয় = সত্য;`
     },
@@ -77,13 +77,13 @@ export default function Features() {
       title: 'Hash Maps',
       description: 'Key-value data structures with flexible types',
       example: `ধরি ব্যক্তি = {
-    "নাম": "করিম",
+    "নাম": "অর্জুন",
     "বয়স": ২৫,
-    "শহর": "ঢাকা"
+    "শহর": "মুম্বাই"
 };
 
-লেখ(ব্যক্তি["নাম"]);  // করিম
-ব্যক্তি["ইমেইল"] = "karim@example.com";`
+লেখ(ব্যক্তি["নাম"]);  // অর্জুন
+ব্যক্তি["ইমেইল"] = "arjun@example.com";`
     },
     {
       icon: Repeat,
@@ -173,11 +173,11 @@ export default function Features() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-slate-900 mb-4">
-              Language Features
+              Compiler Design Learning Features
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Comprehensive feature set with modern syntax, Bengali script support,
-              and high-performance bytecode compilation
+              Explore compiler implementation through a complete feature set with Bengali script,
+              bytecode compilation, and virtual machine execution
             </p>
           </div>
         </div>
@@ -221,10 +221,10 @@ export default function Features() {
           <div className="text-center mb-12">
             <Braces className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Core Features
+              Implementation Examples
             </h2>
             <p className="text-lg text-slate-600">
-              Modern programming constructs with clean syntax
+              Learn how language features are implemented in a real compiler
             </p>
           </div>
 

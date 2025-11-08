@@ -38,7 +38,7 @@ export default function GettingStarted() {
   const helloWorld = `লেখ("নমস্কার বিশ্ব!");`;
 
   const quickExample = `// Variables
-ধরি নাম = "আহমেদ";
+ধরি নাম = "অনিকা";
 ধরি বয়স = ২৫;
 
 // Function
@@ -70,12 +70,12 @@ export default function GettingStarted() {
   ];
 
   const features = [
-    'Write Bengali keywords and identifiers',
-    'Use Bengali numerals (০-৯) in your code',
-    'Full Unicode UTF-8 support',
-    'Interactive REPL for experimentation',
-    'Compile to bytecode for fast execution',
-    'Rich standard library with 30+ functions'
+    'Study lexer implementation with Bengali UTF-8 support',
+    'Explore parser design with Pratt parsing',
+    'Learn bytecode generation and optimization',
+    'Understand VM execution with stack-based architecture',
+    'Experiment with the interactive REPL',
+    'Examine 30+ built-in function implementations'
   ];
 
   return (
@@ -89,7 +89,7 @@ export default function GettingStarted() {
               Getting Started
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Install Bhasa and start programming in Bengali in just a few minutes
+              Build and explore the Bhasa compiler to learn about language implementation
             </p>
           </div>
         </div>
@@ -307,7 +307,7 @@ export default function GettingStarted() {
           <div className="text-center mb-8">
             <Book className="h-12 w-12 text-blue-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              What You Can Do with Bhasa
+              What You Can Learn with Bhasa
             </h2>
           </div>
 
