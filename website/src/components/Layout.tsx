@@ -119,8 +119,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span>ভাষা (Bhasa)</span>
               </h3>
               <p className="text-sm text-slate-400 leading-relaxed">
-                A fully compiled programming language with native support for the Bengali script.
-                Built with modern compiler technology for performance and accessibility.
+                A compiler design learning project with native Bengali script support.
+                Explore modern compiler architecture through a complete bytecode compiler and VM implementation.
               </p>
             </div>
 

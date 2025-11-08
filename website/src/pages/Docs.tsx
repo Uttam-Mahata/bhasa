@@ -165,7 +165,7 @@ export default function Docs() {
               Documentation
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Comprehensive guides and references for the Bhasa programming language
+              Learn about compiler architecture, implementation details, and language design
             </p>
           </div>
         </div>
@@ -289,11 +289,11 @@ export default function Docs() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FileText className="h-12 w-12 text-blue-600 mx-auto mb-4" />
           <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            Need Help?
+            Start Learning
           </h2>
           <p className="text-lg text-slate-600 mb-6">
-            Start with the Quick Start guide for a fast introduction, or dive deep into the
-            Architecture documentation for technical details.
+            Begin with the Quick Start guide, then explore the Architecture documentation
+            to understand the compiler implementation in detail.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a

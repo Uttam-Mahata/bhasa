@@ -27,7 +27,7 @@ export default function Home() {
 
 লেখ(fibonacci(১০));  // Output: 55`;
 
-  const bengaliVarsCode = `ধরি নাম = "রহিম";
+  const bengaliVarsCode = `ধরি নাম = "রাজ";
 ধরি বয়স = ২৫;
 ধরি যোগফল = ৫০০০০;
 লেখ(নাম + " এর বয়স " + বয়স);`;
@@ -36,19 +36,19 @@ export default function Home() {
     {
       icon: Zap,
       title: '3-10x Faster',
-      description: 'Compiled to bytecode with a stack-based VM for blazing-fast performance compared to interpreted execution.',
+      description: 'Learn how bytecode compilation with a stack-based VM achieves significant performance gains over interpreted execution.',
       color: 'from-yellow-500 to-orange-500'
     },
     {
       icon: Globe,
       title: 'Bengali Script Native',
-      description: 'Write code using Bengali keywords and identifiers. Full Unicode support with Bengali numerals.',
+      description: 'Understand UTF-8 handling and Unicode support by working with Bengali keywords and identifiers.',
       color: 'from-blue-500 to-indigo-500'
     },
     {
       icon: Layers,
-      title: 'Modern Architecture',
-      description: 'Complete compilation pipeline: Lexer → Parser → Compiler → VM with 41+ opcodes.',
+      title: 'Complete Compiler Pipeline',
+      description: 'Study the full compilation process: Lexer → Parser → Compiler → VM with 41+ opcodes.',
       color: 'from-green-500 to-emerald-500'
     },
     // Note: Self-hosting compiler is in development
@@ -61,13 +61,13 @@ export default function Home() {
     {
       icon: Rocket,
       title: 'Rich Feature Set',
-      description: 'Functions, closures, arrays, hashes, recursion, control flow, and 30+ built-in functions.',
+      description: 'Explore implementing functions, closures, arrays, hashes, recursion, and 30+ built-in functions.',
       color: 'from-red-500 to-rose-500'
     },
     {
       icon: Code2,
-      title: 'Clean Syntax',
-      description: 'Familiar syntax inspired by modern languages like JavaScript and Python, easy to learn.',
+      title: 'Clean Implementation',
+      description: 'Well-structured codebase with clear separation of concerns, perfect for learning compiler design.',
       color: 'from-cyan-500 to-blue-500'
     }
   ];
@@ -104,9 +104,9 @@ export default function Home() {
               </h1>
 
               <p className="text-xl text-slate-600 leading-relaxed">
-                A modern, compiled programming language with native Bengali script support.
-                Write code using Bengali keywords, achieve 3-10x faster performance with bytecode compilation,
-                and experience a self-hosting compiler written in Bhasa itself.
+                A learning project demonstrating compiler design with native Bengali script support.
+                Explore how compilers work through a modern bytecode compiler and VM implementation,
+                achieving 3-10x performance over tree-walking interpreters.
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -165,11 +165,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              Why Choose ভাষা?
+              Why Learn Compiler Design with ভাষা?
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              A powerful, modern programming language designed for performance,
-              accessibility, and cultural representation.
+              A practical, hands-on project to understand modern compiler architecture
+              and virtual machine implementation.
             </p>
           </div>
 
@@ -233,10 +233,10 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Ready to Start Programming in Bengali?
+            Ready to Learn Compiler Design?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join the community and build amazing things with ভাষা
+            Explore the codebase and understand how compilers work from the ground up
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
