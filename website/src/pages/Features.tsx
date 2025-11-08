@@ -15,7 +15,12 @@ import {
   Calculator,
   Type,
   Download,
-  CheckCircle
+  CheckCircle,
+  Binary,
+  RefreshCw,
+  Database,
+  Shuffle,
+  FileInput
 } from 'lucide-react';
 import CodeBlock from '../components/CodeBlock';
 
@@ -97,6 +102,85 @@ export default function Features() {
 };
 
 লেখ(factorial(৫));  // 120`
+    },
+    {
+      icon: GitBranch,
+      title: 'For Loops',
+      description: 'C-style for loops with initialization, condition, and increment',
+      example: `পর্যন্ত (ধরি i = ০; i < ৫; i = i + ১) {
+    লেখ("Count: " + i);
+}
+
+// Nested loops
+পর্যন্ত (ধরি i = ১; i <= ৩; i = i + ১) {
+    পর্যন্ত (ধরি j = ১; j <= ৩; j = j + ১) {
+        লেখ(i + " × " + j + " = " + (i * j));
+    }
+}`
+    },
+    {
+      icon: Binary,
+      title: 'Bitwise Operators',
+      description: '6 bitwise operators for low-level bit manipulation',
+      example: `ধরি a = ১২;  // 1100 in binary
+ধরি b = ১০;  // 1010 in binary
+
+লেখ(a & b);   // AND: 8 (1000)
+লেখ(a | b);   // OR: 14 (1110)
+লেখ(a ^ b);   // XOR: 6 (0110)
+লেখ(~a);      // NOT: -13
+লেখ(a << ১);  // Left shift: 24
+লেখ(a >> ১);  // Right shift: 6`
+    },
+    {
+      icon: Shuffle,
+      title: 'Logical Operators',
+      description: 'Logical AND, OR, NOT with short-circuit evaluation',
+      example: `ধরি age = ২৫;
+ধরি hasLicense = সত্য;
+
+// Logical AND with short-circuit
+যদি (age >= ১৮ && hasLicense) {
+    লেখ("Can drive");
+}
+
+// Logical OR
+যদি (age < ১৮ || !hasLicense) {
+    লেখ("Cannot drive");
+}`
+    },
+    {
+      icon: RefreshCw,
+      title: 'Type System & Casting',
+      description: '8 data types with explicit type casting functions',
+      example: `// Type casting
+ধরি x = "১২৩";
+ধরি num = সংখ্যা(x);      // String to int
+লেখ(num + ১০);           // 133
+
+// Numeric types
+ধরি b = বাইট(২৫৫);       // byte
+ধরি f = দশমিক(৩.১৪);     // float
+ধরি d = দশমিক_দ্বিগুণ(৩.১৪১৫৯); // double`
+    },
+    {
+      icon: FileInput,
+      title: 'File I/O Operations',
+      description: 'Complete file operations: read, write, append, and check existence',
+      example: `// Write to file
+ফাইল_লেখো("/tmp/test.txt", "নমস্কার");
+
+// Read from file
+ধরি content = ফাইল_পড়ো("/tmp/test.txt");
+লেখ(content);  // নমস্কার
+
+// Append to file
+ফাইল_যোগ("/tmp/test.txt", "\\nবিশ্ব");
+
+// Check if file exists
+যদি (ফাইল_আছে("/tmp/test.txt")) {
+    লেখ("File exists!");
+}`
     }
   ];
 
@@ -109,17 +193,27 @@ export default function Features() {
     {
       icon: Type,
       title: 'String Operations',
-      functions: ['বিভক্ত() - Split', 'যুক্ত() - Join', 'উপরে() - Uppercase', 'নিচে() - Lowercase', 'ছাঁটো() - Trim', 'প্রতিস্থাপন() - Replace', 'খুঁজুন() - indexOf']
+      functions: ['বিভক্ত() - Split', 'যুক্ত() - Join', 'উপরে() - Uppercase', 'নিচে() - Lowercase', 'ছাঁটো() - Trim', 'প্রতিস্থাপন() - Replace', 'খুঁজুন() - Find index', 'অক্ষর() - Get char at index']
     },
     {
       icon: Box,
       title: 'Array Operations',
-      functions: ['দৈর্ঘ্য() - Length', 'প্রথম() - First', 'শেষ() - Last', 'বাকি() - Rest', 'যোগ() - Push']
+      functions: ['দৈর্ঘ্য() - Length', 'প্রথম() - First', 'শেষ() - Last', 'বাকি() - Rest', 'যোগ() - Push', 'উল্টাও() - Reverse']
     },
     {
       icon: Calculator,
       title: 'Math Functions',
       functions: ['শক্তি() - Power', 'বর্গমূল() - Sqrt', 'পরম() - Abs', 'সর্বোচ্চ() - Max', 'সর্বনিম্ন() - Min', 'গোলাকার() - Round']
+    },
+    {
+      icon: RefreshCw,
+      title: 'Type Conversion',
+      functions: ['সংখ্যা() - To int', 'লেখা() - To string', 'বাইট() - To byte', 'দশমিক() - To float', 'দশমিক_দ্বিগুণ() - To double', 'টাইপ() - Get type']
+    },
+    {
+      icon: Code2,
+      title: 'Unicode & Char',
+      functions: ['কোড() - Get Unicode code', 'অক্ষর_থেকে_কোড() - Char from code', 'অক্ষর_রূপান্তর() - To char']
     }
   ];
 
@@ -183,16 +277,46 @@ export default function Features() {
         </div>
       </section>
 
+      {/* Bengali Script Support */}
+      <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-green-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <Globe className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              Full Bengali Script Support
+            </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              Complete support for Bengali keywords, identifiers, and numerals. Write code entirely in Bengali!
+            </p>
+          </div>
+
+          {/* Bengali Numerals Showcase */}
+          <div className="max-w-3xl mx-auto mb-12 p-6 bg-white rounded-xl shadow-lg border-2 border-orange-200">
+            <h3 className="text-xl font-bold text-slate-900 mb-4 text-center">Bengali Numerals (০-৯)</h3>
+            <div className="grid grid-cols-10 gap-2 mb-4">
+              {['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'].map((num, idx) => (
+                <div key={idx} className="text-center p-3 bg-gradient-to-br from-orange-100 to-green-100 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">{num}</div>
+                  <div className="text-xs text-slate-600">{idx}</div>
+                </div>
+              ))}
+            </div>
+            <CodeBlock code={`ধরি সংখ্যা = ১২৩৪৫৬৭৮৯০;
+লেখ(সংখ্যা);  // Full Bengali numeral support!`} />
+          </div>
+        </div>
+      </section>
+
       {/* Bengali Keywords */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Globe className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <Code2 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
               Bengali Keywords
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              13 native Bengali keywords for writing expressive code
+              13 native Bengali keywords for control flow and declarations
             </p>
           </div>
 
@@ -268,11 +392,11 @@ export default function Features() {
               Built-in Functions
             </h2>
             <p className="text-lg text-slate-600">
-              30+ built-in functions for common operations
+              30+ built-in functions across 6 categories
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {builtinCategories.map((category, index) => {
               const IconComponent = category.icon;
               return (
