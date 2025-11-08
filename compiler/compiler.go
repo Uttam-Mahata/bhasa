@@ -664,6 +664,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(node.Arguments))
+
+	// ========== OOP Compilation ==========
+
+	case *ast.ClassDefinition:
+		return c.compileClassDefinition(node)
+
+	case *ast.InterfaceDefinition:
+		return c.compileInterfaceDefinition(node)
+
+	case *ast.NewExpression:
+		return c.compileNewExpression(node)
+
+	case *ast.ThisExpression:
+		c.emit(code.OpGetThis)
+
+	case *ast.SuperExpression:
+		c.emit(code.OpGetSuper)
+
+	case *ast.MethodCallExpression:
+		return c.compileMethodCall(node)
 	}
 
 	return nil
@@ -866,3 +886,250 @@ func (c *Compiler) LoadAndCompileModule(modulePath string) error {
 	return c.Compile(program)
 }
 
+
+// ============================================================================
+// OOP Compilation Functions
+// ============================================================================
+
+// compileClassDefinition compiles a class definition
+func (c *Compiler) compileClassDefinition(node *ast.ClassDefinition) error {
+	// Create a new Class object
+	class := &object.Class{
+		Name:         node.Name.Value,
+		SuperClass:   nil,
+		Interfaces:   []*object.Interface{},
+		Fields:       make(map[string]string),
+		Methods:      make(map[string]*object.Method),
+		Constructor:  nil,
+		StaticFields: make(map[string]object.Object),
+		IsAbstract:   node.IsAbstract,
+		IsFinal:      node.IsFinal,
+		FieldAccess:  make(map[string]string),
+		FieldOrder:   []string{},
+	}
+
+	// Process fields
+	for _, field := range node.Fields {
+		class.Fields[field.Name] = field.TypeAnnot.String()
+		class.FieldAccess[field.Name] = string(field.Access)
+		class.FieldOrder = append(class.FieldOrder, field.Name)
+	}
+
+	// Compile constructor
+	if len(node.Constructors) > 0 {
+		// Use the first constructor (in simple implementation)
+		constructor := node.Constructors[0]
+		
+		// Compile constructor as a function
+		c.enterScope()
+		
+		// Define 'this' parameter
+		c.symbolTable.Define("এই")
+		
+		// Define constructor parameters
+		for _, param := range constructor.Parameters {
+			c.symbolTable.Define(param.Value)
+		}
+		
+		// Compile constructor body
+		if constructor.Body != nil {
+			if err := c.Compile(constructor.Body); err != nil {
+				return err
+			}
+		}
+		
+		// Add implicit return if needed
+		if !c.lastInstructionIs(code.OpReturnValue) {
+			c.emit(code.OpNull)
+			c.emit(code.OpReturnValue)
+		}
+		
+		freeSymbols := c.symbolTable.FreeSymbols
+		numLocals := c.symbolTable.numDefinitions
+		instructions := c.leaveScope()
+		
+		compiledFn := &object.CompiledFunction{
+			Instructions:  instructions,
+			NumLocals:     numLocals,
+			NumParameters: len(constructor.Parameters) + 1, // +1 for 'this'
+		}
+		
+		fnIndex := c.addConstant(compiledFn)
+		
+		for _, s := range freeSymbols {
+			c.loadSymbol(s)
+		}
+		
+		class.Constructor = &object.Closure{
+			Fn:   compiledFn,
+			Free: make([]object.Object, len(freeSymbols)),
+		}
+		
+		c.emit(code.OpClosure, fnIndex, len(freeSymbols))
+		c.emit(code.OpDefineConstructor, fnIndex)
+	}
+	
+	// Compile methods
+	for _, method := range node.Methods {
+		// Skip abstract methods (no body)
+		if method.IsAbstract {
+			continue
+		}
+		
+		// Compile method as a function
+		c.enterScope()
+		
+		// Define 'this' parameter
+		c.symbolTable.Define("এই")
+		
+		// Define method parameters
+		for _, param := range method.Parameters {
+			c.symbolTable.Define(param.Value)
+		}
+		
+		// Compile method body
+		if method.Body != nil {
+			if err := c.Compile(method.Body); err != nil {
+				return err
+			}
+		}
+		
+		// Add implicit return if needed
+		if !c.lastInstructionIs(code.OpReturnValue) {
+			c.emit(code.OpNull)
+			c.emit(code.OpReturnValue)
+		}
+		
+		freeSymbols := c.symbolTable.FreeSymbols
+		numLocals := c.symbolTable.numDefinitions
+		instructions := c.leaveScope()
+		
+		compiledFn := &object.CompiledFunction{
+			Instructions:  instructions,
+			NumLocals:     numLocals,
+			NumParameters: len(method.Parameters) + 1, // +1 for 'this'
+		}
+		
+		fnIndex := c.addConstant(compiledFn)
+		
+		for _, s := range freeSymbols {
+			c.loadSymbol(s)
+		}
+		
+		closure := &object.Closure{
+			Fn:   compiledFn,
+			Free: make([]object.Object, len(freeSymbols)),
+		}
+		
+		// Create method object
+		methodObj := &object.Method{
+			Name:       method.Name.Value,
+			Access:     string(method.Access),
+			IsStatic:   method.IsStatic,
+			IsFinal:    method.IsFinal,
+			IsAbstract: method.IsAbstract,
+			Closure:    closure,
+		}
+		
+		class.Methods[method.Name.Value] = methodObj
+		
+		// Emit method definition
+		methodNameIndex := c.addConstant(&object.String{Value: method.Name.Value})
+		c.emit(code.OpClosure, fnIndex, len(freeSymbols))
+		c.emit(code.OpDefineMethod, methodNameIndex)
+	}
+	
+	// Add class to constants
+	classIndex := c.addConstant(class)
+	c.emit(code.OpClass, classIndex)
+	
+	// Define class in symbol table
+	symbol := c.symbolTable.Define(node.Name.Value)
+	if symbol.Scope == GlobalScope {
+		c.emit(code.OpSetGlobal, symbol.Index)
+	} else {
+		c.emit(code.OpSetLocal, symbol.Index)
+	}
+	
+	return nil
+}
+
+// compileInterfaceDefinition compiles an interface definition
+func (c *Compiler) compileInterfaceDefinition(node *ast.InterfaceDefinition) error {
+	// Create interface object
+	iface := &object.Interface{
+		Name:             node.Name.Value,
+		MethodSignatures: make(map[string][]string),
+	}
+	
+	// Process method signatures
+	for _, method := range node.Methods {
+		paramTypes := []string{}
+		for _, paramType := range method.ParameterTypes {
+			paramTypes = append(paramTypes, paramType.String())
+		}
+		iface.MethodSignatures[method.Name.Value] = paramTypes
+	}
+	
+	// Add interface to constants
+	ifaceIndex := c.addConstant(iface)
+	c.emit(code.OpInterface, ifaceIndex)
+	
+	// Define interface in symbol table
+	symbol := c.symbolTable.Define(node.Name.Value)
+	if symbol.Scope == GlobalScope {
+		c.emit(code.OpSetGlobal, symbol.Index)
+	} else {
+		c.emit(code.OpSetLocal, symbol.Index)
+	}
+	
+	return nil
+}
+
+// compileNewExpression compiles a new instance expression
+func (c *Compiler) compileNewExpression(node *ast.NewExpression) error {
+	// Load the class
+	err := c.Compile(node.ClassName)
+	if err != nil {
+		return err
+	}
+	
+	// Compile constructor arguments
+	for _, arg := range node.Arguments {
+		err := c.Compile(arg)
+		if err != nil {
+			return err
+		}
+	}
+	
+	// Emit OpNewInstance with argument count
+	c.emit(code.OpNewInstance, len(node.Arguments))
+	
+	return nil
+}
+
+// compileMethodCall compiles a method call
+func (c *Compiler) compileMethodCall(node *ast.MethodCallExpression) error {
+	// Compile the object
+	err := c.Compile(node.Object)
+	if err != nil {
+		return err
+	}
+	
+	// Push method name as constant
+	methodNameIndex := c.addConstant(&object.String{Value: node.MethodName.Value})
+	c.emit(code.OpConstant, methodNameIndex)
+	
+	// Compile arguments
+	for _, arg := range node.Arguments {
+		err := c.Compile(arg)
+		if err != nil {
+			return err
+		}
+	}
+	
+	// Emit method call
+	c.emit(code.OpCallMethod, len(node.Arguments))
+	
+	return nil
+}

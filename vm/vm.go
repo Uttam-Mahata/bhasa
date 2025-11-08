@@ -403,6 +403,199 @@ func (vm *VM) Run() error {
 					return err
 				}
 			}
+
+		// ========== OOP Opcodes ==========
+
+		case code.OpClass:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			class := vm.constants[constIndex]
+			err := vm.push(class)
+			if err != nil {
+				return err
+			}
+
+		case code.OpNewInstance:
+			numArgs := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			// Get constructor arguments
+			args := make([]object.Object, numArgs)
+			for i := int(numArgs) - 1; i >= 0; i-- {
+				args[i] = vm.pop()
+			}
+
+			// Get the class
+			classObj := vm.pop()
+			class, ok := classObj.(*object.Class)
+			if !ok {
+				return fmt.Errorf("expected class, got %T", classObj)
+			}
+
+			// Create new instance
+			instance := &object.ClassInstance{
+				Class:  class,
+				Fields: make(map[string]object.Object),
+				This:   nil,
+			}
+			instance.This = instance
+
+			// Initialize fields to null
+			for _, fieldName := range class.FieldOrder {
+				instance.Fields[fieldName] = Null
+			}
+
+			// Call constructor if exists
+			if class.Constructor != nil {
+				// Prepare arguments: [this, arg1, arg2, ...]
+				allArgs := append([]object.Object{instance}, args...)
+
+				// Create new frame for constructor
+				frame := NewFrame(class.Constructor, vm.sp-len(allArgs))
+				vm.pushFrame(frame)
+
+				// Push arguments onto stack
+				for _, arg := range allArgs {
+					err := vm.push(arg)
+					if err != nil {
+						return err
+					}
+				}
+
+				vm.sp = frame.basePointer + class.Constructor.Fn.NumLocals
+			}
+
+			err := vm.push(instance)
+			if err != nil {
+				return err
+			}
+
+		case code.OpCallMethod:
+			numArgs := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			// Get arguments
+			args := make([]object.Object, numArgs)
+			for i := int(numArgs) - 1; i >= 0; i-- {
+				args[i] = vm.pop()
+			}
+
+			// Get method name
+			methodName := vm.pop().(*object.String).Value
+
+			// Get object
+			obj := vm.pop()
+
+			instance, ok := obj.(*object.ClassInstance)
+			if !ok {
+				return fmt.Errorf("cannot call method on non-class instance: %T", obj)
+			}
+
+			// Find method in class hierarchy
+			method := instance.Class.GetMethod(methodName)
+			if method == nil {
+				return fmt.Errorf("method '%s' not found in class '%s'", methodName, instance.Class.Name)
+			}
+
+			// Prepare arguments: [this, arg1, arg2, ...]
+			allArgs := append([]object.Object{instance}, args...)
+
+			// Create new frame for method
+			frame := NewFrame(method.Closure, vm.sp-len(allArgs))
+			vm.pushFrame(frame)
+
+			// Push arguments onto stack
+			for _, arg := range allArgs {
+				err := vm.push(arg)
+				if err != nil {
+					return err
+				}
+			}
+
+			vm.sp = frame.basePointer + method.Closure.Fn.NumLocals
+
+		case code.OpGetThis:
+			// 'this' is always the first parameter (index 0)
+			basePointer := vm.currentFrame().basePointer
+			err := vm.push(vm.stack[basePointer])
+			if err != nil {
+				return err
+			}
+
+		case code.OpGetSuper:
+			// Get current instance (this)
+			basePointer := vm.currentFrame().basePointer
+			thisObj := vm.stack[basePointer]
+
+			instance, ok := thisObj.(*object.ClassInstance)
+			if !ok {
+				return fmt.Errorf("super can only be used in class methods")
+			}
+
+			if instance.Class.SuperClass == nil {
+				return fmt.Errorf("class has no parent class")
+			}
+
+			// Push parent class
+			err := vm.push(instance.Class.SuperClass)
+			if err != nil {
+				return err
+			}
+
+		case code.OpInterface:
+			constIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			iface := vm.constants[constIndex]
+			err := vm.push(iface)
+			if err != nil {
+				return err
+			}
+
+		case code.OpGetInstanceField:
+			// Get field name
+			fieldName := vm.pop().(*object.String).Value
+
+			// Get instance
+			obj := vm.pop()
+			instance, ok := obj.(*object.ClassInstance)
+			if !ok {
+				return fmt.Errorf("cannot get field from non-class instance")
+			}
+
+			// Get field value
+			value, exists := instance.GetField(fieldName)
+			if !exists {
+				value = Null
+			}
+
+			err := vm.push(value)
+			if err != nil {
+				return err
+			}
+
+		case code.OpSetInstanceField:
+			// Get value
+			value := vm.pop()
+
+			// Get field name
+			fieldName := vm.pop().(*object.String).Value
+
+			// Get instance
+			obj := vm.pop()
+			instance, ok := obj.(*object.ClassInstance)
+			if !ok {
+				return fmt.Errorf("cannot set field on non-class instance")
+			}
+
+			// Set field value
+			instance.SetField(fieldName, value)
+
+			err := vm.push(value)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
