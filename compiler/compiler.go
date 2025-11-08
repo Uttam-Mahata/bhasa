@@ -194,7 +194,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 
-	case *ast.IfExpression:
+case *ast.IfExpression:
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err
@@ -207,8 +207,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
+		// If-else is an expression that MUST leave a value. If consequence doesn't
+		// end with OpPop (meaning it's a statement, not expression), emit OpNull.
 		if c.lastInstructionIs(code.OpPop) {
 			c.removeLastPop()
+		} else {
+			c.emit(code.OpNull)
 		}
 
 		jumpPos := c.emit(code.OpJump, 9999)
@@ -216,6 +220,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		afterConsequencePos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
 
+		// Same for alternative - must leave a value
 		if node.Alternative == nil {
 			c.emit(code.OpNull)
 		} else {
@@ -226,11 +231,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 			if c.lastInstructionIs(code.OpPop) {
 				c.removeLastPop()
+			} else {
+				c.emit(code.OpNull)
 			}
 		}
 
 		afterAlternativePos := len(c.currentInstructions())
 		c.changeOperand(jumpPos, afterAlternativePos)
+
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
@@ -938,9 +946,11 @@ func (c *Compiler) compileClassDefinition(node *ast.ClassDefinition) error {
 			}
 		}
 		
-		// Add implicit return if needed
+		// Constructor should always return 'this' (এই)
+		// If there's no explicit return, add implicit return of 'this'
 		if !c.lastInstructionIs(code.OpReturnValue) {
-			c.emit(code.OpNull)
+			// Load 'এই' (this) parameter - it's always the first parameter (index 0)
+			c.emit(code.OpGetLocal, 0)
 			c.emit(code.OpReturnValue)
 		}
 		
@@ -1088,23 +1098,24 @@ func (c *Compiler) compileInterfaceDefinition(node *ast.InterfaceDefinition) err
 
 // compileNewExpression compiles a new instance expression
 func (c *Compiler) compileNewExpression(node *ast.NewExpression) error {
-	// Load the class
-	err := c.Compile(node.ClassName)
-	if err != nil {
-		return err
-	}
-	
-	// Compile constructor arguments
+	// Compile constructor arguments first
 	for _, arg := range node.Arguments {
 		err := c.Compile(arg)
 		if err != nil {
 			return err
 		}
 	}
-	
+
+	// Load the class last (so it's on top of stack)
+	err := c.Compile(node.ClassName)
+	if err != nil {
+		return err
+	}
+
 	// Emit OpNewInstance with argument count
+	// Stack layout before OpNewInstance: [arg1, arg2, ..., argN, class]
 	c.emit(code.OpNewInstance, len(node.Arguments))
-	
+
 	return nil
 }
 

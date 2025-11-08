@@ -205,6 +205,20 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseAssignmentStatement()
 		}
 		return p.parseExpressionStatement()
+	case token.THIS, token.SUPER:
+		// Check if this is a member assignment (this.member = value or super.member = value)
+		if p.peekTokenIs(token.DOT) {
+			// Parse the member access expression
+			left := p.parseExpressionStatement()
+			// Check if it's actually an assignment
+			if memberAccess, ok := left.Expression.(*ast.MemberAccessExpression); ok {
+				if p.peekTokenIs(token.ASSIGN) {
+					return p.parseMemberAssignmentStatement(memberAccess)
+				}
+			}
+			return left
+		}
+		return p.parseExpressionStatement()
 	default:
 		return p.parseExpressionStatement()
 	}

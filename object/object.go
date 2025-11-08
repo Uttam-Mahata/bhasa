@@ -36,6 +36,7 @@ const (
 	HASH_OBJ              = "HASH"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	CLOSURE_OBJ           = "CLOSURE"
+	BOUND_METHOD_OBJ      = "BOUND_METHOD"
 	STRUCT_OBJ            = "STRUCT"
 	ENUM_OBJ              = "ENUM"
 	ENUM_TYPE_OBJ         = "ENUM_TYPE"
@@ -347,6 +348,17 @@ type Closure struct {
 func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
+}
+
+// BoundMethod represents a method bound to an instance (with 'this')
+type BoundMethod struct {
+	Receiver Object   // The instance that 'this' refers to
+	Method   *Closure // The method closure
+}
+
+func (bm *BoundMethod) Type() ObjectType { return BOUND_METHOD_OBJ }
+func (bm *BoundMethod) Inspect() string {
+	return fmt.Sprintf("BoundMethod[%p]", bm)
 }
 
 // Struct represents a struct instance
