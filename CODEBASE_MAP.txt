@@ -1,0 +1,265 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                 BHASA CODEBASE ARCHITECTURE MAP                               ║
+║                                                                                ║
+║  Bengali Programming Language - Compiled with Bytecode VM                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        COMPILATION PIPELINE                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  বাংলা সোর্স কোড (UTF-8)
+         │
+         ├─────────────────────────────────────────────────────────┐
+         │                                                          │
+    [LEXER]                                               (token/token.go)
+    lexer/lexer.go                                      • 41 token types
+    • UTF-8 handling                                    • Bengali keywords
+    • Bengali support                                   • 20+ operators
+    • Line/column tracking                              • Symbol mapping
+         │
+         ├─────────────────────────────────────────────────────────┐
+         │                                                          │
+    [PARSER]                                              (parser/parser.go)
+    1,169 lines                                         • Pratt parsing
+    • Operator precedence                              • 14 precedence levels
+    • AST construction                                 • Recursive descent
+    • Error reporting
+         │
+         ├─────────────────────────────────────────────────────────┐
+         │                                                          │
+   [COMPILER]                                         (compiler/compiler.go)
+   868 lines                                          • AST traversal
+   • Bytecode generation                              • Single-pass
+   • Constant pool management                         • Symbol table mgmt
+   • Jump patching                                    • Scope tracking
+   • Free variable tracking
+         │
+         ├─────────────────────────────────────────────────────────┐
+         │                                                          │
+    [VM - EXECUTOR]                                      (vm/vm.go)
+    1,172 lines                                        • Stack-based (2048)
+    • Stack operations                                • Global storage (65536)
+    • Instruction dispatch                           • Frames (1024)
+    • Built-in integration                           • 41 opcodes
+    • Garbage collection (Go)
+         │
+         └─────────────────────────────────────────────────────────┘
+                                  │
+                            OUTPUT / RESULT
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      KEY DATA STRUCTURES                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+AST (ast/ast.go - 654 lines)                Object System (object/object.go - 370 lines)
+├─ Statements (10+ types)                   ├─ Primitives (Integer, String, etc)
+├─ Expressions (15+ types)                  ├─ Collections (Array, Hash)
+├─ Struct Nodes                             ├─ Functions (Closure, CompiledFunction)
+├─ Enum Nodes                               ├─ OOP (Struct, Enum, EnumType)
+└─ Type Annotations                         └─ Special (Null, Error, ReturnValue)
+
+Compiler (compiler/compiler.go)             Symbol Table (compiler/symbol_table.go)
+├─ CompilationScope                         ├─ GlobalScope
+├─ Bytecode                                 ├─ LocalScope
+├─ LoopContext                              ├─ BuiltinScope
+└─ Constants Pool                           ├─ FreeScope (Closures)
+                                            └─ FunctionScope (Recursion)
+
+Code (code/code.go)                         VM (vm/vm.go)
+├─ 41 Opcodes                               ├─ Stack [2048]
+├─ Instruction Format                       ├─ Globals [65536]
+├─ Instruction Readers                      ├─ Frames [1024]
+└─ Opcode Definitions                       └─ Frame (IP, Closure)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      FILE STRUCTURE                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+bhasa/
+├── Phase 1: TOKENIZATION
+│   ├── token/token.go          (164 lines) - Token definitions
+│   └── lexer/lexer.go          (210 lines) - Lexical analyzer
+│
+├── Phase 2: PARSING
+│   ├── parser/parser.go        (1169 lines) - Pratt parser
+│   └── ast/ast.go              (654 lines) - AST node types
+│
+├── Phase 3: COMPILATION
+│   ├── compiler/compiler.go    (868 lines) - AST → Bytecode
+│   ├── compiler/symbol_table.go (120 lines) - Variable scoping
+│   └── code/code.go            (200 lines) - Instruction definitions
+│
+├── Phase 4: EXECUTION
+│   ├── vm/vm.go                (1172 lines) - Stack-based VM
+│   ├── vm/frame.go             (30 lines) - Call frames
+│   └── object/object.go        (370 lines) - Runtime objects
+│
+├── Entry Points
+│   ├── main.go                 (59 lines) - CLI entry
+│   └── repl/repl.go            (105 lines) - Interactive shell
+│
+├── Legacy
+│   ├── evaluator/evaluator.go  - Tree-walking interpreter
+│   └── evaluator/builtins.go   - Built-in function definitions
+│
+├── Self-Hosted Compiler
+│   └── modules/                - Compiler written in Bhasa itself
+│       ├── লেক্সার.ভাষা           - Lexer
+│       ├── পার্সার.ভাষা           - Parser
+│       ├── কম্পাইলার.ভাষা        - Compiler
+│       └── ... (6 more modules)
+│
+├── Examples
+│   ├── hello.bhasa
+│   ├── variables.bhasa
+│   ├── functions.bhasa
+│   ├── fibonacci.bhasa
+│   ├── arrays.bhasa
+│   ├── hash.bhasa
+│   ├── conditionals.bhasa
+│   ├── loops.bhasa
+│   ├── bitwise_comprehensive.bhasa
+│   └── bengali_variable_names.bhasa
+│
+└── Tests
+    ├── lexer_test.bhasa
+    ├── parser_test.bhasa
+    ├── compiler_test.bhasa
+    └── bootstrap_test.bhasa
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LANGUAGE FEATURES (20 Keywords)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTROL FLOW (9)           LITERALS (3)              OOP (3)
+├─ ধরি    (let)          ├─ সত্য    (true)        ├─ স্ট্রাক্ট (struct)
+├─ ফাংশন (function)     ├─ মিথ্যা  (false)       ├─ গণনা   (enum)
+├─ যদি    (if)           ├─ নাল    (null)         └─ হিসাবে  (as / type cast)
+├─ নাহলে  (else)         │
+├─ ফেরত   (return)        TYPE KEYWORDS (11)
+├─ যতক্ষণ  (while)       ├─ বাইট, ছোট_সংখ্যা
+├─ পর্যন্ত (for)         ├─ পূর্ণসংখ্যা, দীর্ঘ_সংখ্যা
+├─ বিরতি  (break)        ├─ দশমিক, দশমিক_দ্বিগুণ
+├─ চালিয়ে_যাও (continue) ├─ অক্ষর, লেখা, বুলিয়ান
+└─ অন্তর্ভুক্ত (import)   └─ তালিকা, ম্যাপ
+
+DATA TYPES (13)            OPERATORS (20+)
+├─ Integer, Byte, Short    ├─ Arithmetic: + - * / %
+├─ Int, Long              ├─ Comparison: == != < > <= >=
+├─ Float, Double          ├─ Logical: ! && ||
+├─ Char, Boolean          ├─ Bitwise: & | ^ ~ << >>
+├─ String, Null           ├─ Assignment: =
+├─ Array, Hash            └─ Access: . (dot notation)
+└─ Function, Closure
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    BYTECODE INSTRUCTIONS (41)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+DATA (4)               VARIABLES (6)           CONTROL (4)
+├─ OpConstant         ├─ OpGetGlobal         ├─ OpJump
+├─ OpNull             ├─ OpSetGlobal         ├─ OpJumpNotTruthy
+├─ OpTrue             ├─ OpGetLocal          ├─ OpReturn
+└─ OpFalse            ├─ OpSetLocal          └─ OpReturnValue
+                      ├─ OpGetBuiltin
+ARITHMETIC (5)        └─ OpGetFree            FUNCTIONS (3)
+├─ OpAdd                                     ├─ OpCall
+├─ OpSub              COMPARISON (4)         ├─ OpClosure
+├─ OpMul              ├─ OpEqual             └─ OpCurrentClosure
+├─ OpDiv              ├─ OpNotEqual
+└─ OpMod              ├─ OpGreaterThan       COLLECTIONS (3)
+                      └─ OpGreaterThanEqual  ├─ OpArray
+LOGICAL (3)                                  ├─ OpHash
+├─ OpAnd              BITWISE (6)            └─ OpIndex
+├─ OpOr               ├─ OpBitAnd
+└─ OpBang             ├─ OpBitOr             OOP (3)
+                      ├─ OpBitXor            ├─ OpStruct
+PREFIX (3)            ├─ OpBitNot            ├─ OpGetStructField
+├─ OpMinus            ├─ OpLeftShift         └─ OpSetStructField
+├─ OpBang             └─ OpRightShift
+└─ OpBitNot           
+                      STACK (1)              TYPE (3)
+                      └─ OpPop               ├─ OpTypeCheck
+                                             ├─ OpTypeCast
+                                             └─ OpAssertType
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    BUILT-IN FUNCTIONS (30+)                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+I/O (1)              STRING (7)           ARRAY (6)            MATH (6)
+├─ লেখ              ├─ বিভক্ত            ├─ দৈর্ঘ্য            ├─ শক্তি
+│                  ├─ যুক্ত             ├─ প্রথম             ├─ বর্গমূল
+FILE I/O (4)        ├─ উপরে             ├─ শেষ              ├─ পরম
+├─ ফাইল_পড়ো      ├─ নিচে             ├─ বাকি             ├─ সর্বোচ্চ
+├─ ফাইল_লেখো     ├─ ছাঁটো            ├─ যোগ              ├─ সর্বনিম্ন
+├─ ফাইল_যোগ     ├─ প্রতিস্থাপন      └─ উল্টাও           └─ গোলাকার
+└─ ফাইল_আছে     └─ খুঁজুন
+
+TYPE CAST (10+)      CHARACTER (5)
+├─ বাইট            ├─ অক্ষর
+├─ ছোট_সংখ্যা     ├─ কোড
+├─ পূর্ণসংখ্যা    ├─ অক্ষর_থেকে_কোড
+├─ দীর্ঘ_সংখ্যা   ├─ সংখ্যা
+├─ দশমিক          ├─ লেখা
+└─ দশমিক_দ্বিগুণ  └─ টাইপ
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    OOP FEATURES STATUS                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+IMPLEMENTED ✓                    NOT YET IMPLEMENTED ✗
+├─ Struct definition             ├─ Methods on structs
+├─ Struct instance creation      ├─ Inheritance
+├─ Field access (dot notation)   ├─ Interfaces
+├─ Field assignment              ├─ Visibility (public/private)
+├─ Enum definition               ├─ Constructors
+├─ Enum values                   ├─ Enum associated data
+└─ Enum comparison               └─ Pattern matching
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PERFORMANCE METRICS                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CODE SIZE:
+├─ Total Go Code: ~3,860 lines
+├─ AST Nodes: 20+ types
+├─ Bytecode Opcodes: 41
+└─ Built-in Functions: 30+
+
+EXECUTION SPEED (vs Tree-Walking Interpreter):
+├─ Arithmetic: 10x faster
+├─ Variables: 5x faster
+├─ Functions: 3x faster
+└─ Overall: 3-10x faster
+
+MEMORY LIMITS:
+├─ Stack Size: 2,048 elements
+├─ Global Storage: 65,536 slots
+├─ Call Frames: 1,024 max
+└─ Constants Pool: 65,536 max (uint16 indices)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    KEY FILES TO MODIFY FOR OOP                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TO ADD METHODS:                 TO ADD INTERFACES:
+1. token/token.go             1. token/token.go
+2. parser/parser.go           2. parser/parser.go
+3. ast/ast.go                 3. ast/ast.go
+4. compiler/compiler.go       4. compiler/compiler.go
+5. object/object.go           5. object/object.go
+6. vm/vm.go                   6. vm/vm.go
+
+TO ENHANCE ENUMS:             TO ADD INHERITANCE:
+1. parser/parser.go           1. ast/ast.go
+2. ast/ast.go                 2. parser/parser.go
+3. compiler/compiler.go       3. compiler/compiler.go
+4. object/object.go           4. object/object.go
+5. vm/vm.go                   5. vm/vm.go
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  TOTAL: 14 Files | 3,860 Lines of Go Code | 41 Opcodes | 30+ Builtins      ║
+║         Well-structured, modular, ready for OOP extensions!                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
