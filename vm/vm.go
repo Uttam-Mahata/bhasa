@@ -883,23 +883,38 @@ func (vm *VM) buildStruct(startIndex, endIndex int) (object.Object, error) {
 	return &object.Struct{Fields: fields, FieldOrder: fieldOrder}, nil
 }
 
-func (vm *VM) executeGetStructField(structObj, fieldName object.Object) error {
-	st, ok := structObj.(*object.Struct)
-	if !ok {
-		return fmt.Errorf("cannot access field on non-struct type: %s", structObj.Type())
-	}
-
+func (vm *VM) executeGetStructField(obj, fieldName object.Object) error {
 	fieldNameStr, ok := fieldName.(*object.String)
 	if !ok {
-		return fmt.Errorf("struct field name must be string, got %s", fieldName.Type())
+		return fmt.Errorf("field name must be string, got %s", fieldName.Type())
 	}
 
-	value, exists := st.Fields[fieldNameStr.Value]
-	if !exists {
-		return fmt.Errorf("struct has no field named '%s'", fieldNameStr.Value)
+	// Handle struct field access
+	if st, ok := obj.(*object.Struct); ok {
+		value, exists := st.Fields[fieldNameStr.Value]
+		if !exists {
+			return fmt.Errorf("struct has no field named '%s'", fieldNameStr.Value)
+		}
+		return vm.push(value)
 	}
 
-	return vm.push(value)
+	// Handle enum variant access
+	if enumType, ok := obj.(*object.EnumType); ok {
+		variantValue, exists := enumType.Variants[fieldNameStr.Value]
+		if !exists {
+			return fmt.Errorf("enum %s has no variant '%s'", enumType.Name, fieldNameStr.Value)
+		}
+
+		// Create Enum value object
+		enumVal := &object.Enum{
+			EnumType:    enumType.Name,
+			VariantName: fieldNameStr.Value,
+			Value:       variantValue,
+		}
+		return vm.push(enumVal)
+	}
+
+	return fmt.Errorf("cannot access field on type: %s", obj.Type())
 }
 
 func (vm *VM) executeSetStructField(structObj, fieldName, value object.Object) error {

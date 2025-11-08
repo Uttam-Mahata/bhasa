@@ -38,6 +38,7 @@ const (
 	CLOSURE_OBJ           = "CLOSURE"
 	STRUCT_OBJ            = "STRUCT"
 	ENUM_OBJ              = "ENUM"
+	ENUM_TYPE_OBJ         = "ENUM_TYPE"
 )
 
 // Object represents a value in the language
@@ -359,6 +360,28 @@ func (s *Struct) Inspect() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+	return out.String()
+}
+
+// EnumType represents an enum type definition
+type EnumType struct {
+	Name     string         // enum type name
+	Variants map[string]int // variant name -> integer value
+}
+
+func (et *EnumType) Type() ObjectType { return ENUM_TYPE_OBJ }
+func (et *EnumType) Inspect() string {
+	var out bytes.Buffer
+	out.WriteString("গণনা ")
+	out.WriteString(et.Name)
+	out.WriteString(" { ")
+
+	variants := []string{}
+	for name, value := range et.Variants {
+		variants = append(variants, fmt.Sprintf("%s = %d", name, value))
+	}
+	out.WriteString(strings.Join(variants, ", "))
+	out.WriteString(" }")
 	return out.String()
 }
 
