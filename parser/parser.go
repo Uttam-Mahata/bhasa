@@ -1290,6 +1290,7 @@ func (p *Parser) parseClassDefinition() *ast.ClassDefinition {
 				constructor.Access = access
 				classDef.Constructors = append(classDef.Constructors, constructor)
 			}
+			p.nextToken() // Move to next token after constructor
 		} else if p.curTokenIs(token.METHOD) {
 			// Parse method
 			method := p.parseMethodDefinition()
@@ -1301,6 +1302,7 @@ func (p *Parser) parseClassDefinition() *ast.ClassDefinition {
 				method.IsOverride = isOverride
 				classDef.Methods = append(classDef.Methods, method)
 			}
+			p.nextToken() // Move to next token after method
 		} else if p.curTokenIs(token.IDENT) {
 			// Parse field
 			field := p.parseClassField()
@@ -1310,6 +1312,7 @@ func (p *Parser) parseClassDefinition() *ast.ClassDefinition {
 				field.IsFinal = isFinal
 				classDef.Fields = append(classDef.Fields, field)
 			}
+			p.nextToken() // Move to next token after field
 		} else {
 			p.error(fmt.Sprintf("unexpected token in class body: %s", p.curToken.Literal))
 			p.nextToken()
