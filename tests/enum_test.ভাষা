@@ -1,21 +1,76 @@
-// Simple Enum Tests for Bhasa Language
+// Comprehensive Enum Tests for Bhasa Language
 
 লেখ("=== Enum Test Suite ===\n");
 
-// Test 1: Simple enum definition (as hash)
-লেখ("Test 1: Simple enum as hash");
-ধরি Direction = {"North": 0, "South": 1, "East": 2, "West": 3};
-লেখ("Direction defined");
+// Test 1: Simple enum definition
+লেখ("Test 1: Simple enum definition");
+ধরি Direction = গণনা { North, South, East, West };
+লেখ("Direction enum defined");
 লেখ(Direction);
 
-// Test 2: Access enum values
-লেখ("\nTest 2: Access enum values");
-লেখ("North:", Direction["North"]);
-লেখ("South:", Direction["South"]);
+// Test 2: Access enum variants
+লেখ("\nTest 2: Access enum variants");
+ধরি north = Direction.North;
+লেখ("North variant:");
+লেখ(north);
 
-// Test 3: Use enum values
-লেখ("\nTest 3: Use enum values");
-ধরি currentDirection = Direction["North"];
-লেখ("Current direction:", currentDirection);
+ধরি south = Direction.South;
+লেখ("South variant:");
+লেখ(south);
 
-লেখ("\n=== Enum Tests Completed ===");
+// Test 3: Multiple enum instances
+লেখ("\nTest 3: Multiple enum instances");
+ধরি dir1 = Direction.East;
+ধরি dir2 = Direction.West;
+লেখ("dir1:");
+লেখ(dir1);
+লেখ("dir2:");
+লেখ(dir2);
+
+// Test 4: Enum with explicit values
+লেখ("\nTest 4: Enum with explicit values");
+ধরি Status = গণনা { Success = ১০, Failure = ২০, Pending = ৩০ };
+লেখ("Status enum:");
+লেখ(Status);
+
+ধরি success = Status.Success;
+লেখ("Success variant:");
+লেখ(success);
+
+// Test 5: Store enum values in variables
+লেখ("\nTest 5: Store and use enum values");
+ধরি currentDir = Direction.North;
+লেখ("Current direction:");
+লেখ(currentDir);
+
+currentDir = Direction.South;
+লেখ("Changed to:");
+লেখ(currentDir);
+
+// Test 6: Enum in array
+লেখ("\nTest 6: Enum in array");
+ধরি directions = [Direction.North, Direction.East, Direction.South];
+লেখ("First direction:");
+লেখ(directions[০]);
+
+// Test 7: Different enum types
+লেখ("\nTest 7: Multiple enum types");
+ধরি Color = গণনা { Red, Green, Blue };
+ধরি color = Color.Red;
+লেখ("Color:");
+লেখ(color);
+
+// Test 8: Sequential values
+লেখ("\nTest 8: Auto-incremented values");
+ধরি Priority = গণনা { Low, Medium, High };
+ধরি lowPriority = Priority.Low;
+ধরি mediumPriority = Priority.Medium;
+ধরি highPriority = Priority.High;
+লেখ("Low priority:");
+লেখ(lowPriority);
+লেখ("Medium priority:");
+লেখ(mediumPriority);
+লেখ("High priority:");
+লেখ(highPriority);
+
+লেখ("\n=== All Enum Tests Completed ===");

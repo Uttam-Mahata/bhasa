@@ -249,6 +249,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 			symbol = c.symbolTable.Define(node.Name.Value)
 		}
 
+		// If value is an EnumDefinition, set its name from the binding
+		if enumDef, ok := node.Value.(*ast.EnumDefinition); ok {
+			enumDef.Name = node.Name
+		}
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
@@ -539,14 +544,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpStruct, len(node.Fields)*2)
 
 	case *ast.EnumDefinition:
-		// Store enum type name and variants as a constant
-		// This allows runtime to create enum values
+		// Create EnumType object
 		enumName := ""
 		if node.Name != nil {
 			enumName = node.Name.Value
 		}
 
-		// Create a hash to store enum metadata
+		// Build variants map
 		variants := make(map[string]int)
 		value := 0
 		for _, variant := range node.Variants {
@@ -557,25 +561,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			value++
 		}
 
-		// Store enum definition as a hash constant
-		pairs := make(map[object.HashKey]object.HashPair)
-		for name, val := range variants {
-			key := &object.String{Value: name}
-			value := &object.Integer{Value: int64(val)}
-			pairs[key.HashKey()] = object.HashPair{Key: key, Value: value}
+		// Create EnumType object and add as constant
+		enumType := &object.EnumType{
+			Name:     enumName,
+			Variants: variants,
 		}
-
-		// Add enum type name to constants
-		enumTypeIndex := c.addConstant(&object.String{Value: enumName})
-		// Add variants hash to constants
-		variantsIndex := c.addConstant(&object.Hash{Pairs: pairs})
-
-		// Push both onto the stack
+		enumTypeIndex := c.addConstant(enumType)
 		c.emit(code.OpConstant, enumTypeIndex)
-		c.emit(code.OpConstant, variantsIndex)
-
-		// The Let statement will handle binding this to the enum name
-		// For now, we just push the hash which represents the enum type
 
 	case *ast.MemberAccessExpression:
 		// Compile the object expression
