@@ -938,9 +938,11 @@ func (c *Compiler) compileClassDefinition(node *ast.ClassDefinition) error {
 			}
 		}
 		
-		// Add implicit return if needed
+		// Constructor should always return 'this' (এই)
+		// If there's no explicit return, add implicit return of 'this'
 		if !c.lastInstructionIs(code.OpReturnValue) {
-			c.emit(code.OpNull)
+			// Load 'এই' (this) parameter - it's always the first parameter (index 0)
+			c.emit(code.OpGetLocal, 0)
 			c.emit(code.OpReturnValue)
 		}
 		
@@ -1088,23 +1090,24 @@ func (c *Compiler) compileInterfaceDefinition(node *ast.InterfaceDefinition) err
 
 // compileNewExpression compiles a new instance expression
 func (c *Compiler) compileNewExpression(node *ast.NewExpression) error {
-	// Load the class
-	err := c.Compile(node.ClassName)
-	if err != nil {
-		return err
-	}
-	
-	// Compile constructor arguments
+	// Compile constructor arguments first
 	for _, arg := range node.Arguments {
 		err := c.Compile(arg)
 		if err != nil {
 			return err
 		}
 	}
-	
+
+	// Load the class last (so it's on top of stack)
+	err := c.Compile(node.ClassName)
+	if err != nil {
+		return err
+	}
+
 	// Emit OpNewInstance with argument count
+	// Stack layout before OpNewInstance: [arg1, arg2, ..., argN, class]
 	c.emit(code.OpNewInstance, len(node.Arguments))
-	
+
 	return nil
 }
 
