@@ -61,6 +61,20 @@ const (
 	OpGetStructField                 // Get struct field
 	OpSetStructField                 // Set struct field
 	OpEnum                           // Create enum variant
+
+	// OOP opcodes
+	OpClass           // Create a class definition
+	OpNewInstance     // Create a new instance (নতুন)
+	OpCallMethod      // Call a method on an object
+	OpGetThis         // Get current object reference (এই)
+	OpGetSuper        // Get parent class reference (উর্ধ্ব)
+	OpDefineMethod    // Define a method in a class
+	OpDefineConstructor // Define a constructor
+	OpInterface       // Define an interface
+	OpCheckInterface  // Check if object implements interface
+	OpInherit         // Set up inheritance (প্রসারিত)
+	OpGetInstanceField // Get instance field (like OpGetStructField but for classes)
+	OpSetInstanceField // Set instance field (like OpSetStructField but for classes)
 )
 
 // Definition holds information about an opcode
@@ -117,6 +131,20 @@ var definitions = map[Opcode]*Definition{
 	OpGetStructField:   {"OpGetStructField", []int{}},
 	OpSetStructField:   {"OpSetStructField", []int{}},
 	OpEnum:             {"OpEnum", []int{2, 2}}, // enum type index, variant index
+
+	// OOP opcode definitions
+	OpClass:            {"OpClass", []int{2}},    // class definition index
+	OpNewInstance:      {"OpNewInstance", []int{1}}, // number of constructor args
+	OpCallMethod:       {"OpCallMethod", []int{1}},  // number of method args
+	OpGetThis:          {"OpGetThis", []int{}},
+	OpGetSuper:         {"OpGetSuper", []int{}},
+	OpDefineMethod:     {"OpDefineMethod", []int{2}}, // method name index in constants
+	OpDefineConstructor: {"OpDefineConstructor", []int{2}}, // constructor closure index
+	OpInterface:        {"OpInterface", []int{2}},    // interface definition index
+	OpCheckInterface:   {"OpCheckInterface", []int{2}}, // interface type index
+	OpInherit:          {"OpInherit", []int{2}},      // parent class index
+	OpGetInstanceField: {"OpGetInstanceField", []int{}},
+	OpSetInstanceField: {"OpSetInstanceField", []int{}},
 }
 
 // Lookup returns the definition for an opcode

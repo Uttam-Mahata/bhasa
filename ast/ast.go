@@ -652,3 +652,282 @@ func (ev *EnumValue) String() string {
 	return out.String()
 }
 
+// ====== OOP Features (Classes, Methods, Inheritance, Interfaces) ======
+
+// AccessModifier represents access level (সার্বজনীন, ব্যক্তিগত, সুরক্ষিত)
+type AccessModifier string
+
+const (
+	PUBLIC    AccessModifier = "সার্বজনীন"
+	PRIVATE   AccessModifier = "ব্যক্তিগত"
+	PROTECTED AccessModifier = "সুরক্ষিত"
+)
+
+// ClassField represents a field in a class definition
+type ClassField struct {
+	Name       string
+	TypeAnnot  *TypeAnnotation
+	Access     AccessModifier
+	IsStatic   bool // স্থির (static)
+	IsFinal    bool // চূড়ান্ত (final)
+}
+
+// MethodDefinition represents a method in a class
+// Example: পদ্ধতি গণনা_করো(মান: পূর্ণসংখ্যা): পূর্ণসংখ্যা { ... }
+type MethodDefinition struct {
+	Token          token.Token       // the পদ্ধতি token
+	Name           *Identifier       // method name
+	Access         AccessModifier    // access level
+	IsStatic       bool              // স্থির (static method)
+	IsFinal        bool              // চূড়ান্ত (cannot be overridden)
+	IsAbstract     bool              // বিমূর্ত (abstract method - no body)
+	IsOverride     bool              // পুনর্সংজ্ঞা (overrides parent method)
+	Parameters     []*Identifier     // parameter names
+	ParameterTypes []*TypeAnnotation // parameter types
+	ReturnType     *TypeAnnotation   // return type
+	Body           *BlockStatement   // method body (nil for abstract)
+}
+
+func (md *MethodDefinition) statementNode()       {}
+func (md *MethodDefinition) TokenLiteral() string { return md.Token.Literal }
+func (md *MethodDefinition) String() string {
+	var out bytes.Buffer
+
+	if md.Access != "" {
+		out.WriteString(string(md.Access) + " ")
+	}
+	if md.IsStatic {
+		out.WriteString("স্থির ")
+	}
+	if md.IsFinal {
+		out.WriteString("চূড়ান্ত ")
+	}
+	if md.IsAbstract {
+		out.WriteString("বিমূর্ত ")
+	}
+	if md.IsOverride {
+		out.WriteString("পুনর্সংজ্ঞা ")
+	}
+
+	out.WriteString("পদ্ধতি ")
+	out.WriteString(md.Name.String())
+	out.WriteString("(")
+
+	params := []string{}
+	for i, p := range md.Parameters {
+		paramStr := p.String()
+		if md.ParameterTypes != nil && i < len(md.ParameterTypes) && md.ParameterTypes[i] != nil {
+			paramStr += ": " + md.ParameterTypes[i].String()
+		}
+		params = append(params, paramStr)
+	}
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+
+	if md.ReturnType != nil {
+		out.WriteString(": " + md.ReturnType.String())
+	}
+
+	if md.Body != nil {
+		out.WriteString(" ")
+		out.WriteString(md.Body.String())
+	}
+
+	return out.String()
+}
+
+// ConstructorDefinition represents a constructor method (নির্মাতা)
+// Example: নির্মাতা(নাম: লেখা, বয়স: পূর্ণসংখ্যা) { ... }
+type ConstructorDefinition struct {
+	Token          token.Token       // the নির্মাতা token
+	Access         AccessModifier    // access level
+	Parameters     []*Identifier     // parameter names
+	ParameterTypes []*TypeAnnotation // parameter types
+	Body           *BlockStatement   // constructor body
+}
+
+func (cd *ConstructorDefinition) statementNode()       {}
+func (cd *ConstructorDefinition) TokenLiteral() string { return cd.Token.Literal }
+func (cd *ConstructorDefinition) String() string {
+	var out bytes.Buffer
+
+	if cd.Access != "" {
+		out.WriteString(string(cd.Access) + " ")
+	}
+
+	out.WriteString("নির্মাতা(")
+
+	params := []string{}
+	for i, p := range cd.Parameters {
+		paramStr := p.String()
+		if cd.ParameterTypes != nil && i < len(cd.ParameterTypes) && cd.ParameterTypes[i] != nil {
+			paramStr += ": " + cd.ParameterTypes[i].String()
+		}
+		params = append(params, paramStr)
+	}
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+
+	if cd.Body != nil {
+		out.WriteString(cd.Body.String())
+	}
+
+	return out.String()
+}
+
+// ClassDefinition represents a class definition (শ্রেণী)
+// Example: শ্রেণী ব্যক্তি প্রসারিত মানুষ বাস্তবায়ন কথাবার্তা { ... }
+type ClassDefinition struct {
+	Token        token.Token             // the শ্রেণী token
+	Name         *Identifier             // class name
+	IsAbstract   bool                    // বিমূর্ত (abstract class)
+	IsFinal      bool                    // চূড়ান্ত (cannot be extended)
+	SuperClass   *Identifier             // parent class (প্রসারিত)
+	Interfaces   []*Identifier           // implemented interfaces (বাস্তবায়ন)
+	Fields       []*ClassField           // class fields
+	Constructors []*ConstructorDefinition // constructors
+	Methods      []*MethodDefinition     // methods
+}
+
+func (cd *ClassDefinition) statementNode()       {}
+func (cd *ClassDefinition) TokenLiteral() string { return cd.Token.Literal }
+func (cd *ClassDefinition) String() string {
+	var out bytes.Buffer
+
+	if cd.IsAbstract {
+		out.WriteString("বিমূর্ত ")
+	}
+	if cd.IsFinal {
+		out.WriteString("চূড়ান্ত ")
+	}
+
+	out.WriteString("শ্রেণী ")
+	out.WriteString(cd.Name.String())
+
+	if cd.SuperClass != nil {
+		out.WriteString(" প্রসারিত ")
+		out.WriteString(cd.SuperClass.String())
+	}
+
+	if len(cd.Interfaces) > 0 {
+		out.WriteString(" বাস্তবায়ন ")
+		interfaceStrs := []string{}
+		for _, iface := range cd.Interfaces {
+			interfaceStrs = append(interfaceStrs, iface.String())
+		}
+		out.WriteString(strings.Join(interfaceStrs, ", "))
+	}
+
+	out.WriteString(" { ... }")
+
+	return out.String()
+}
+
+// InterfaceMethod represents a method signature in an interface
+type InterfaceMethod struct {
+	Name           *Identifier       // method name
+	Parameters     []*Identifier     // parameter names
+	ParameterTypes []*TypeAnnotation // parameter types
+	ReturnType     *TypeAnnotation   // return type
+}
+
+// InterfaceDefinition represents an interface definition (চুক্তি)
+// Example: চুক্তি কথাবার্তা { পদ্ধতি বলো(বার্তা: লেখা): লেখা; }
+type InterfaceDefinition struct {
+	Token   token.Token        // the চুক্তি token
+	Name    *Identifier        // interface name
+	Methods []*InterfaceMethod // method signatures
+}
+
+func (id *InterfaceDefinition) statementNode()       {}
+func (id *InterfaceDefinition) TokenLiteral() string { return id.Token.Literal }
+func (id *InterfaceDefinition) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("চুক্তি ")
+	out.WriteString(id.Name.String())
+	out.WriteString(" { ... }")
+
+	return out.String()
+}
+
+// NewExpression represents creating a new instance (নতুন)
+// Example: নতুন ব্যক্তি("রহিম", 30)
+type NewExpression struct {
+	Token     token.Token   // the নতুন token
+	ClassName *Identifier   // class name
+	Arguments []Expression  // constructor arguments
+}
+
+func (ne *NewExpression) expressionNode()      {}
+func (ne *NewExpression) TokenLiteral() string { return ne.Token.Literal }
+func (ne *NewExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("নতুন ")
+	out.WriteString(ne.ClassName.String())
+	out.WriteString("(")
+
+	args := []string{}
+	for _, arg := range ne.Arguments {
+		args = append(args, arg.String())
+	}
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}
+
+// ThisExpression represents a reference to the current object (এই)
+// Example: এই.নাম or এই.গণনা_করো()
+type ThisExpression struct {
+	Token token.Token // the এই token
+}
+
+func (te *ThisExpression) expressionNode()      {}
+func (te *ThisExpression) TokenLiteral() string { return te.Token.Literal }
+func (te *ThisExpression) String() string {
+	return "এই"
+}
+
+// SuperExpression represents a reference to the parent class (উর্ধ্ব)
+// Example: উর্ধ্ব.পদ্ধতি_নাম() - call parent method
+type SuperExpression struct {
+	Token token.Token // the উর্ধ্ব token
+}
+
+func (se *SuperExpression) expressionNode()      {}
+func (se *SuperExpression) TokenLiteral() string { return se.Token.Literal }
+func (se *SuperExpression) String() string {
+	return "উর্ধ্ব"
+}
+
+// MethodCallExpression represents calling a method on an object
+// Example: ব্যক্তি.বলো("হ্যালো")
+type MethodCallExpression struct {
+	Token      token.Token  // the . token
+	Object     Expression   // the object (or class for static methods)
+	MethodName *Identifier  // method name
+	Arguments  []Expression // method arguments
+}
+
+func (mce *MethodCallExpression) expressionNode()      {}
+func (mce *MethodCallExpression) TokenLiteral() string { return mce.Token.Literal }
+func (mce *MethodCallExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(mce.Object.String())
+	out.WriteString(".")
+	out.WriteString(mce.MethodName.String())
+	out.WriteString("(")
+
+	args := []string{}
+	for _, arg := range mce.Arguments {
+		args = append(args, arg.String())
+	}
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}
+
