@@ -991,6 +991,24 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
 
+	// Handle NULL comparisons - NULL is less than everything except NULL
+	if left.Type() == object.NULL_OBJ || right.Type() == object.NULL_OBJ {
+		switch op {
+		case code.OpEqual:
+			return vm.push(nativeBoolToBooleanObject(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ))
+		case code.OpNotEqual:
+			return vm.push(nativeBoolToBooleanObject(!(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ)))
+		case code.OpGreaterThan:
+			// NULL is never greater than anything
+			return vm.push(False)
+		case code.OpGreaterThanEqual:
+			// NULL >= NULL is true, otherwise false
+			return vm.push(nativeBoolToBooleanObject(left.Type() == object.NULL_OBJ && right.Type() == object.NULL_OBJ))
+		default:
+			return fmt.Errorf("unknown operator: %d", op)
+		}
+	}
+
 	// Handle numeric comparisons
 	if vm.isNumericType(left.Type()) && vm.isNumericType(right.Type()) {
 		return vm.executeNumericComparison(op, left, right)
