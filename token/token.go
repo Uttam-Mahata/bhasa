@@ -73,6 +73,26 @@ const (
 	BREAK    = "বিরতি"       // break
 	CONTINUE = "চালিয়ে_যাও"  // continue
 	IMPORT   = "অন্তর্ভুক্ত"  // import/include
+
+	// Type keywords (Bengali)
+	TYPE_BYTE    = "বাইট"           // byte type
+	TYPE_SHORT   = "ছোট_সংখ্যা"     // short type
+	TYPE_INT     = "পূর্ণসংখ্যা"    // int type
+	TYPE_LONG    = "দীর্ঘ_সংখ্যা"   // long type
+	TYPE_FLOAT   = "দশমিক"          // float type
+	TYPE_DOUBLE  = "দশমিক_দ্বিগুণ"  // double type
+	TYPE_CHAR    = "অক্ষর"          // char type
+	TYPE_STRING  = "লেখা"           // string type
+	TYPE_BOOLEAN = "বুলিয়ান"       // boolean type
+	TYPE_ARRAY   = "তালিকা"         // array type
+	TYPE_HASH    = "ম্যাপ"          // hash/map type
+	AS           = "হিসাবে"        // type casting keyword (as/in the form of)
+
+	// Struct and Enum keywords
+	STRUCT = "স্ট্রাক্ট" // struct keyword
+	ENUM   = "গণনা"     // enum keyword (enumeration in Bengali)
+	DOT    = "."        // dot for field access
+	ARROW  = "=>"       // arrow for pattern matching
 )
 
 var keywords = map[string]TokenType{
@@ -88,6 +108,22 @@ var keywords = map[string]TokenType{
 	"বিরতি":       BREAK,
 	"চালিয়ে_যাও":  CONTINUE,
 	"অন্তর্ভুক্ত": IMPORT,
+	// Type keywords
+	"বাইট":           TYPE_BYTE,
+	"ছোট_সংখ্যা":     TYPE_SHORT,
+	"পূর্ণসংখ্যা":    TYPE_INT,
+	"দীর্ঘ_সংখ্যা":   TYPE_LONG,
+	"দশমিক":          TYPE_FLOAT,
+	"দশমিক_দ্বিগুণ":  TYPE_DOUBLE,
+	"অক্ষর":          TYPE_CHAR,
+	"লেখা":           TYPE_STRING,
+	"বুলিয়ান":       TYPE_BOOLEAN,
+	"তালিকা":         TYPE_ARRAY,
+	"ম্যাপ":          TYPE_HASH,
+	"হিসাবে":        AS,
+	// Struct and Enum keywords
+	"স্ট্রাক্ট": STRUCT,
+	"গণনা":     ENUM,
 }
 
 // LookupIdent checks if an identifier is a keyword

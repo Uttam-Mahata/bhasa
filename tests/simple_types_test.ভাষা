@@ -1,0 +1,44 @@
+// Simple Type System Test
+// Tests basic type annotations with simple variable names
+
+লেখ("=== Basic Type Annotations Test ===\n");
+
+// Test 1: Int type
+ধরি সংখ্যা: পূর্ণসংখ্যা = ৪২;
+লেখ("Int value:", সংখ্যা);
+
+// Test 2: Float type
+ধরি দশমিক_সংখ্যা: দশমিক = ৩.১৪;
+লেখ("Float value:", দশমিক_সংখ্যা);
+
+// Test 3: String type
+ধরি নাম: লেখা = "ভাষা";
+লেখ("String value:", নাম);
+
+// Test 4: Boolean type
+ধরি সত্যমান: বুলিয়ান = সত্য;
+লেখ("Boolean value:", সত্যমান);
+
+// Test 5: Type cast int to float
+ধরি x = ১০;
+ধরি y = x as দশমিক;
+লেখ("Type cast (int to float):", y);
+
+// Test 6: Typed function
+ধরি যোগ = ফাংশন(a: পূর্ণসংখ্যা, b: পূর্ণসংখ্যা): পূর্ণসংখ্যা {
+    ফেরত a + b;
+};
+
+লেখ("Function result:", যোগ(৫, ৩));
+
+// Test 7: Without type annotations (backward compatibility)
+ধরি পুরোনো = ১০০;
+লেখ("Untyped variable:", পুরোনো);
+
+ধরি পুরোনো_ফাংশন = ফাংশন(x, y) {
+    ফেরত x * y;
+};
+
+লেখ("Untyped function result:", পুরোনো_ফাংশন(৪, ৫));
+
+লেখ("\nAll tests passed!");

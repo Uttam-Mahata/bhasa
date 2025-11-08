@@ -3,6 +3,7 @@ package ast
 import (
 	"bhasa/token"
 	"bytes"
+	"fmt"
 	"strings"
 )
 
@@ -46,9 +47,10 @@ func (p *Program) String() string {
 
 // LetStatement represents a variable declaration (ধরি)
 type LetStatement struct {
-	Token token.Token // the ধরি token
-	Name  *Identifier
-	Value Expression
+	Token      token.Token     // the ধরি token
+	Name       *Identifier
+	TypeAnnot  *TypeAnnotation // optional type annotation (can be nil)
+	Value      Expression
 }
 
 func (ls *LetStatement) statementNode()       {}
@@ -57,6 +59,10 @@ func (ls *LetStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
+	if ls.TypeAnnot != nil {
+		out.WriteString(": ")
+		out.WriteString(ls.TypeAnnot.String())
+	}
 	out.WriteString(" = ")
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
@@ -273,9 +279,11 @@ func (ie *IfExpression) String() string {
 
 // FunctionLiteral represents a function literal
 type FunctionLiteral struct {
-	Token      token.Token // The ফাংশন token
-	Parameters []*Identifier
-	Body       *BlockStatement
+	Token          token.Token       // The ফাংশন token
+	Parameters     []*Identifier     // Parameter names (for backward compatibility)
+	ParameterTypes []*TypeAnnotation // Optional parameter type annotations (parallel to Parameters)
+	ReturnType     *TypeAnnotation   // Optional return type annotation
+	Body           *BlockStatement
 }
 
 func (fl *FunctionLiteral) expressionNode()      {}
@@ -283,13 +291,22 @@ func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
 	params := []string{}
-	for _, p := range fl.Parameters {
-		params = append(params, p.String())
+	for i, p := range fl.Parameters {
+		paramStr := p.String()
+		if fl.ParameterTypes != nil && i < len(fl.ParameterTypes) && fl.ParameterTypes[i] != nil {
+			paramStr += ": " + fl.ParameterTypes[i].String()
+		}
+		params = append(params, paramStr)
 	}
 	out.WriteString(fl.TokenLiteral())
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") ")
+	out.WriteString(")")
+	if fl.ReturnType != nil {
+		out.WriteString(": ")
+		out.WriteString(fl.ReturnType.String())
+	}
+	out.WriteString(" ")
 	out.WriteString(fl.Body.String())
 	return out.String()
 }
@@ -425,5 +442,213 @@ func (cs *ContinueStatement) statementNode()       {}
 func (cs *ContinueStatement) TokenLiteral() string { return cs.Token.Literal }
 func (cs *ContinueStatement) String() string {
 	return cs.TokenLiteral() + ";"
+}
+
+// TypeAnnotation represents a type annotation
+type TypeAnnotation struct {
+	Token      token.Token // The type token (e.g., পূর্ণসংখ্যা, বাইট, etc.)
+	TypeName   string      // The name of the type
+	ElementType *TypeAnnotation // For array/hash element types (e.g., তালিকা<পূর্ণসংখ্যা>)
+	KeyType     *TypeAnnotation // For hash key types (e.g., ম্যাপ<লেখা, পূর্ণসংখ্যা>)
+}
+
+func (ta *TypeAnnotation) expressionNode()      {}
+func (ta *TypeAnnotation) TokenLiteral() string { return ta.Token.Literal }
+func (ta *TypeAnnotation) String() string {
+	if ta.ElementType != nil && ta.KeyType != nil {
+		// Hash type: ম্যাপ<লেখা, পূর্ণসংখ্যা>
+		return ta.TypeName + "<" + ta.KeyType.String() + ", " + ta.ElementType.String() + ">"
+	} else if ta.ElementType != nil {
+		// Array type: তালিকা<পূর্ণসংখ্যা>
+		return ta.TypeName + "<" + ta.ElementType.String() + ">"
+	}
+	return ta.TypeName
+}
+
+// TypedIdentifier represents an identifier with a type annotation
+type TypedIdentifier struct {
+	Token      token.Token     // The identifier token
+	Name       string          // The identifier name
+	TypeAnnot  *TypeAnnotation // The type annotation (can be nil for untyped)
+}
+
+func (ti *TypedIdentifier) expressionNode()      {}
+func (ti *TypedIdentifier) TokenLiteral() string { return ti.Token.Literal }
+func (ti *TypedIdentifier) String() string {
+	if ti.TypeAnnot != nil {
+		return ti.Name + ": " + ti.TypeAnnot.String()
+	}
+	return ti.Name
+}
+
+// TypeCastExpression represents a type cast (e.g., x as দশমিক)
+type TypeCastExpression struct {
+	Token      token.Token     // The 'as' token
+	Expression Expression      // The expression to cast
+	TargetType *TypeAnnotation // The target type
+}
+
+func (tce *TypeCastExpression) expressionNode()      {}
+func (tce *TypeCastExpression) TokenLiteral() string { return tce.Token.Literal }
+func (tce *TypeCastExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(tce.Expression.String())
+	out.WriteString(" as ")
+	out.WriteString(tce.TargetType.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+// StructField represents a field in a struct definition
+type StructField struct {
+	Name      string
+	TypeAnnot *TypeAnnotation
+}
+
+// StructDefinition represents a struct type definition
+// Example: ধরি ব্যক্তি = স্ট্রাক্ট { নাম: লেখা, বয়স: পূর্ণসংখ্যা }
+type StructDefinition struct {
+	Token  token.Token    // the স্ট্রাক্ট token
+	Name   *Identifier    // struct type name (from LetStatement)
+	Fields []*StructField // ordered list of fields
+}
+
+func (sd *StructDefinition) expressionNode()      {}
+func (sd *StructDefinition) TokenLiteral() string { return sd.Token.Literal }
+func (sd *StructDefinition) String() string {
+	var out bytes.Buffer
+	out.WriteString("স্ট্রাক্ট {")
+
+	fieldStrs := []string{}
+	for _, field := range sd.Fields {
+		fieldStr := field.Name + ": " + field.TypeAnnot.String()
+		fieldStrs = append(fieldStrs, fieldStr)
+	}
+	out.WriteString(strings.Join(fieldStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// StructLiteral represents creating a struct instance
+// Example: ব্যক্তি{নাম: "রহিম", বয়স: 30}
+type StructLiteral struct {
+	Token      token.Token            // the { token
+	StructType *Identifier            // struct type name
+	Fields     map[string]Expression  // field name -> value
+	FieldOrder []string               // preserve field order for output
+}
+
+func (sl *StructLiteral) expressionNode()      {}
+func (sl *StructLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *StructLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString(sl.StructType.String())
+	out.WriteString("{")
+
+	fieldStrs := []string{}
+	for _, fieldName := range sl.FieldOrder {
+		fieldValue := sl.Fields[fieldName]
+		fieldStrs = append(fieldStrs, fieldName+": "+fieldValue.String())
+	}
+	out.WriteString(strings.Join(fieldStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// MemberAccessExpression represents accessing a struct field
+// Example: person.নাম
+type MemberAccessExpression struct {
+	Token  token.Token // the . token
+	Object Expression  // the struct instance
+	Member *Identifier // the field name
+}
+
+func (mae *MemberAccessExpression) expressionNode()      {}
+func (mae *MemberAccessExpression) TokenLiteral() string { return mae.Token.Literal }
+func (mae *MemberAccessExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(mae.Object.String())
+	out.WriteString(".")
+	out.WriteString(mae.Member.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+// MemberAssignmentStatement represents assigning to a struct field
+// Example: person.নাম = "নতুন নাম"
+type MemberAssignmentStatement struct {
+	Token  token.Token // the identifier token
+	Object Expression  // the struct instance
+	Member *Identifier // the field name
+	Value  Expression  // the new value
+}
+
+func (mas *MemberAssignmentStatement) statementNode()       {}
+func (mas *MemberAssignmentStatement) TokenLiteral() string { return mas.Token.Literal }
+func (mas *MemberAssignmentStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(mas.Object.String())
+	out.WriteString(".")
+	out.WriteString(mas.Member.String())
+	out.WriteString(" = ")
+	if mas.Value != nil {
+		out.WriteString(mas.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
+// EnumVariant represents a single variant in an enum definition
+type EnumVariant struct {
+	Name  string
+	Value *int // optional explicit value
+}
+
+// EnumDefinition represents an enum type definition
+// Example: গণনা { উত্তর, দক্ষিণ, পূর্ব, পশ্চিম }
+type EnumDefinition struct {
+	Token    token.Token     // the গণনা token
+	Name     *Identifier     // enum type name (from LetStatement)
+	Variants []*EnumVariant  // ordered list of variants
+}
+
+func (ed *EnumDefinition) expressionNode()      {}
+func (ed *EnumDefinition) TokenLiteral() string { return ed.Token.Literal }
+func (ed *EnumDefinition) String() string {
+	var out bytes.Buffer
+	out.WriteString("গণনা {")
+
+	variantStrs := []string{}
+	for _, variant := range ed.Variants {
+		varStr := variant.Name
+		if variant.Value != nil {
+			varStr += fmt.Sprintf(" = %d", *variant.Value)
+		}
+		variantStrs = append(variantStrs, varStr)
+	}
+
+	out.WriteString(strings.Join(variantStrs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+// EnumValue represents accessing an enum variant
+// Example: দিক.উত্তর (Direction.North)
+type EnumValue struct {
+	Token       token.Token // the enum type name token
+	EnumType    *Identifier // the enum type name
+	VariantName *Identifier // the variant name
+}
+
+func (ev *EnumValue) expressionNode()      {}
+func (ev *EnumValue) TokenLiteral() string { return ev.Token.Literal }
+func (ev *EnumValue) String() string {
+	var out bytes.Buffer
+	out.WriteString(ev.EnumType.String())
+	out.WriteString(".")
+	out.WriteString(ev.VariantName.String())
+	return out.String()
 }
 

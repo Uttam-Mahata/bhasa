@@ -241,10 +241,28 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.LetStatement:
-		symbol := c.symbolTable.Define(node.Name.Value)
+		// Define symbol with type annotation if present
+		var symbol Symbol
+		if node.TypeAnnot != nil {
+			symbol = c.symbolTable.DefineWithType(node.Name.Value, node.TypeAnnot)
+		} else {
+			symbol = c.symbolTable.Define(node.Name.Value)
+		}
+
+		// If value is an EnumDefinition, set its name from the binding
+		if enumDef, ok := node.Value.(*ast.EnumDefinition); ok {
+			enumDef.Name = node.Name
+		}
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
+		}
+
+		// If type annotation is present, emit type check
+		if node.TypeAnnot != nil {
+			typeConstIndex := c.addConstant(&object.String{Value: node.TypeAnnot.String()})
+			c.emit(code.OpAssertType, typeConstIndex)
 		}
 
 		if symbol.Scope == GlobalScope {
@@ -269,6 +287,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 		} else {
 			c.emit(code.OpSetLocal, symbol.Index)
 		}
+
+	case *ast.MemberAssignmentStatement:
+		// Compile the object expression
+		err := c.Compile(node.Object)
+		if err != nil {
+			return err
+		}
+
+		// Push the field name as a constant
+		nameConstant := c.addConstant(&object.String{Value: node.Member.Value})
+		c.emit(code.OpConstant, nameConstant)
+
+		// Compile the value to assign
+		err = c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		// Emit instruction to set struct field
+		c.emit(code.OpSetStructField)
 
 	case *ast.WhileStatement:
 		loopStart := len(c.currentInstructions())
@@ -481,6 +519,70 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emit(code.OpHash, len(node.Pairs)*2)
 
+	case *ast.StructLiteral:
+		// Sort field names for deterministic compilation
+		fieldNames := make([]string, 0, len(node.Fields))
+		for name := range node.Fields {
+			fieldNames = append(fieldNames, name)
+		}
+		sort.Strings(fieldNames)
+
+		// Compile field name-value pairs
+		for _, name := range fieldNames {
+			// Push field name as constant
+			nameConstant := c.addConstant(&object.String{Value: name})
+			c.emit(code.OpConstant, nameConstant)
+
+			// Push field value
+			err := c.Compile(node.Fields[name])
+			if err != nil {
+				return err
+			}
+		}
+
+		// Create struct with number of fields
+		c.emit(code.OpStruct, len(node.Fields)*2)
+
+	case *ast.EnumDefinition:
+		// Create EnumType object
+		enumName := ""
+		if node.Name != nil {
+			enumName = node.Name.Value
+		}
+
+		// Build variants map
+		variants := make(map[string]int)
+		value := 0
+		for _, variant := range node.Variants {
+			if variant.Value != nil {
+				value = *variant.Value
+			}
+			variants[variant.Name] = value
+			value++
+		}
+
+		// Create EnumType object and add as constant
+		enumType := &object.EnumType{
+			Name:     enumName,
+			Variants: variants,
+		}
+		enumTypeIndex := c.addConstant(enumType)
+		c.emit(code.OpConstant, enumTypeIndex)
+
+	case *ast.MemberAccessExpression:
+		// Compile the object expression
+		err := c.Compile(node.Object)
+		if err != nil {
+			return err
+		}
+
+		// Push the field name as a constant
+		nameConstant := c.addConstant(&object.String{Value: node.Member.Value})
+		c.emit(code.OpConstant, nameConstant)
+
+		// Emit instruction to get struct field
+		c.emit(code.OpGetStructField)
+
 	case *ast.IndexExpression:
 		err := c.Compile(node.Left)
 		if err != nil {
@@ -536,6 +638,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpReturnValue)
+
+	case *ast.TypeCastExpression:
+		// Compile the expression to cast
+		err := c.Compile(node.Expression)
+		if err != nil {
+			return err
+		}
+
+		// Emit type cast opcode with target type
+		typeConstIndex := c.addConstant(&object.String{Value: node.TargetType.String()})
+		c.emit(code.OpTypeCast, typeConstIndex)
 
 	case *ast.CallExpression:
 		err := c.Compile(node.Function)
