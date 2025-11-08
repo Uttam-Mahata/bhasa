@@ -1,6 +1,7 @@
 # Binaries for programs and plugins
 bhasa
 *.exe
+!bin/*.exe
 *.exe~
 *.dll
 *.so
@@ -13,7 +14,6 @@ bhasa
 *.out
 
 # Build artifacts
-bin/
 dist/
 build/
 
