@@ -27,10 +27,10 @@ export default function Examples() {
       {
         title: 'Bengali Variable Names',
         description: 'Using Bengali identifiers in your code',
-        code: `ধরি নাম = "রহিম";
+        code: `ধরি নাম = "প্রিয়া";
 ধরি বয়স = ২৫;
 ধরি যোগফল = ৫০০০০;
-ধরি শহর = "ঢাকা";
+ধরি শহর = "দিল্লি";
 
 লেখ(নাম + " এর বয়স " + বয়স);
 লেখ("তিনি " + শহর + " তে থাকেন");
@@ -199,9 +199,9 @@ export default function Examples() {
         title: 'Hash Maps',
         description: 'Creating and accessing hash maps',
         code: `ধরি ব্যক্তি = {
-    "নাম": "করিম",
+    "নাম": "বিক্রম",
     "বয়স": ২৫,
-    "শহর": "ঢাকা",
+    "শহর": "বেঙ্গালুরু",
     "সক্রিয়": সত্য
 };
 
@@ -338,7 +338,7 @@ export default function Examples() {
               Code Examples
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Explore practical examples demonstrating Bhasa's features and capabilities
+              Practical examples to understand how language features are executed
             </p>
           </div>
         </div>
@@ -394,10 +394,10 @@ export default function Examples() {
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Write Your Own Code?
+            Ready to Explore the Compiler?
           </h2>
           <p className="text-lg text-blue-100 mb-6">
-            Download Bhasa and start building amazing things
+            Clone the repository and dive into the implementation
           </p>
           <a
             href="https://github.com/Uttam-Mahata/bhasa"

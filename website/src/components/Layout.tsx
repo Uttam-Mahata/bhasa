@@ -24,11 +24,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 group">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-md group-hover:shadow-lg transition-all">
+              <div className="p-2 bg-gradient-to-br from-orange-500 to-green-600 rounded-lg shadow-md group-hover:shadow-lg transition-all">
                 <Code2 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-orange-600 to-green-600 bg-clip-text text-transparent">
                   ভাষা
                 </span>
                 <span className="block text-xs text-slate-600">Bhasa Programming Language</span>
@@ -119,8 +119,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span>ভাষা (Bhasa)</span>
               </h3>
               <p className="text-sm text-slate-400 leading-relaxed">
-                A fully compiled programming language with native support for the Bengali script.
-                Built with modern compiler technology for performance and accessibility.
+                A compiler design learning project with native Bengali script support.
+                Explore modern compiler architecture through a complete bytecode compiler and VM implementation.
               </p>
             </div>
 
@@ -173,7 +173,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="text-slate-400 hover:text-blue-400 transition-colors"
                   >
-                    MIT License
+                    Apache 2.0 License
                   </a>
                 </li>
               </ul>
@@ -181,7 +181,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
-            <p>© {new Date().getFullYear()} ভাষা (Bhasa) Programming Language. Open source under MIT License.</p>
+            <p>© {new Date().getFullYear()} ভাষা (Bhasa) Programming Language. Open source under Apache 2.0 License.</p>
           </div>
         </div>
       </footer>
