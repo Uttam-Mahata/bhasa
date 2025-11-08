@@ -173,7 +173,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="text-slate-400 hover:text-blue-400 transition-colors"
                   >
-                    MIT License
+                    Apache 2.0 License
                   </a>
                 </li>
               </ul>
@@ -181,7 +181,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
-            <p>© {new Date().getFullYear()} ভাষা (Bhasa) Programming Language. Open source under MIT License.</p>
+            <p>© {new Date().getFullYear()} ভাষা (Bhasa) Programming Language. Open source under Apache 2.0 License.</p>
           </div>
         </div>
       </footer>

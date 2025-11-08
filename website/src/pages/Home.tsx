@@ -3,7 +3,6 @@ import {
   Zap,
   Globe,
   Code2,
-  FileCode,
   Layers,
   Rocket,
   BookOpen,
@@ -50,14 +49,15 @@ export default function Home() {
       icon: Layers,
       title: 'Modern Architecture',
       description: 'Complete compilation pipeline: Lexer → Parser → Compiler → VM with 41+ opcodes.',
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      icon: FileCode,
-      title: 'Self-Hosting Compiler',
-      description: 'The compiler is written entirely in Bhasa itself! A unique achievement showcasing language maturity.',
       color: 'from-green-500 to-emerald-500'
     },
+    // Note: Self-hosting compiler is in development
+    // {
+    //   icon: FileCode,
+    //   title: 'Self-Hosting Compiler',
+    //   description: 'The compiler is written entirely in Bhasa itself! A unique achievement showcasing language maturity.',
+    //   color: 'from-green-500 to-emerald-500'
+    // },
     {
       icon: Rocket,
       title: 'Rich Feature Set',
@@ -83,7 +83,7 @@ export default function Home() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-70"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-green-50 opacity-70"></div>
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] bg-[size:32px_32px]"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,7 +96,7 @@ export default function Home() {
               </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-green-600 bg-clip-text text-transparent">
                   ভাষা
                 </span>
                 <br />

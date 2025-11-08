@@ -263,7 +263,7 @@ export default function Features() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Download className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+            <Download className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
               Built-in Functions
             </h2>
@@ -278,16 +278,16 @@ export default function Features() {
               return (
                 <div
                   key={index}
-                  className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200"
+                  className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200"
                 >
                   <div className="flex items-center space-x-2 mb-4">
-                    <IconComponent className="h-6 w-6 text-purple-600" />
+                    <IconComponent className="h-6 w-6 text-green-600" />
                     <h3 className="text-lg font-bold text-slate-900">{category.title}</h3>
                   </div>
                   <ul className="space-y-2">
                     {category.functions.map((fn, idx) => (
                       <li key={idx} className="flex items-start space-x-2 text-sm text-slate-700">
-                        <CheckCircle className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                         <span>{fn}</span>
                       </li>
                     ))}
@@ -365,8 +365,8 @@ export default function Features() {
         </div>
       </section>
 
-      {/* Self-Hosting */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600">
+      {/* Self-Hosting - Currently in development */}
+      {/* <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FileCode className="h-16 w-16 text-white mx-auto mb-6" />
           <h2 className="text-4xl font-bold text-white mb-4">
@@ -381,7 +381,7 @@ export default function Features() {
             <span>9 self-hosted modules, 2500+ lines of Bhasa code</span>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
