@@ -169,7 +169,6 @@ func LookupIdent(ident string) TokenType {
 	return IDENT
 }
 
-// BengaliDigits maps Bengali numerals to Arabic numerals
 var BengaliDigits = map[rune]rune{
 	'০': '0',
 	'১': '1',
@@ -183,7 +182,6 @@ var BengaliDigits = map[rune]rune{
 	'৯': '9',
 }
 
-// ConvertBengaliNumber converts Bengali numerals to Arabic numerals
 func ConvertBengaliNumber(s string) string {
 	result := ""
 	for _, ch := range s {
