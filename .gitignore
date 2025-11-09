@@ -7,6 +7,10 @@ bhasa
 *.so
 *.dylib
 
+# Compiled bytecode files
+*.compiled
+*.সংকলিত
+
 # Test binary, built with `go test -c`
 *.test
 
