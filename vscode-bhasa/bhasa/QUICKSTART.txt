@@ -1,0 +1,102 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║         🎉 BHASA VS CODE EXTENSION - SETUP COMPLETE! 🎉              ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📍 LOCATION: /home/uttam/bhasa/vscode-bhasa/bhasa
+
+✅ FEATURES IMPLEMENTED:
+   ✓ Syntax highlighting for .bhasa and .ভাষা files
+   ✓ IntelliSense auto-completion (40+ keywords)
+   ✓ Hover documentation (Bengali + English)
+   ✓ Auto-closing brackets, quotes, parentheses
+   ✓ Comment support (// and /* */)
+   ✓ Code folding
+   ✓ Bengali numeral support (০-৯)
+
+🚀 QUICK START:
+
+   1. TEST IN DEVELOPMENT MODE:
+      cd /home/uttam/bhasa/vscode-bhasa/bhasa
+      code .
+      [Press F5 to launch Extension Development Host]
+      [Open test.bhasa in the new window]
+
+   2. INSTALL LOCALLY:
+      npm install -g @vscode/vsce
+      vsce package
+      code --install-extension bhasa-0.0.1.vsix
+
+   3. COMPILE:
+      npm run compile
+
+   4. WATCH MODE:
+      npm run watch
+
+📦 KEY FILES:
+
+   ├── src/extension.ts              → Main extension code
+   ├── syntaxes/bhasa.tmLanguage.json → Syntax rules
+   ├── language-configuration.json    → Language settings
+   ├── package.json                   → Extension manifest
+   ├── test.bhasa                     → Test file
+   ├── SETUP_COMPLETE.md              → Full documentation
+   ├── DEVELOPMENT.md                 → Developer guide
+   └── README-BHASA.md                → User documentation
+
+🎨 SUPPORTED KEYWORDS:
+
+   Bengali:  ধরি, ফাংশন, যদি, নাহলে, ফেরত, যতক্ষণ, পর্যন্ত,
+             বিরতি, চালিয়ে_যাও, সত্য, মিথ্যা, লেখ
+   
+   English:  let, function, if, else, return, while, for,
+             break, continue, true, false, print
+
+🧪 TEST THE EXTENSION:
+
+   1. Open test.bhasa
+   2. Check syntax highlighting ✓
+   3. Press Ctrl+Space (auto-complete) ✓
+   4. Hover over keywords ✓
+   5. Type { (auto-close) ✓
+
+📤 PUBLISH TO MARKETPLACE:
+
+   npm install -g @vscode/vsce
+   vsce login <publisher-name>
+   vsce publish
+
+📚 DOCUMENTATION:
+
+   • Full setup guide:  SETUP_COMPLETE.md
+   • Developer guide:   DEVELOPMENT.md
+   • User README:       README-BHASA.md
+
+🔗 RESOURCES:
+
+   • Bhasa Repo: https://github.com/Uttam-Mahata/bhasa
+   • VS Code API: https://code.visualstudio.com/api
+   • Publishing: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
+
+⚡ NEXT STEPS:
+
+   → Press F5 in VS Code to test your extension
+   → Open test.bhasa to see syntax highlighting
+   → Read SETUP_COMPLETE.md for detailed instructions
+   → Customize syntaxes/bhasa.tmLanguage.json to add more features
+
+💡 PRO TIP: Use "npm run watch" during development for auto-recompilation!
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║              ✨ Ready to enhance your Bhasa coding! ✨               ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Author: Uttam Mahata
+Language: Bhasa (ভাষা) - Bengali Programming Language
+Version: 0.0.1
+License: Same as Bhasa language
+
+🎊 Happy Coding in Bhasa! নমস্কার!

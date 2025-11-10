@@ -1,0 +1,32 @@
+// Test file for Bhasa Language Extension
+
+// নমস্কার বিশ্ব (Hello World)
+লেখ("নমস্কার বিশ্ব!");
+লেখ("Hello from Bhasa!");
+
+// Variable declaration
+ধরি নাম = "উত্তম";
+ধরি বয়স = ২৫;
+
+// Function example
+ধরি যোগ = ফাংশন(a, b) {
+    ফেরত a + b;
+};
+
+// Conditional
+যদি (বয়স > ১৮) {
+    লেখ("প্রাপ্তবয়স্ক");
+} নাহলে {
+    লেখ("নাবালক");
+}
+
+// Loop
+ধরি i = ০;
+যতক্ষণ (i < ৫) {
+    লেখ(i);
+    i = i + ১;
+}
+
+// Boolean values
+ধরি সত্যমান = সত্য;
+ধরি মিথ্যামান = মিথ্যা;
