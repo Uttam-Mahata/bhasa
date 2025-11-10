@@ -1,0 +1,71 @@
+{
+  "name": "bhasa",
+  "displayName": "bhasa",
+  "description": "Language support for bhasa programming language",
+  "version": "0.0.1",
+  "publisher": "Uttam-Mahata",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Uttam-Mahata/bhasa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Uttam-Mahata/bhasa/issues"
+  },
+  "homepage": "https://github.com/Uttam-Mahata/bhasa#readme",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bhasa",
+        "aliases": [
+          "Bhasa",
+          "bhasa"
+        ],
+        "extensions": [
+          ".bhasa",
+          ".ভাষা"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bhasa",
+        "scopeName": "source.bhasa",
+        "path": "./syntaxes/bhasa.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "bhasa.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.105.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
